@@ -48,6 +48,8 @@ for suit in suits:
         possible_street.append({Card(value, suit)
                         for value in [idx, idx+2]})
 
+
+
 for value in values:
     meld_100.append({Card(value, suit) for suit in suits})
 
@@ -101,16 +103,6 @@ class Trick:
                 highest = card        
         return (self.starting_player + self.cards.index(highest)) % 4
 
-    #Returns the highest card currently played in this trick
-    def highest_card(self, trump_suit):
-        highest = self.cards[0] 
-        for card in self.cards:
-            if (card.order(trump_suit) > highest.order(trump_suit) and
-                (card.suit == self.leading_suit() or
-                 card.suit == trump_suit)):
-                highest = card 
-        return highest
-
     #Returns the player that is currently at turn
     def to_play(self):
         return (self.starting_player + len(self.cards)) % 4
@@ -129,6 +121,16 @@ class Trick:
     def meld(self, trump_suit):
         return meld_points(self.cards, trump_suit)
 
+    #Returns the highest card currently played in this trick
+    def highest_card(self, trump_suit):
+        highest = self.cards[0] 
+        for card in self.cards:
+            if (card.order(trump_suit) > highest.order(trump_suit) and
+                (card.suit == self.leading_suit() or
+                 card.suit == trump_suit)):
+                highest = card 
+        return highest
+    
 class Round:
     def __init__(self, starting_player, trump_suit):
         self.starting_player = starting_player
@@ -140,14 +142,18 @@ class Round:
         self.points = [0, 0]
         self.meld = [0, 0]
         
+        self.cardsleft = [[i for i in range(7,15)] for j in range(4)]
+        for i in range(4):
+            if ['k', 'h', 'r', 's'][i] == self.trump_suit:
+                order = [8, 9, 14, 12, 15, 10, 11, 13]
+            else:
+                order = [0, 1, 2, 6, 3, 4, 5, 7]
+            ordered_list = [i for _, i in sorted(zip(order, self.cardsleft[i]))]
+            self.cardsleft[i] = ordered_list
+            
     def deal_cards(self):
         random.shuffle(self.cards)
         self.player_hands = [self.cards[:8], self.cards[8:16], self.cards[16:24], self.cards[24:]]
-    
-    # def deal_cards(self, seed):
-    #     random.seed(seed)
-    #     random.shuffle(self.cards)
-    #     self.player_hands = [self.cards[:8], self.cards[8:16], self.cards[16:24], self.cards[24:]]
 
     #Returns the legal moves a player could make based on the current hand and played cards
     def legal_moves(self):
@@ -155,14 +161,14 @@ class Round:
         trick = self.tricks[-1]
         leading_suit = trick.leading_suit()
 
+        # There has not yet been played a card, all cards may be played.
         if leading_suit is None:
             return hand
 
         follow = []
         trump = []
         trump_higher = []
-        highest_trump_value = trick.highest_trump(
-            self.trump_suit).order(self.trump_suit)
+        highest_trump_value = trick.highest_trump(self.trump_suit).order(self.trump_suit)
         for card in hand:
             if card.suit == leading_suit:
                 follow.append(card)
@@ -186,7 +192,6 @@ class Round:
         self.tricks[-1].add_card(card)
         self.player_hands[current_player].remove(card)
         
-
     #Returns the player currently at turn    
     def to_play(self):
         return self.tricks[-1].to_play()
@@ -197,10 +202,12 @@ class Round:
         if trick.is_complete():
             winner = trick.winner(self.trump_suit)
             points = trick.points(self.trump_suit)
+
             meld = trick.meld(self.trump_suit)
+
             self.points[team(winner)] += points
             self.meld[team(winner)] += meld
-
+        
             if len(self.tricks) == 8:
                 self.points[team(winner)] += 10
                 us = team(self.starting_player)
@@ -226,6 +233,76 @@ class Round:
                 return False
         return True
 
+    def get_highest_card(self, suit):
+        return self.cardsleft[['k', 'h', 'r', 's'].index(suit)][-1]
+    
+    def get_number_of_cards_suit(self, suit):
+        return len(self.cardsleft[['k', 'h', 'r', 's'].index(suit)])
+
+class rule_based_player:
+    #Returns the card for the rule-based player
+    def get_card_good_player(self, round: Round, player: int):
+        trick = round.tricks[-1]
+        trump = round.trump_suit
+        legal_moves = round.legal_moves()
+        cant_follow = 0
+        if len(trick.cards) == 0:
+            for card in legal_moves:
+                if card.value == round.get_highest_card(card.suit):
+                    return card
+            return self.get_lowest_card(legal_moves, trump)
+
+        if legal_moves[0].suit == trick.cards[0].suit:
+            cant_follow = 1
+            
+        if len(trick.cards) == 1:
+            for card in legal_moves:
+                if card.value == round.get_highest_card(trick.cards[0].suit):
+                    return card
+            return self.get_lowest_card(legal_moves, trump)
+                
+
+        if len(trick.cards) == 2:
+            if cant_follow:
+                return self.get_lowest_card(legal_moves, trump)
+
+            if trick.cards[0].value == round.get_highest_card(trick.cards[0].suit):
+                return self.get_highest_card(legal_moves, trump)
+
+
+            for card in legal_moves:
+                if card.value == round.get_highest_card(trick.cards[0].suit):
+                    return card
+
+            return self.get_lowest_card(legal_moves, trump)
+
+        else:
+            
+            if trick.winner(trump) %2 == 1:
+                return self.get_highest_card(legal_moves, trump)
+
+            highest = trick.highest_card(trump)
+            for card in legal_moves:
+                if card.order(trump) > highest.order(trump):
+                    return card
+
+            return self.get_lowest_card(legal_moves, trump)
+    
+    def get_lowest_card(self, legal_moves, trump):
+        lowest_points = 21
+        for card in legal_moves:
+            if card.points(trump) < lowest_points:
+                lowest_card = card
+                lowest_points = card.points(trump)
+        return lowest_card
+
+    def get_highest_card(self, legal_moves, trump):
+        highest_points = -1
+        for card in legal_moves:
+            if card.points(trump) > highest_points:
+                highest_card = card
+                highest_points = card.points(trump)
+        return highest_card
 
 def print_moves(moves):
     print(list(map(card_to_string, moves)))
@@ -242,13 +319,19 @@ def print_hands(hands):
     print(list(map(card_to_string, hands[2])))
     print(list(map(card_to_string, hands[3])))
 
+print(type(meld_20))
+# print_moves(meld_50)
+# print_moves(meld_100)
+# print_moves(possible_street)
+
 def main():
     points = [0, 0]
     meld = [0, 0]
     import time 
     start = time.time()
-    for _ in range(100000):
-        round = Round(0, 'k')
+    player = rule_based_player()
+    for i in range(10000):
+        round = Round(i % 4, 'k')
         round.deal_cards()
 
         # print_hands(round.player_hands)
@@ -256,19 +339,34 @@ def main():
 
 
         for _ in range(8):
-            for _ in range(4):
+            for _ in range(2):
                 # print("CENTER:")
                 # print_moves(round.tricks[-1].cards)
+                # print("HANDS:")
                 # print_hands(round.player_hands)
-                legal_moves = round.legal_moves()
+                # legal_moves = round.legal_moves()
+                choice = player.get_card_good_player(round, round.to_play())
+                round.play_card(choice)
                 # print("LEGAL MOVES:")
                 # print_moves(legal_moves)
                 # print("TO PLAY:")
                 # print(round.to_play())
+
+                # round.play_card(random.choice(legal_moves))
+                # choice = player.get_card_good_player(round, round.to_play())
+
+                # print("CHOICES")
+                # print_moves(round.legal_moves())
+                # print("CHOICE", card_to_string(choice))
+                # round.play_card(choice)
+                legal_moves = round.legal_moves()
                 round.play_card(random.choice(legal_moves))
+
+
                 
             # print("ROUND COMPLETE")
-            round.complete_trick()
+            if not round.complete_trick():
+                print("ERROR")
             # print_moves(round.tricks[-1].cards)
         # print_moves(round.tricks[-1].cards)
         # print("CENTER:")
