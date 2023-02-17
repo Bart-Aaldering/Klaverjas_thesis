@@ -41,9 +41,6 @@ for suit in suits:
         meld_50.append({Card(value, suit)
                         for value in range(idx, idx + 4)})
 
-
-
-
 for value in values:
     meld_100.append({Card(value, suit) for suit in suits})
 
@@ -53,6 +50,7 @@ for value in values:
 def meld_points(trick, trump_suit):
     for meld in meld_100:
         if meld <= set(trick):
+            print( "HIERasdf1")
             return 100
 
     points = 0
@@ -62,9 +60,11 @@ def meld_points(trick, trump_suit):
 
     for meld in meld_50:
         if meld <= set(trick):
+            print( "HIERasdf2")
             return points + 50
     for meld in meld_20:
         if meld <= set(trick):
+            print( "HIERasdf3")
             return points + 20
     return points
 
@@ -89,12 +89,14 @@ class Trick:
 
     #Returns the winner of the trick
     def winner(self, trump_suit):
-        highest = self.cards[0] 
+        highest = self.cards[0]
+        highest_order = highest.order(trump_suit)
         for card in self.cards:
-            if (card.order(trump_suit) > highest.order(trump_suit) and
+            if (card.order(trump_suit) > highest_order and
                 (card.suit == self.leading_suit() or
                  card.suit == trump_suit)):
-                highest = card        
+                highest = card
+                highest_order = card.order(trump_suit)
         return (self.starting_player + self.cards.index(highest)) % 4
 
     #Returns the player that is currently at turn
@@ -297,6 +299,12 @@ class rule_based_player:
                 highest_card = card
                 highest_points = card.points(trump)
         return highest_card
+        
+    def get_highest_card(self, suit):
+        return self.cardsleft[['k', 'h', 'r', 's'].index(suit)][-1]
+    
+    def get_number_of_cards_suit(self, suit):
+        return len(self.cardsleft[['k', 'h', 'r', 's'].index(suit)])
 
 def print_moves(moves):
     print(list(map(card_to_string, moves)))
@@ -338,23 +346,26 @@ def main():
                 # print_moves(round.tricks[-1].cards)
                 # print("HANDS:")
                 # print_hands(round.player_hands)
-                # legal_moves = round.legal_moves()
+                # print("TO PLAY:")
+                # print(round.to_play())
+
+                legal_moves = round.legal_moves()
+                round.play_card(random.choice(legal_moves))
+                
                 choice = player.get_card_good_player(round, round.to_play())
                 round.play_card(choice)
                 # print("LEGAL MOVES:")
                 # print_moves(legal_moves)
-                # print("TO PLAY:")
-                # print(round.to_play())
 
-                # round.play_card(random.choice(legal_moves))
+
                 # choice = player.get_card_good_player(round, round.to_play())
 
                 # print("CHOICES")
                 # print_moves(round.legal_moves())
                 # print("CHOICE", card_to_string(choice))
                 # round.play_card(choice)
-                legal_moves = round.legal_moves()
-                round.play_card(random.choice(legal_moves))
+                # legal_moves = round.legal_moves()
+                # round.play_card(random.choice(legal_moves))
 
 
                 
@@ -372,9 +383,11 @@ def main():
         # print("TO PLAY:")
         # print(round.to_play())
         # print(round.points)
-        print(round.points)
+        # print(round.meld)
         points[0] += round.points[0]
         points[1] += round.points[1]
+        meld[0] += round.meld[0]
+        meld[1] += round.meld[1]
     end = time.time()
     print("Time: ", end - start)
     print("Points: ", points)
