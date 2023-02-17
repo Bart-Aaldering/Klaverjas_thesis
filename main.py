@@ -6,9 +6,9 @@ import pandas as pd
 
 class Card:
     def __init__(self, value, suit):
-        """suit + value are ints"""
         self.value = value
         self.suit = suit
+        # self.id = 
 
     #Returns the rank of the card given the trump suit
     def order(self, trump_suit):
@@ -31,7 +31,6 @@ def other_team(player):
 meld_20 = []
 meld_50 = []
 meld_100 = []
-possible_street = []
 suits = ['k', 'h', 'r', 's']
 values = [7, 8, 9, 10, 11, 12, 13, 14]
 for suit in suits:
@@ -41,12 +40,7 @@ for suit in suits:
     for idx in range(7,12):
         meld_50.append({Card(value, suit)
                         for value in range(idx, idx + 4)})
-    for idx in range(7,14):
-        possible_street.append({Card(value, suit)
-                        for value in [idx, idx+1]})
-    for idx in range(7,13):
-        possible_street.append({Card(value, suit)
-                        for value in [idx, idx+2]})
+
 
 
 
@@ -378,14 +372,32 @@ def main():
         # print("TO PLAY:")
         # print(round.to_play())
         # print(round.points)
+        print(round.points)
         points[0] += round.points[0]
         points[1] += round.points[1]
-        meld[0] += round.meld[0]
-        meld[1] += round.meld[1]
     end = time.time()
     print("Time: ", end - start)
     print("Points: ", points)
     print("Meld: ", meld)
+
+def main2():
+    trick = Trick(0)
+    trick.add_card(Card(7, 'k'))
+    trick.add_card(Card(8, 'k'))
+    trick.add_card(Card(9, 'k'))
+    trick.add_card(Card(7, 'h'))
+    trick2 = Trick(0)
+    trick2.add_card(Card(7, 'k'))
+    trick2.add_card(Card(8, 'k'))
+    trick2.add_card(Card(9, 'k'))
+    trick2.add_card(Card(7, 'h'))
+    if set(trick.cards) <= set(trick2.cards):
+        print("JAA")
+    print("hier", trick.meld('h'))
+    print_moves(set(trick.cards))
+    return
+    for i in range(len(meld_20)):
+        print_moves((meld_20[i]))
 
 
 if __name__ == '__main__':
