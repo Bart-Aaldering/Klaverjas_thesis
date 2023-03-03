@@ -1,0 +1,12 @@
+10000 rounds
+[842184, 1073626] random vs rule
+[823242, 1091428] random vs alpha with tijd 1
+
+
+10000 rounds
+[83037, 108423] random vs alpha with tijd 1
+[82223, 109877] random vs alpha with tijd 1 with ucb
+[80078, 111452] random vs alpha with tijd 20 simulations 5 and ucb
+[81543, 108777] random vs alpha with tijd 20 simulations 5 and ucb
+[84311, 107769] random vs alpha with tijd 20 simulations 5
+[122177, 74283] random vs alpha with tijd 20 simulations 5 and ucb fixed

@@ -1,5 +1,3 @@
-import numpy as np
-
 from helper import *
 
 
@@ -43,8 +41,9 @@ class Trick:
 
     #Returns the meld points in this trick
     def meld(self, trump_suit: int):
-        values = card_to_value(self.cards)
-        sorted = self.cards.sort()
+        values = [card_to_value(card) for card in self.cards]
+        sorted = self.cards.copy()
+        sorted.sort()
         point = 0
 
         # King and Queen of trump suit
@@ -61,12 +60,14 @@ class Trick:
             return point + 20
         
         # four cards of value Jack
-        if np.all(values == 4):
+        if len(set(values)) == 1 and values[0] == 4:
             return 200
 
         # four cards of the same face value
         if len(set(values)) == 1:
             return 100
+        
+        return point
 
     #Returns the highest played trump card
     def highest_trump(self, trump_suit: int):
@@ -84,3 +85,4 @@ class Trick:
                  card_suit == trump_suit)):
                 highest = card 
         return highest
+
