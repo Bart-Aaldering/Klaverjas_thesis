@@ -1,4 +1,4 @@
-
+import random
 
 from typing import List
 
@@ -16,19 +16,20 @@ class State:
         self.current_player = round.current_player
         self.declaring_team = round.declaring_team
         
-        own_hand = round.player_hands[self.own_position] 
         # The hand of the transformed to the game state representation
-        self.own_hand = [card_transform(card.id, ['k', 'h', 'r', 's'].index(round.trump_suit)) for card in own_hand]
+        own_hand_as_id = [card_transform(card.id, ['k', 'h', 'r', 's'].index(round.trump_suit)) 
+                            for card in round.player_hands[self.own_position]]
         
-        all_cards = set([suit*10 + value for suit in range(4) for value in range(8)])
-        other_players_cards = list(all_cards - set(self.own_hand))
-        other_players_cards = [Card(id) for id in other_players_cards]
+        not_own_hand_as_id = set([suit*10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
         
-        self.own_hand = [Card(id) for id in self.own_hand]
-        self.possible_cards = [other_players_cards for i in range(4)]
-        self.possible_cards[self.own_position] = self.own_hand
-
-        # self.information_set_id = hash of the information set
+        # Cards that other players can have
+        self.other_players_cards = set([Card(id) for id in not_own_hand_as_id]) 
+        
+        self.hands = [set() for i in range(4)]
+        self.hands[own_position] = set([Card(id) for id in own_hand_as_id])
+        
+        # self.possible_cards = [self.other_players_cards for i in range(4)]
+        # self.possible_cards[self.own_position] = self.hands[own_position]
         
         # 1 if the team of Player is declaring, 0 if the team of Player not declaring
         if round.declaring_team == self.own_position%2:
@@ -39,26 +40,29 @@ class State:
         self.centre = Trick(self.current_player)
         
         self.has_lost = [False, False]
-        self.number_of_tricks = 0
+        self.cards_left = [8, 8, 8, 8]
         # The current score of the round
         self.points = [0, 0]
         self.meld = [0, 0]
-    
-    def legal_moves(self, hand: List[Card]) -> List[Card]:
-        if hand is None:
-            hand = self.possible_cards[self.current_player]
-            if self.current_player != self.own_position:
-                raise Exception("Not the current players turn")
-            
-        # print("hand", hand)
-        if len(hand) == 0:
-            print(self.possible_cards)
-            raise Exception("No cards in hand")
-        # print('centre', self.centre)
+
+    def determine(self):
+        other_players = [i for i in range(4) if i != self.own_position]
+        other_players_cards = list(self.other_players_cards)
+        for player in other_players:
+            self.hands[player] = set()
+            for _ in range(self.cards_left[player]):
+                choice = random.sample(other_players_cards, 1)[0]
+                self.hands[player].add(choice)
+                other_players_cards.remove(choice)
+        # Kies een kaart per speler
+        
+    def legal_moves(self) -> List[Card]:
+
+        hand = self.hands[self.current_player]
+
         leading_suit = self.centre.leading_suit()
 
         if leading_suit is None:
-            # print("HIER1")
             return hand
 
         follow = []
@@ -75,35 +79,29 @@ class State:
                     trump_higher.append(card)
 
         if follow and leading_suit != 0:
-            # print("HIER2")
             return follow
 
         if (current_winner + self.current_player) % 2 == 0:
-            # print("HIER3")
             return hand
-        # print("HIER4")
+        
         return trump_higher or trump or hand
 
-    def play_card(self, card: Card):
-        # print("play_card", card)
-        # print("centre", self.centre)
-        # print("current_player", self.current_player)
-        # print("own_position", self.own_position)
-        # print("possible_cards", self.possible_cards)
+    def play_card(self, card: Card, simulation: bool = True):
+
         self.centre.add_card(card)
 
-        card_removed = False
-        for i in range(4):
-            if card in self.possible_cards[i]:
-                self.possible_cards[i].remove(card)
-                card_removed = True
-                
-        if not card_removed:
-            raise Exception("Card not in hand")
+        self.cards_left[self.current_player] -= 1
         
+        if simulation:
+            self.hands[self.current_player].remove(card)
+
+        else:
+            if self.current_player != self.own_position:
+                self.other_players_cards.remove(card)
+            else:
+                self.hands[self.current_player].remove(card)
+
         if self.centre.trick_complete():
-            
-            self.number_of_tricks += 1
             
             winner = self.centre.winner()
             team_winner = team(winner)
@@ -117,7 +115,6 @@ class State:
             self.meld[team_winner] += meld
 
             if self.round_complete():
-                # print("Round complete")
 
                 # Winner of last trick gets 10 points
                 self.points[team_winner] += 10
@@ -140,13 +137,10 @@ class State:
                 self.centre = Trick(winner)
                 self.current_player = winner
         else:
-            self.current_player = (self.current_player + 1) % 4
+            self.current_player = (self.current_player+1) % 4
     
     def round_complete(self):
-        if self.number_of_tricks == 8:
-            for i in range(4):
-                if len(self.possible_cards[i]) != 0:
-                    raise Exception("Not all cards played")
+        if self.cards_left == [0, 0, 0, 0]:
             return True
         return False
 
@@ -154,32 +148,7 @@ class State:
         local_team = team(player)
         return self.points[local_team] - self.points[1-local_team] + self.meld[local_team] - self.meld[1-local_team]
 
-    def set_state_with_round(self, round: Round):
-        own_hand = round.player_hands[self.own_position] 
-        # The hand of the transformed to the game state representation
-        self.own_hand = [card_transform(card.id, round.trump_suit) for card in own_hand] + [-1]*(8-len(own_hand))
-        
-        # 1 if the team of Player is declaring, 0 if the team of Player not declaring
-        if round.declaring_team == self.own_position%2:
-            self.declaring = 1
-        else:
-            self.declaring = 0
-        
-        # # Creating the game state representation of the tricks
-        # played_tricks = [self.trick_transform(trick) for trick in reversed(round.tricks)] # The tricks that have been played starting from Player
-        # unplayed_tricks = [[-1, -1, -1, -1]]*(8-len(round.tricks))  # The tricks that have not been played
-        # tricks = played_tricks + unplayed_tricks # Combination of the played and unplayed tricks
-        # self.tricks = [item for sublist in tricks for item in sublist] # Flatten the list
-    
-        # The current score of the round
-        self.points = round.points
-       
-    # def trick_transform(self, trick: Trick) -> list[int]:
-    #     "Makes the trick start with the cards of Player"
-    #     cards = [-1, -1, -1, -1]
-    #     for i, card in enumerate(trick.cards):
-    #         cards[(i+trick.starting_player+(3-self.own_position))%4] = card
-    #     return cards
+
     
 
 
