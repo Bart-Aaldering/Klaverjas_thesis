@@ -28,11 +28,11 @@ class Node:
             # new_state = self.state
             # self.state = temp_state
             # new_card = [new_card for new_card in new_state.legal_moves() if new_card.id == card.id][0]
-            new_round = copy.deepcopy(self.state)
-            new_card = [new_card for new_card in new_round.legal_moves() if new_card.id == card.id][0]
+            new_state = copy.deepcopy(self.state)
+            new_card = [new_card for new_card in new_state.legal_moves() if new_card.id == card.id][0]
 
-            new_round.play_card(new_card)
-            self.children.append(Node(new_round, self, card))
+            new_state.play_card(new_card)
+            self.children.append(Node(new_state, self, card))
 
 
     def select_child_random(self):
@@ -98,11 +98,8 @@ class AlphaZero_player:
         current_node.state.determine()
         for _ in range(tijd):
 
-
-            
             # Selection
-            while current_node.children and not current_node.state.round_complete():
-                current_node = current_node.select_child_ucb()
+            current_node = self.selection()
             
             # Expansion
             if not current_node.state.round_complete():
@@ -138,3 +135,9 @@ class AlphaZero_player:
                 best_child = child
                 
         return best_child.move
+
+    def selection(self, current_node: Node):
+        # zodra er ee nacti is die niet in de huidige tree zit stop
+        
+        while not current_node.state.round_complete() and set(current_node.state.legal_moves()) - set(current_node.children) == set():
+            current_node = current_node.select_child_ucb()
