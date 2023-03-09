@@ -25,25 +25,28 @@ def other_team(player):
 def card_to_suit(card: int) -> int:
     return card // 10
 
-# def cards_to_suit(cards: list) -> int:
-#     return [card_to_suit(card) for card in cards]
-
-# def cards_to_value(cards: list) -> int:
-#     return [card_to_value(card) for card in cards]
-
 def card_to_value(card: int) -> int:
     return card % 10
 
-def card_to_order(card: int, trump: int) -> int:
+def card_to_order2(card: int, trump: int) -> int:
     if card // 10 == trump:
         return [8, 9, 14, 12, 15, 10, 11, 13][card % 10]
     return [0, 1, 2, 6, 3, 4, 5, 7][card % 10]
 
-def card_to_points(card: int, trump: int) -> int:
+def card_to_points2(card: int, trump: int) -> int:
     if card // 10 == trump:
         return [0, 0, 14, 10, 20, 3, 4, 11][card % 10]
     return [0, 0, 0, 10, 2, 3, 4, 11][card % 10]
 
+def card_to_order(card: int) -> int:
+    if card // 10 == 0:
+        return [8, 9, 14, 12, 15, 10, 11, 13][card % 10]
+    return [0, 1, 2, 6, 3, 4, 5, 7][card % 10]
+
+def card_to_points(card: int) -> int:
+    if card // 10 == 0:
+        return [0, 0, 14, 10, 20, 3, 4, 11][card % 10]
+    return [0, 0, 0, 10, 2, 3, 4, 11][card % 10]
 
 def print_moves(moves):
     print(list(map(card_to_string, moves)))
@@ -58,3 +61,8 @@ def print_hands(hands):
     print(list(map(card_to_string, hands[2])))
     print(list(map(card_to_string, hands[3])))
     
+# def cards_to_suit(cards: list) -> int:
+#     return [card_to_suit(card) for card in cards]
+
+# def cards_to_value(cards: list) -> int:
+#     return [card_to_value(card) for card in cards]

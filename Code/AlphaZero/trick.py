@@ -1,74 +1,74 @@
-from deck import Deck, Card
-from helper import *
+from AlphaZero.card import Card
+from AlphaZero.helper import card_to_suit, card_to_value
 
 class Trick:
-    def __init__(self, starting_player):
+    """AlphaZero trick class"""
+    def __init__(self, starting_player: int):
         self.cards = []
         self.starting_player = starting_player
-
-    #Adds the played card to itself
-    def add_card(self, card):
+    
+    def __repr__(self):
+        return str(self.cards)
+        
+    def add_card(self, card: Card):
+        """Adds the played card to itself"""
         self.cards.append(card)
 
-    #Checks whether the trick is over
-    def is_complete(self):
+    def trick_complete(self) -> bool:
+        """Checks whether the trick is over"""
         return len(self.cards) == 4
 
-    #Returns the leading suit of the trick
-    def leading_suit(self):
+    def leading_suit(self) -> int:
+        """Returns the leading suit of the trick"""
         if self.cards:
             return self.cards[0].suit
 
-    #Returns the winner of the trick
-    def winner(self, trump_suit):
+    def winner(self) -> int:
+        """Returns the winner of the trick"""
         highest = self.cards[0] 
         for card in self.cards:
-            if (card.order(trump_suit) > highest.order(trump_suit) and
+            if (card.order() > highest.order() and
                 (card.suit == self.leading_suit() or
-                 card.suit == trump_suit)):
+                 card.suit == 0)):
                 highest = card        
         return (self.starting_player + self.cards.index(highest)) % 4
 
-    #Returns the highest card currently played in this trick
-    def highest_card(self, trump_suit):
+    def highest_card(self) -> Card:
+        """Returns the highest card currently played in this trick"""
         highest = self.cards[0] 
         for card in self.cards:
-            if (card.order(trump_suit) > highest.order(trump_suit) and
+            if (card.order() > highest.order() and
                 (card.suit == self.leading_suit() or
-                 card.suit == trump_suit)):
+                 card.suit == 0)):
                 highest = card 
         return highest
 
-    #Returns the player that is currently at turn
-    def to_play(self):
+    def to_play(self) -> int:
+        """Returns the player that is currently at turn"""
         return (self.starting_player + len(self.cards)) % 4
 
-    #Returns the total points of the played cards in this trick
-    def points(self, trump_suit):
-        return sum(card.points(trump_suit) for card in self.cards)
-    
-    #Returns the highest played trump card
-    def highest_trump(self, trump_suit):
-        return max(self.cards,
-                   default=Card(7, trump_suit).order(trump_suit),
-                   key=lambda card: card.order(trump_suit))
 
-    # #Returns the meld points in this trick
-    # def meld(self, trump_suit):
-    #     return meld_points(self.cards, trump_suit)
+    def points(self) -> int:
+        """Returns the total points of the played cards in this trick"""
+        return sum(card.points() for card in self.cards)
     
-    #Returns the meld points in this trick
-    def meld(self, trump_suit: int):
-        # print(trump_suit)
-        trump_suit = ['k', 'h', 'r', 's'].index(trump_suit)
+
+    def highest_trump(self) -> Card:
+        """Returns the highest played trump card"""
+        return max(self.cards,
+                   default=Card(0).order(),
+                   key=lambda card: card.order())
+    
+    def meld(self) -> int:
+        """Returns the meld points in this trick"""
         cards = [card.id for card in self.cards]
-        values = [card_to_value(card) for card in cards]
+        values = [card.value for card in self.cards]
         sorted = cards.copy()
         sorted.sort()
         point = 0
 
         # King and Queen of trump suit
-        if trump_suit*10 + 5 in cards and trump_suit*10 + 6 in cards:
+        if 5 in cards and 6 in cards:
             point += 20
 
         # four consecutive cards of the same suit
@@ -89,3 +89,4 @@ class Trick:
             return 100
         
         return point
+    

@@ -32,12 +32,13 @@ class Round:
     def deal(self):
         deck = Deck()
         deck.shuffle()
-        self.player_cards = [deck.cards[0:8], deck.cards[8:16], deck.cards[16:24], deck.cards[24:32]]
+        self.player_hands = [deck.cards[0:8], deck.cards[8:16], deck.cards[16:24], deck.cards[24:32]]
         
     #Returns the legal moves a player could make based on the current hand and played cards
-    def legal_moves(self):
-        player = self.current_player
-        hand = self.player_cards[player]
+    def legal_moves(self, player=None):
+        if player is None:
+            player = self.current_player
+        hand = self.player_hands[player]
         trick = self.tricks[-1]
         leading_suit = trick.leading_suit()
 
@@ -70,20 +71,21 @@ class Round:
         return len(self.tricks) == 8 and self.tricks[-1].is_complete()
 
     #Plays the card in a trick
-    def play_card(self, card):
+    def play_card(self, card, player=None):
 
         # if card not in self.legal_moves():
         #     print("HIER", card.value, card.suit)
         #     print([(card.value, card.suit) for card in self.legal_moves()])
         #     raise Exception("Illegal move")
-        player = self.current_player
+        if player is None:
+            player = self.current_player
         # if player != self.current_player:
         #     raise Exception("Not your turn")
         self.tricks[-1].add_card(card)
         # print("hier1", card.value, card.suit)
         # for card in self.player_cards[player]:
         #     print("hier2", card.value, card.suit)
-        self.player_cards[player].remove(card)
+        self.player_hands[player].remove(card)
         if self.tricks[-1].is_complete():
             self.complete_trick()
         else:
@@ -123,7 +125,7 @@ class Round:
     #Checks whether all tricks are won by one team
     def is_pit(self):
         for trick in self.tricks:
-            if team(self.starting_player) != team(trick.winner(self.trump_suit)):
+            if team(self.declaring_team) != team(trick.winner(self.trump_suit)):
                 return False
         return True
 
