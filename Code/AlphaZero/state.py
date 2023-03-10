@@ -1,3 +1,5 @@
+from __future__ import annotations # To use the class name in the type hinting
+
 import random
 
 from typing import List
@@ -11,7 +13,6 @@ from AlphaZero.helper import *
 class State:
     def __init__(self, round: Round, own_position: int) -> None:
         self.own_position = own_position
-        self.trump_suit = ['k', 'h', 'r', 's'].index(round.trump_suit)
         
         self.current_player = round.current_player
         self.declaring_team = round.declaring_team
@@ -31,12 +32,6 @@ class State:
         # self.possible_cards = [self.other_players_cards for i in range(4)]
         # self.possible_cards[self.own_position] = self.hands[own_position]
         
-        # 1 if the team of Player is declaring, 0 if the team of Player not declaring
-        if round.declaring_team == self.own_position%2:
-            self.declaring = 1
-        else:
-            self.declaring = 0
-        
         self.centre = Trick(self.current_player)
         
         self.has_lost = [False, False]
@@ -44,7 +39,15 @@ class State:
         # The current score of the round
         self.points = [0, 0]
         self.meld = [0, 0]
-
+    
+    def __eq__(self, other: State) -> bool:
+        raise NotImplementedError
+        return self.__dict__ == other.__dict__
+    
+    def __hash__(self) -> int:
+        raise NotImplementedError
+        return hash(tuple(sorted(self.__dict__.items())))
+    
     def determine(self):
         other_players = [i for i in range(4) if i != self.own_position]
         other_players_cards = list(self.other_players_cards)
@@ -55,7 +58,7 @@ class State:
                 self.hands[player].add(choice)
                 other_players_cards.remove(choice)
         # Kies een kaart per speler
-        
+    
     def legal_moves(self) -> List[Card]:
 
         hand = self.hands[self.current_player]
@@ -81,13 +84,12 @@ class State:
         if follow and leading_suit != 0:
             return follow
 
-        if (current_winner + self.current_player) % 2 == 0:
+        if (current_winner+self.current_player) % 2 == 0:
             return hand
         
         return trump_higher or trump or hand
 
     def play_card(self, card: Card, simulation: bool = True):
-
         self.centre.add_card(card)
 
         self.cards_left[self.current_player] -= 1
@@ -139,8 +141,8 @@ class State:
         else:
             self.current_player = (self.current_player+1) % 4
     
-    def round_complete(self):
-        if self.cards_left == [0, 0, 0, 0]:
+    def round_complete(self) -> bool:
+        if self.centre.trick_complete() and self.hands[self.own_position] == set():
             return True
         return False
 

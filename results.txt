@@ -7,42 +7,59 @@
 1000 rounds
 [83037, 108423] random vs alpha with tijd 1
 [82223, 109877] random vs alpha with tijd 1 with ucb
-[80078, 111452] random vs alpha with tijd 20 simulations 5 and ucb
-[81543, 108777] random vs alpha with tijd 20 simulations 5 and ucb
-[84311, 107769] random vs alpha with tijd 20 simulations 5
-[122177, 74283] random vs alpha with tijd 20 simulations 5 and ucb fixed
+[80078, 111452] random vs alpha with tijd 20 simulations 1 and ucb
+[81543, 108777] random vs alpha with tijd 20 simulations 1 and ucb
+[84311, 107769] random vs alpha with tijd 20 simulations 1
+[122177, 74283] random vs alpha with tijd 20 simulations 1 and ucb fixed
 
 100
 [19574, 18766] random vs alpha without cheating
 
 [0.001003265380859375, 0.0070040225982666016, 0.048003435134887695, 0.033093929290771484, 0.0]
 
-1000 rounds  random vs alpha  without cheating default
+1000 rounds  random vs alpha  without cheating default determinization mcts?
 [82106, 109444]
-100.58681297302246 tijd 10 simulations 5 c 1 without ucb in selection
+100.58681297302246 tijd 10 simulations 1 c 1 without ucb in selection
+[99032, 93358]
+107.27258157730103 tijd 10 simulations 1 c 1
 [97279, 92821]
-107.35958003997803 tijd 10 simulations 5 c 1
+107.35958003997803 tijd 10 simulations 1 c 1
 [98791, 91399]
-111.50632739067078 tijd 10 simulations 5 c 1
+111.50632739067078 tijd 10 simulations 1 c 1
 [94143, 96227]
-101.98518109321594 tijd 10 simulations 5 c 1 change in root node
+101.98518109321594 tijd 10 simulations 1 c 1 change in root node
 [98953, 91697]
 522.3048372268677 tijd = 50 simulations = 10 c = 1
 [99784, 91106]
-208.55000472068787 tijd 20 simulations 5 c = 0.3
+208.55000472068787 tijd 20 simulations 1 c = 0.3
 [98286, 93104]
-205.21774768829346 tijd 20 simulations 5 c = 10
+205.21774768829346 tijd 20 simulations 1 c = 10
 [100172, 91428]
-215.19180750846863 tijd 20 simulations 5 c = 10
+215.19180750846863 tijd 20 simulations 1 c = 10
 [103493, 89507]
-204.97037410736084 tijd 20 simulations 5 c = 1
+204.97037410736084 tijd 20 simulations 1 c = 1
 [100833, 90227] 
 232.3951461315155 tijd = 20 simulations = 5 c = 1.41
 [100086, 92564]
-193.73168468475342 tijd 20 simulations 5 c = 1.41
+193.73168468475342 tijd 20 simulations 1 c = 1.41
 [92901, 98309]
 65.77755069732666 tijd 5 simulations 20 c = 1.41
 [89274, 101526]
 63.03403854370117 tijd 5 simulations 20 c = 1.41
+[82223, 109877]
 
+500 rounds random vs alpha  without cheating default ismcts?
+[49108, 46312]
+178.19055366516113
 
+1000 rounds random vs alpha  without cheating default ismcts?
+
+[98902, 92008]
+293.1248664855957 tijd 10 simulations 1 c 1
+
+[102773, 86397]
+525.0786366462708 tijd 10 simulations 5 c 1
+
+test
+[94518, 95712]
+102.71400475502014

@@ -1,3 +1,5 @@
+from __future__ import annotations # To use the class name in the type hinting
+
 class Card:
     """AlphaZero card class"""
     def __init__(self, id: int):
@@ -7,7 +9,13 @@ class Card:
         
     def __repr__(self):
         return str(self.id)
-        
+    
+    def __eq__(self, other: Card):
+        return self.id == other.id
+    
+    def __hash__(self):
+        return self.id
+    
     def order(self) -> int:
         """Returns the rank of the card"""
         if self.id // 10 == 0:

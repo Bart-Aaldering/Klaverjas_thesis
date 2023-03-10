@@ -10,6 +10,14 @@ class Trick:
     def __repr__(self):
         return str(self.cards)
         
+    def __eq__(self, other):
+        raise NotImplementedError
+        return self.cards == other.cards
+    
+    def __hash__(self):
+        raise NotImplementedError
+        return hash(tuple(self.cards))
+
     def add_card(self, card: Card):
         """Adds the played card to itself"""
         self.cards.append(card)
@@ -47,12 +55,10 @@ class Trick:
         """Returns the player that is currently at turn"""
         return (self.starting_player + len(self.cards)) % 4
 
-
     def points(self) -> int:
         """Returns the total points of the played cards in this trick"""
         return sum(card.points() for card in self.cards)
     
-
     def highest_trump(self) -> Card:
         """Returns the highest played trump card"""
         return max(self.cards,

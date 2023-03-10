@@ -7,6 +7,8 @@ class Card:
         self.suit = suit
         self.id = ['k', 'h', 'r', 's'].index(suit)*10 + value-7
         
+    def __repr__(self):
+        return str(self.id)
 
     #Returns the rank of the card given the trump suit
     def order(self, trump_suit):

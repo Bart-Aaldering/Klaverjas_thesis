@@ -304,3 +304,12 @@ def check_possible_street(center, card):
     #         sum += tes.id
     # print(sum)
     # print(time.time() - timetime)
+    
+            # temp_state = copy.deepcopy(self.state)
+            # new_state = self.state
+            # self.state = temp_state
+            # new_card = [new_card for new_card in new_state.legal_moves() if new_card.id == card.id][0
+        # for card in self.state.legal_moves():
+        #     new_state = copy.deepcopy(self.state)
+        #     new_state.play_card(card)
+        #     self.children.add(Node(new_state, self, card))

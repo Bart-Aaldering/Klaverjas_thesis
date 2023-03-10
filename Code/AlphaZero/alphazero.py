@@ -1,3 +1,5 @@
+from __future__ import annotations # To use the class name in the type hinting
+
 import numpy as np
 import random
 import copy
@@ -6,6 +8,8 @@ import time
 
 from typing import List
 
+
+from AlphaZero.card import Card
 from rounds import Round
 # from tricks import Trick
 from AlphaZero.state import State
@@ -14,109 +18,112 @@ from AlphaZero.helper import card_transform, card_untransform
 
 
 class Node:
-    def __init__(self, state: State, parent=None, move=None):
+    def __init__(self, state: State, parent: Node = None, move: Card = None):
         self.state = state
-        self.children = []
+        self.children = set()
         self.parent = parent
         self.move = move
         self.score = 0
         self.visits = 0
     
-    def expand(self):
-        for card in self.state.legal_moves():
-            # temp_state = copy.deepcopy(self.state)
-            # new_state = self.state
-            # self.state = temp_state
-            # new_card = [new_card for new_card in new_state.legal_moves() if new_card.id == card.id][0]
-            new_state = copy.deepcopy(self.state)
-            new_card = [new_card for new_card in new_state.legal_moves() if new_card.id == card.id][0]
-
-            new_state.play_card(new_card)
-            self.children.append(Node(new_state, self, card))
-
-
-    def select_child_random(self):
-        # print("Node", self, self.visits)
-        return random.choice(self.children)
+    def __repr__(self) -> str:
+        return f"Node({self.move}, {self.score}, {self.visits})"
     
-    def select_child_ucb(self):
-        # print("Node", self, self.visits)
-        # print("Children", [child.visits for child in self.children])
+    def __eq__(self, other: Node) -> bool:
+        # raise NotImplementedError
+        return self.move == other.move
+    
+    def __hash__(self) -> int:
+        # raise NotImplementedError
+        return hash(self.move)
+
+    def set_legal_children(self):
+        legal_moves = self.state.legal_moves()
+        self.legal_children = set()
+        for move in legal_moves:
+            new_state = copy.deepcopy(self.state)
+            new_state.play_card(move)
+            self.legal_children.add(Node(new_state, self, move))
+        
+    def expand(self):
+        for node in self.legal_children:
+            self.children.add(node)
+
+    def select_child_random(self) -> Node:
+        return random.choice(list(self.legal_children.intersection(self.children)))
+        # return random.choice(list(self.legal_children))
+    
+    def select_child_ucb(self) -> Node:
         c = 1
         ucbs = []
-        for child in self.children: # HIER
+        children_list = list(self.legal_children.intersection(self.children))
+        # children_list = list(self.legal_children)
+        for child in children_list:
             if child.visits == 0:
                 return child
-            # if self.visits == 0:
-            #     raise Exception("Visits is 0")
             ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
-        return self.children[index_max]
+        return children_list[index_max]
     
 class AlphaZero_player:
-    def __init__(self, round: Round, player_position: int):
+    def __init__(self, round: Round, player_position: int, debug = False):
         self.player_position = player_position
         self.state = State(round, player_position)
-        self.node = Node(self.state)
         # self.policy_network = policy_network()
-    
-    def update_state(self, move: int):
 
-        # Tranform the move to a card object
-        if self.state.current_player == self.player_position:
-            cards = self.state.hands[self.state.current_player]
-        else:
-            cards = self.state.other_players_cards
-        move = card_transform(move, self.state.trump_suit)
-        for card in cards:
-            if card.id == move:
-                new_move = card
-                break
-        
-        self.state.play_card(new_move, simulation=False)
-        if self.state != self.node.state:
-            raise Exception("State is not the same")
+        self.debug = debug
+    def update_state(self, move: int, trump_suit: str):
+
+        move = Card(card_transform(move, ['k', 'h', 'r', 's'].index(trump_suit)))
+        self.state.play_card(move, simulation=False)
+
     
-    def get_move(self):     
+    def get_move(self, trump_suit: str):
         card_id = self.mcts().id
         
-        if type(self.state.trump_suit) == str:
-            raise Exception("Trump suit is not set")
-        
-        return card_untransform(card_id, self.state.trump_suit)
+        return card_untransform(card_id, ['k', 'h', 'r', 's'].index(trump_suit))
 
     def mcts(self):
         
-        root = Node(self.node.state)
+        root = Node(copy.deepcopy(self.state))
 
-        # current_node = copy.deepcopy(root)
         current_node = root
         number_of_simulations = 5
         tijd = 10
 
-        # Determination
-        current_node.state.determine()
         for _ in range(tijd):
+            # Determination
+            current_node.state.determine()
+            current_node.set_legal_children()
 
+            i = 0
             # Selection
-            current_node = self.selection()
+            while not current_node.state.round_complete() and current_node.legal_children-current_node.children == set():
+                i += 1
+            # while not current_node.state.round_complete() and current_node.children:
+                prev_state = copy.deepcopy(current_node.state)
+                current_node = current_node.select_child_ucb()
+                prev_state.play_card(current_node.move)
+                current_node.state = prev_state
+                current_node.set_legal_children()
             
             # Expansion
             if not current_node.state.round_complete():
                 current_node.expand()
                 current_node = current_node.select_child_random()
-
+                current_node.set_legal_children()
+                
             # Simulation
-            explore_round = copy.deepcopy(current_node.state)
+            # explore_state = copy.deepcopy(current_node.state)
             points = 0
             for _ in range(number_of_simulations):
-                while not explore_round.round_complete():
+                explore_state = copy.deepcopy(current_node.state)
+                while not explore_state.round_complete():
                     
-                    move = random.choice(list(explore_round.legal_moves()))
+                    move = random.choice(list(explore_state.legal_moves()))
+                    explore_state.play_card(move)
                     
-                    explore_round.play_card(move)
-                    
-                points += explore_round.get_score(self.player_position)
+                points += explore_state.get_score(self.player_position)
             points /= number_of_simulations
             
             # Backpropagation
@@ -125,8 +132,7 @@ class AlphaZero_player:
                 current_node.score += points
                 current_node = current_node.parent
             root.visits += 1
- 
-        
+
         best_score = -1
         for child in root.children:
             score = child.visits
@@ -136,8 +142,3 @@ class AlphaZero_player:
                 
         return best_child.move
 
-    def selection(self, current_node: Node):
-        # zodra er ee nacti is die niet in de huidige tree zit stop
-        
-        while not current_node.state.round_complete() and set(current_node.state.legal_moves()) - set(current_node.children) == set():
-            current_node = current_node.select_child_ucb()
