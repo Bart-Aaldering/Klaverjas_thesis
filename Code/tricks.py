@@ -1,5 +1,5 @@
 from deck import Deck, Card
-from helper import *
+from helper import card_to_suit, card_to_value
 
 class Trick:
     def __init__(self, starting_player):
@@ -52,10 +52,6 @@ class Trick:
         return max(self.cards,
                    default=Card(7, trump_suit).order(trump_suit),
                    key=lambda card: card.order(trump_suit))
-
-    # #Returns the meld points in this trick
-    # def meld(self, trump_suit):
-    #     return meld_points(self.cards, trump_suit)
     
     #Returns the meld points in this trick
     def meld(self, trump_suit: int):

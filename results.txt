@@ -1,23 +1,23 @@
 10000 rounds
 [842184, 1073626] random vs rule
 [837614, 1092306] "" "" 
-[823242, 1091428] random vs alpha with tijd 1
+[823242, 1091428] rule vs alpha with tijd 1
 
 
 1000 rounds
-[83037, 108423] random vs alpha with tijd 1
-[82223, 109877] random vs alpha with tijd 1 with ucb
-[80078, 111452] random vs alpha with tijd 20 simulations 1 and ucb
-[81543, 108777] random vs alpha with tijd 20 simulations 1 and ucb
-[84311, 107769] random vs alpha with tijd 20 simulations 1
-[122177, 74283] random vs alpha with tijd 20 simulations 1 and ucb fixed
+[83037, 108423] rule vs alpha with tijd 1
+[82223, 109877] rule vs alpha with tijd 1 with ucb
+[80078, 111452] rule vs alpha with tijd 20 simulations 1 and ucb
+[81543, 108777] rule vs alpha with tijd 20 simulations 1 and ucb
+[84311, 107769] rule vs alpha with tijd 20 simulations 1
+[122177, 74283] rule vs alpha with tijd 20 simulations 1 and ucb fixed
 
 100
-[19574, 18766] random vs alpha without cheating
+[19574, 18766] rule vs alpha without cheating
 
 [0.001003265380859375, 0.0070040225982666016, 0.048003435134887695, 0.033093929290771484, 0.0]
 
-1000 rounds  random vs alpha  without cheating default determinization mcts?
+1000 rounds  rule vs alpha  without cheating default determinization mcts?
 [82106, 109444]
 100.58681297302246 tijd 10 simulations 1 c 1 without ucb in selection
 [99032, 93358]
@@ -48,18 +48,35 @@
 63.03403854370117 tijd 5 simulations 20 c = 1.41
 [82223, 109877]
 
-500 rounds random vs alpha  without cheating default ismcts?
+500 rounds rule vs alpha  without cheating default ismcts?
 [49108, 46312]
 178.19055366516113
 
-1000 rounds random vs alpha  without cheating default ismcts?
-
+1000 rounds rule vs alpha  without cheating default ismcts?
 [98902, 92008]
 293.1248664855957 tijd 10 simulations 1 c 1
-
 [102773, 86397]
 525.0786366462708 tijd 10 simulations 5 c 1
+[104719, 88681]
+321.59546422958374 tijd 10 simulations 5 c 1 determinization mcts?
+
+1000 round rule vs alpha with updated possible_cards
+[100695, 93445]
+1737.9773166179657 tijd 10 simulations 5 c 1
+
+1000 random vs alpha  tijd 10 simulations 5 c 1
+[115818, 80032]
+483.34387826919556
+[112594, 83316]
+471.4009642601013
+[12910, 6980]
+200.68251705169678 100 rounds
+
 
 test
 [94518, 95712]
 102.71400475502014
+[113499, 82551]
+1490.5462021827698
+[12910, 6980]
+200.68251705169678

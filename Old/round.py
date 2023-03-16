@@ -62,6 +62,7 @@ class Round:
                     trump_higher.append(card)
 
         if follow and leading_suit != self.trump_suit:
+        # if follow:
             return follow
 
         return trump_higher or trump or hand   

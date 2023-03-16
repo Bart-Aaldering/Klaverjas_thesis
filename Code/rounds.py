@@ -49,7 +49,6 @@ class Round:
         trump = []
         trump_higher = []
         highest_trump_value = trick.highest_trump(self.trump_suit).order(self.trump_suit)
-        current_winner = trick.winner(self.trump_suit)
         for card in hand:
             if card.suit == leading_suit:
                 follow.append(card)
@@ -58,11 +57,13 @@ class Round:
                 if card.order(self.trump_suit) > highest_trump_value:
                     trump_higher.append(card)
 
-        if follow and leading_suit != self.trump_suit:
+        # if follow and leading_suit != self.trump_suit:
+        if follow:
             return follow
 
-        if (current_winner + player) % 2 == 0:
-            return hand
+        # current_winner = trick.winner(self.trump_suit)
+        # if (current_winner + player) % 2 == 0:
+        #     return hand
 
         return trump_higher or trump or hand   
     
@@ -73,14 +74,14 @@ class Round:
     #Plays the card in a trick
     def play_card(self, card, player=None):
 
-        # if card not in self.legal_moves():
-        #     print("HIER", card.value, card.suit)
-        #     print([(card.value, card.suit) for card in self.legal_moves()])
-        #     raise Exception("Illegal move")
+        if card not in self.legal_moves():
+            print("HIER", card.value, card.suit)
+            print([(card.value, card.suit) for card in self.legal_moves()])
+            raise Exception("Illegal move")
         if player is None:
             player = self.current_player
-        # if player != self.current_player:
-        #     raise Exception("Not your turn")
+        if player != self.current_player:
+            raise Exception("Not your turn")
         self.tricks[-1].add_card(card)
         # print("hier1", card.value, card.suit)
         # for card in self.player_cards[player]:

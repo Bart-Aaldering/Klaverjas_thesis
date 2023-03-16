@@ -63,12 +63,3 @@ class Rule_player:
                 highest_points = card.points(trump)
         return highest_card
 
-
-        "Makes cards of the trump suit to have suit trump_suit and cards with suit trump_suit have suit 0"
-        suit = card_to_suit(card)
-        if suit == 0:
-            return trump_suit*10 + card_to_value(card)
-        elif suit == trump_suit:
-            return card_to_value(card)
-        else:
-            return card   
