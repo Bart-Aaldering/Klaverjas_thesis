@@ -123,15 +123,25 @@ class AlphaZero_player:
             # tijd = time.time()
             # Simulation
             points = 0
+            current_state = current_node.state
             for _ in range(number_of_simulations):
+                moves = []
+
+                # Do random moves until round is complete
+                while not current_state.round_complete():
+                    
+                    move = random.choice(list(current_state.legal_moves()))
+                    moves.append(move)
+                    current_state.do_move(move)
                 
-                explore_state = copy.deepcopy(current_node.state)
-                while not explore_state.round_complete():
-                    
-                    move = random.choice(list(explore_state.legal_moves()))
-                    explore_state.do_move(move)
-                    
-                points += explore_state.get_score(self.player_position)
+                # Add score to points
+                points += current_state.get_score(self.player_position)
+                
+                # Undo moves
+                moves.reverse()
+                for move in moves:
+                    current_state.undo_move(move)
+                
             points /= number_of_simulations
             # tijden[3] += time.time()-tijd
             # tijd = time.time()
