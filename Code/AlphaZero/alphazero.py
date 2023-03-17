@@ -40,7 +40,7 @@ class Node:
         self.legal_children = set()
         for move in legal_moves:
             new_state = copy.deepcopy(self.state)
-            new_state.play_card(move)
+            new_state.do_move(move)
             self.legal_children.add(Node(new_state, self, move))
     # def set_legal_moves(self):
     #     self.legal_moves = self.state.legal_moves()
@@ -69,7 +69,7 @@ class Node:
             ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
-    
+
 class AlphaZero_player:
     def __init__(self, round: Round, player_position: int):
         self.player_position = player_position
@@ -78,7 +78,7 @@ class AlphaZero_player:
         
     def update_state(self, move: int, trump_suit: str):
         move = Card(card_transform(move, ['k', 'h', 'r', 's'].index(trump_suit)))
-        self.state.play_card(move, simulation=False)
+        self.state.do_move(move, simulation=False)
 
     def get_move(self, trump_suit: str):
         card_id = self.mcts().id
@@ -108,7 +108,7 @@ class AlphaZero_player:
             # while not current_node.state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
                 prev_state = copy.deepcopy(current_node.state)
                 current_node = current_node.select_child_ucb()
-                prev_state.play_card(current_node.move)
+                prev_state.do_move(current_node.move)
                 current_node.state = prev_state
                 current_node.set_legal_children()
                 # current_node.set_legal_moves()
@@ -124,11 +124,12 @@ class AlphaZero_player:
             # Simulation
             points = 0
             for _ in range(number_of_simulations):
+                
                 explore_state = copy.deepcopy(current_node.state)
                 while not explore_state.round_complete():
                     
                     move = random.choice(list(explore_state.legal_moves()))
-                    explore_state.play_card(move)
+                    explore_state.do_move(move)
                     
                 points += explore_state.get_score(self.player_position)
             points /= number_of_simulations
@@ -150,4 +151,3 @@ class AlphaZero_player:
         # print(tijden)
         # print(tijden2)
         return best_child.move
-

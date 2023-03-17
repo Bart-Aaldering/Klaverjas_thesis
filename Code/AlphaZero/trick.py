@@ -11,8 +11,8 @@ class Trick:
         return str(self.cards)
         
     def __eq__(self, other):
-        raise NotImplementedError
-        return self.cards == other.cards
+        # raise NotImplementedError
+        return (self.cards == other.cards and self.starting_player == other.starting_player)
     
     def __hash__(self):
         raise NotImplementedError
@@ -21,6 +21,10 @@ class Trick:
     def add_card(self, card: Card):
         """Adds the played card to itself"""
         self.cards.append(card)
+        
+    def remove_card(self):
+        """Removes the played card from itself"""
+        self.cards.pop()
 
     def trick_complete(self) -> bool:
         """Checks whether the trick is over"""

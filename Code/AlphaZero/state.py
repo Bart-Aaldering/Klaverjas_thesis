@@ -35,10 +35,11 @@ class State:
         self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
         self.possible_cards[own_position] = set([Card(id) for id in own_hand_as_id])
         
-        self.centre = Trick(self.current_player)
+        self.tricks = [Trick(self.current_player)]
         
-        self.has_lost = [False, False]
+        self.has_lost = [0, 0]
         self.cards_left = [8, 8, 8, 8]
+        self.final_score = [0, 0]
         # The current score of the round
         self.points = [0, 0]
         self.meld = [0, 0]
@@ -102,9 +103,9 @@ class State:
         # print("possible_cards", self.possible_cards)
         # possible_cards = copy.deepcopy(self.possible_cards)
         
-        real_hands_id = [[card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
-                            for card in self.round.player_hands[i]] for i in range(4)]
-        real_hands = [{Card(id) for id in hand} for hand in real_hands_id]
+        # real_hands_id = [[card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
+        #                     for card in self.round.player_hands[i]] for i in range(4)]
+        # real_hands = [{Card(id) for id in hand} for hand in real_hands_id]
 
         # print("real hand2", real_hands)
         # for i in range(4):
@@ -160,7 +161,7 @@ class State:
         if self.current_player == self.own_position:
             return
             
-        leading_suit = self.centre.leading_suit()
+        leading_suit = self.tricks[-1].leading_suit()
         if leading_suit is None:
             return
 
@@ -173,7 +174,7 @@ class State:
                 self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
                                                              if card.id in {0,1,2,3,4,5,6,7}}
             else:
-                if (highest_trump_order := self.centre.highest_trump().order()) > played_card.order():
+                if (highest_trump_order := self.tricks[-1].highest_trump().order()) > played_card.order():
                     # remove all trump cards higher then the highest trump card from the current player
                     self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
                                                                  if card.id in [0,1,5,6,3,7,2,4][highest_trump_order-8:]}
@@ -188,7 +189,7 @@ class State:
     def legal_moves(self) -> Set[Card]:
         hand = self.hands[self.current_player]
 
-        leading_suit = self.centre.leading_suit()
+        leading_suit = self.tricks[-1].leading_suit()
 
         if leading_suit is None:
             return hand
@@ -196,7 +197,7 @@ class State:
         follow = set()
         trump = set()
         trump_higher = set()
-        highest_trump_value = self.centre.highest_trump().order()
+        highest_trump_value = self.tricks[-1].highest_trump().order()
         for card in hand:
             if card.suit == leading_suit:
                 follow.add(card)
@@ -209,39 +210,34 @@ class State:
         # if follow and leading_suit != 0:
             return follow
 
-        # current_winner = self.centre.winner()
+        # current_winner = self.tricks[-1].winner()
         # if (current_winner+self.current_player) % 2 == 0:
         #     return hand
         
         return trump_higher or trump or hand
 
-    def play_card(self, card: Card, simulation: bool = True):
+    def do_move(self, card: Card, simulation: bool = True):
+        """Play a card and update the game state"""
         if simulation:
-            if card not in self.legal_moves():
-                # print(self.legal_moves(), card)
-                raise ValueError(f"Card {card} is not a legal move")
             self.hands[self.current_player].remove(card)
         else:
             self.update_possible_cards(card)
-            if self.current_player != self.own_position:
-                pass
-                # self.other_players_cards.remove(card)
-            else:
+            if self.current_player == self.own_position:
                 self.hands[self.current_player].remove(card)
                              
-        self.centre.add_card(card)
+        self.tricks[-1].add_card(card)
 
         self.cards_left[self.current_player] -= 1
         
-        if self.centre.trick_complete():
+        if self.tricks[-1].trick_complete():
             
-            winner = self.centre.winner()
+            winner = self.tricks[-1].winner()
             team_winner = team(winner)
             
-            self.has_lost[1-team_winner] = True
+            self.has_lost[1-team_winner] += 1
             
-            points = self.centre.points()
-            meld = self.centre.meld()
+            points = self.tricks[-1].points()
+            meld = self.tricks[-1].meld()
             
             self.points[team_winner] += points
             self.meld[team_winner] += meld
@@ -252,35 +248,78 @@ class State:
                 self.points[team_winner] += 10
                 defending_team = 1 - self.declaring_team
                 
-                # Check if the round has "nat"
-                if (self.points[self.declaring_team] + self.meld[self.declaring_team] <=
-                        self.points[defending_team] + self.meld[defending_team]):
-                    self.points[defending_team] = 162
-                    self.meld[defending_team] += self.meld[self.declaring_team]
-                    self.points[self.declaring_team] = 0
-                    self.meld[self.declaring_team] = 0
-                
                 # Check if the round has "pit"
                 if not self.has_lost[0]:
                     self.meld[0] += 100
                 elif not self.has_lost[1]:
                     self.meld[1] += 100
+                    
+                # Check if the round has "nat"
+                if (self.points[self.declaring_team] + self.meld[self.declaring_team] <=
+                        self.points[defending_team] + self.meld[defending_team]):
+                    self.final_score[defending_team] = 162 + self.meld[defending_team] + self.meld[self.declaring_team]
+                    self.final_score[self.declaring_team] = 0
+                else:
+                    self.final_score[0] = self.points[0] + self.meld[0]
+                    self.final_score[1] = self.points[1] + self.meld[1]
+                    
             else:
-                self.centre = Trick(winner)
+                self.tricks.append(Trick(winner))
                 self.current_player = winner
         else:
             self.current_player = (self.current_player+1) % 4
     
+    def undo_move(self, card: Card):
+        """Undo the last move made in the game. Can only be used for simulations"""
+        if self.tricks[-1].cards == [] or self.round_complete():
+
+            if self.round_complete():
+                
+                # Reverse the: Check if the round has "nat"
+                self.final_score[0] = 0
+                self.final_score[1] = 0
+                
+                # Reverse the: Check if the round has "pit"
+                if not self.has_lost[0]:
+                    self.meld[0] -= 100
+                elif not self.has_lost[1]:
+                    self.meld[1] -= 100
+            
+                # Reverse the: Winner of last trick gets 10 points
+                self.points[team(self.tricks[-1].winner())] -= 10
+            else:
+                self.tricks.pop()
+                self.current_player = (self.tricks[-1].starting_player+3) % 4
+                
+                
+            team_winner = team(self.tricks[-1].winner())
+        
+            points = self.tricks[-1].points()
+            meld = self.tricks[-1].meld()
+            
+            self.points[team_winner] -= points
+            self.meld[team_winner] -= meld
+            
+            self.has_lost[1-team_winner] -= 1
+        else:
+            self.current_player = (self.current_player+3) % 4
+
+        self.cards_left[self.current_player] += 1
+        
+        self.tricks[-1].remove_card()
+
+        self.hands[self.current_player].add(card)
+        
+
+        
     def round_complete(self) -> bool:
-        if self.centre.trick_complete() and len(self.hands[self.own_position]) == 0:
+        if self.tricks[-1].trick_complete() and len(self.hands[self.own_position]) == 0:
             return True
         return False
 
     def get_score(self, player: int) -> int:
         local_team = team(player)
-        return self.points[local_team] - self.points[1-local_team] + self.meld[local_team] - self.meld[1-local_team]
+        return self.final_score[local_team] - self.final_score[1-local_team]
 
-
-    
 
 

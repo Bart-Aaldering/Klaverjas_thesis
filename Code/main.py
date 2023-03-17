@@ -91,10 +91,79 @@ def main():
     print(end_time - start_time)
     print()
 
+def print_state(state: State):
+    print("Current player: ", state.current_player)
+    print("Current trick: ", state.tricks[-1])
+    print("hands: ", state.hands)
 
+def main2():
+    # random.seed(13)
+    round = Round(0, 'k', 0)
+    state = State(round, 0)
+    played_moves = []
+    state.determine()
+    for i in range(4):
+        moves = state.legal_moves()
+        # print("Legal moves: ", moves)
+        move = random.choice(list(moves))
+        # print("Move: ", move)
+        state.do_move(move)
+        
+    state_copy = copy.deepcopy(state)
+    # state_copy = state
+    
+    previous = state_copy
+    
+    # moves = state.legal_moves()
+    # move = random.choice(list(moves))
+    # print_state(state)
+    # state.do_move(move)
+    # print_state(state)
+    # state.undo_move(move)
+    # print_state(state)
+    players = [[], []]
+    # print("hands: ", round.player_hands)
+    for i in range(7):
+        for j in range(4):
+            # print("player: ", state.current_player)
+            moves = state.legal_moves()
+            # print("Legal moves: ", moves)
+            move = random.choice(list(moves))
+            # print("Move: ", move)
+            played_moves.append(move)
+            players[0].append(state.current_player)
+            state.do_move(move)
+            # print("hands: ", round.player_hands)
+    print(state.__dict__)
+    played_moves.reverse()
+    for move in played_moves:
+        
+        state.undo_move(move)
+        players[1].insert(0, state.current_player)
+        
+        
+    print(players[0])
+    print(players[1])
+
+    new = state
+    print(previous.__dict__)
+    print(new.__dict__)
+    if previous.__dict__ != new.__dict__:
+        raise Exception("not equal")
+    if previous.hands != new.hands:
+        raise Exception("hands not equal")
+    if previous.tricks != new.tricks:
+        raise Exception("tricks not equal")
+    if previous.current_player != new.current_player:
+        raise Exception("current_player not equal")
+    if previous.possible_cards != new.possible_cards:
+        raise Exception("possible_cards not equal")
+    print("equal")
+    
         
 if __name__ == "__main__":
     main()
+    # main2()
     # a = [Card(10), Card(11)]
     # b = a.copy()
     # a.remove(Card(10))
@@ -102,21 +171,18 @@ if __name__ == "__main__":
     # print(a,b)
 
     # tijd = time.time()
-    # import numpy as np
-    # from AlphaZero.state import State
+    # # import numpy as np
+    # # from AlphaZero.state import State
 
-    
-    # asdf = [x for x in range(32)]
-    # for _ in range(1000):
-    #     round = Round(0, 'k', 0)
-    #     state = State(round, 0)
-    #     moves = state.legal_moves()
-    #     choice = random.choice(list(moves))
-    #     state.play_card(choice)
-        
-        # state2 = copy.deepcopy(state)
+    # a = [1,2,3,4,5]
+    # # asdf = [x for x in range(32)]
+    # b = 0
+    # for _ in range(10000000):
+    #     if len(a) == 0:
+    #     # if a == []:
+    #         b = 10
 
-    # print(a)
+    # print(b)
     # print(time.time() - tijd)
     # # main2()
     # for i in range(1,2): 
