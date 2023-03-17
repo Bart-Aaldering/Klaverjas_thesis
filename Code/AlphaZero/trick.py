@@ -22,9 +22,11 @@ class Trick:
         """Adds the played card to itself"""
         self.cards.append(card)
         
-    def remove_card(self):
+    def remove_card(self, card: Card):
         """Removes the played card from itself"""
-        self.cards.pop()
+        
+        if self.cards.pop() != card:
+            raise ValueError("Card not in trick")
 
     def trick_complete(self) -> bool:
         """Checks whether the trick is over"""

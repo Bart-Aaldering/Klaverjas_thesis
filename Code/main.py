@@ -67,7 +67,7 @@ def main():
     point_cumulative = [0,0]
     #Simulates the 10000 pre-generated games
     start_time = time.time()
-    for i in range(200):
+    for i in range(1000):
         if i % 1 == 0:
             print(i)
             

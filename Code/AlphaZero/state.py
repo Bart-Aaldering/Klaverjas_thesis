@@ -52,11 +52,52 @@ class State:
         raise NotImplementedError
         return hash(tuple(sorted(self.__dict__.items())))
     
+    def find_all_configurations(self, hand: List[set], possible_cards: List[set], num_cards_to_add: List[int]):
+        all_cards = set(possible_cards[0]) | set(possible_cards[1]) | set(possible_cards[2])
+        all_cards2 = []
+        for card in all_cards:
+            players = []
+            if card in possible_cards[0]:
+                players.append(0)
+            if card in possible_cards[1]:
+                players.append(1)
+            if card in possible_cards[2]:
+                players.append(2)
+            all_cards2.append((card, players))
     
+    def recur(self, all_cards2: List[tuple], card_index , hand: List[set], possible_cards: List[set], num_cards_to_add: List[int]):
+        
+        card = all_cards2[card_index]
+        if card_index == len(all_cards2)-1:
+            return True
+        for player in card[1]:
+            hand[player].add(card[0])
+            
+            for other_player in card[1]:
+                possible_cards[other_player].remove(card[0])
+                
+            num_cards_to_add[player] -= 1
+            
+            if self.recur(all_cards2, card_index+1, hand, possible_cards, num_cards_to_add):
+                return True
+            
+            num_cards_to_add[player] += 1
+            
+            for other_player in card[1]:
+                possible_cards[other_player].add(card[0])
+            
+            hand[player].remove(card[0])
+            
+                
+                
+                
+                
+        
+            
     def find_card_configuration(self, hand: List[set], possible_cards: List[list], player: int, num_cards_to_add: List[int]) -> bool:
         if player == 3:
-            if num_cards_to_add != [0, 0, 0]:
-                raise Exception("Not all cards added")
+            # if num_cards_to_add != [0, 0, 0]:
+            #     raise Exception("Not all cards added")
             return True
         elif num_cards_to_add[player] == 0:
             return self.find_card_configuration(hand, possible_cards, player+1, num_cards_to_add)
@@ -65,20 +106,29 @@ class State:
             cards = possible_cards[player].copy()
             # possible_cards_copy = copy.deepcopy(possible_cards)
             for card in cards:
-                has_card = []
+                had_card = []
                 for other_player in range(player+1, 3):
                     if card in possible_cards[other_player]:
-                        has_card.append(other_player)
+                        had_card.append(other_player)
                         possible_cards[other_player].remove(card)
                         if len(possible_cards[other_player]) < num_cards_to_add[other_player]:
                             wont_work = True
-                            for removed_player in has_card:
-                                possible_cards[removed_player].append(card)
+                            for player_had_card in had_card:
+                                possible_cards[player_had_card].append(card)
                             break
-
+                        
                 if wont_work:
                     wont_work = False
                     continue
+                all_possible_cards = set(possible_cards[0]) | set(possible_cards[1]) | set(possible_cards[2])
+                # print("all_possible_cards", all_possible_cards)
+                # print("num_cards_to_add", sum(num_cards_to_add))
+                if len(all_possible_cards) < sum(num_cards_to_add):
+                    raise Exception("Not enough cards")
+                    for player_had_card in had_card:
+                        possible_cards[player_had_card].append(card)
+                    continue
+                    
                 hand[player].add(card)
                 num_cards_to_add[player] -= 1
 
@@ -91,8 +141,8 @@ class State:
                 
                 num_cards_to_add[player] += 1
                 hand[player].remove(card)
-                for removed_player in has_card:
-                    possible_cards[removed_player].append(card)
+                for player_had_card in had_card:
+                    possible_cards[player_had_card].append(card)
 
             return False
         
@@ -107,9 +157,9 @@ class State:
         #                     for card in self.round.player_hands[i]] for i in range(4)]
         # real_hands = [{Card(id) for id in hand} for hand in real_hands_id]
 
-        # print("real hand2", real_hands)
+        # # print("real hand2", real_hands)
         # for i in range(4):
-        #     if real_hands[i] - possible_cards[i] != set():
+        #     if real_hands[i] - self.possible_cards[i] != set():
         #         # print(possible_cards)
         #         raise Exception("Real hand not possible")
         
@@ -124,31 +174,32 @@ class State:
         # cards_left = self.cards_left.copy()
         cards_left.pop(self.own_position)
         
+        print(random.choice([1,2,3,4,5,6,7,8,9,10,11,12,13]))
         if not self.find_card_configuration(hand, possible_cards, 0, cards_left):
             raise Exception("Could not find a card configuration")
-        if cards_left != [0, 0, 0]:
-            # print(possible_cards)
-            # print(hand)
-            # print(cards_left)
-            # print(self.cards_left)
-            raise Exception("Not all cards added1")
-        possible_cards = copy.deepcopy(self.possible_cards)
-        possible_cards = [list(cards) for cards in possible_cards]
-        # print("HIER", possible_cards)
-        # print(self.own_position)
-        possible_cards.pop(self.own_position)
-        for i in range(3):
-            if hand[i] - set(possible_cards[i]) != set():
-                # print("hand", hand)
-                # print(possible_cards)
-                # print(self.round.player_hands)
-                # print(self.round.trump_suit)
-                # print(self.own_position)
-                raise Exception("Not all cards added2")
+        # if cards_left != [0, 0, 0]:
+        #     # print(possible_cards)
+        #     # print(hand)
+        #     # print(cards_left)
+        #     # print(self.cards_left)
+        #     raise Exception("Not all cards added1")
+        # possible_cards = copy.deepcopy(self.possible_cards)
+        # possible_cards = [list(cards) for cards in possible_cards]
+        # # print("HIER", possible_cards)
+        # # print(self.own_position)
+        # possible_cards.pop(self.own_position)
+        # for i in range(3):
+        #     if hand[i] - set(possible_cards[i]) != set():
+        #         # print("hand", hand)
+        #         # print(possible_cards)
+        #         # print(self.round.player_hands)
+        #         # print(self.round.trump_suit)
+        #         # print(self.own_position)
+        #         raise Exception("Not all cards added2")
         for index, player in enumerate(other_players):
             self.hands[player] = hand[index]
-            if len(hand[index]) != self.cards_left[player]:
-                raise Exception("Not all cards added3")
+            # if len(hand[index]) != self.cards_left[player]:
+            #     raise Exception("Not all cards added3")
 
 
 
@@ -179,12 +230,12 @@ class State:
                     self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
                                                                  if card.id in [0,1,5,6,3,7,2,4][highest_trump_order-8:]}
         
-        for i in range(4):
-            real_hand_id = [card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
-                            for card in self.round.player_hands[i]]
-            real_hand = set([Card(id) for id in real_hand_id])
-            if real_hand - self.possible_cards[i] != set():
-                raise Exception("Not all cards added")
+        # for i in range(4):
+        #     real_hand_id = [card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
+        #                     for card in self.round.player_hands[i]]
+        #     real_hand = set([Card(id) for id in real_hand_id])
+        #     if real_hand - self.possible_cards[i] != set():
+        #         raise Exception("Not all cards added")
     
     def legal_moves(self) -> Set[Card]:
         hand = self.hands[self.current_player]
@@ -306,7 +357,7 @@ class State:
 
         self.cards_left[self.current_player] += 1
         
-        self.tricks[-1].remove_card()
+        self.tricks[-1].remove_card(card)
 
         self.hands[self.current_player].add(card)
         

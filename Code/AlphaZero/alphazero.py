@@ -15,8 +15,7 @@ from AlphaZero.helper import card_transform, card_untransform
 
 
 class Node:
-    def __init__(self, state: State, parent: Node = None, move: Card = None):
-        self.state = state
+    def __init__(self, parent: Node = None, move: Card = None):
         self.children = set()
         self.children_moves = set()
         self.parent = parent
@@ -25,7 +24,7 @@ class Node:
         self.visits = 0
     
     def __repr__(self) -> str:
-        return f"Node({self.move}, {self.score}, {self.visits})"
+        return f"Node({self.move}, {self.parent.move}, {self.score}, {self.visits})"
     
     def __eq__(self, other: Node) -> bool:
         # raise NotImplementedError
@@ -35,39 +34,43 @@ class Node:
         # raise NotImplementedError
         return hash(self.move)
 
-    def set_legal_children(self):
-        legal_moves = self.state.legal_moves()
-        self.legal_children = set()
-        for move in legal_moves:
-            new_state = copy.deepcopy(self.state)
-            new_state.do_move(move)
-            self.legal_children.add(Node(new_state, self, move))
-    # def set_legal_moves(self):
-    #     self.legal_moves = self.state.legal_moves()
+    # def set_legal_children(self):
+    #     legal_moves = self.state.legal_moves()
+    #     self.legal_children = set()
+    #     for move in legal_moves:
+    #         new_state = copy.deepcopy(self.state)
+    #         new_state.do_move(move)
+    #         self.legal_children.add(Node(new_state, self, move))
+    def set_legal_moves(self, state: State):
+        self.legal_moves = state.legal_moves()
         
     def expand(self):
-        # for move in self.legal_moves - self.children_moves:
-        #     new_state = copy.deepcopy(self.state)
-        #     new_state.play_card(move)
-        #     self.children.add(Node(new_state, self, move))
+        for move in self.legal_moves - self.children_moves:
+            self.children.add(Node(self, move))
+            self.children_moves.add(move)
             
-        for node in self.legal_children:
-            self.children.add(node)
+        # for node in self.legal_children:
+        #     self.children.add(node)
 
     def select_child_random(self) -> Node:
-        return random.choice(list(self.legal_children.intersection(self.children)))
-        # return random.choice([child for child in self.children if child.move in self.legal_moves])
+        # return random.choice(list(self.legal_children.intersection(self.children)))
+        choice = random.choice([child for child in self.children if child.move in self.legal_moves])
+        # print("random choice child", self.children)
+        # print("random", choice)
+        return choice
     
     def select_child_ucb(self) -> Node:
         c = 1
         ucbs = []
-        # legal_children = [child for child in self.children if child.move in self.legal_moves]
-        legal_children = list(self.legal_children.intersection(self.children))
+        legal_children = [child for child in self.children if child.move in self.legal_moves]
+        # legal_children = list(self.legal_children.intersection(self.children))
         for child in legal_children:
             if child.visits == 0:
                 return child
             ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
+        # print("ucb choice child", self.children)
+        # print("legal", legal_children[index_max])
         return legal_children[index_max]
 
 class AlphaZero_player:
@@ -85,45 +88,46 @@ class AlphaZero_player:
         return card_untransform(card_id, ['k', 'h', 'r', 's'].index(trump_suit))
 
     def mcts(self):
-        root = Node(copy.deepcopy(self.state))
-        current_node = root
+        current_state = copy.deepcopy(self.state)
+        current_node = Node()
         number_of_simulations = 5
-        tijd = 20
+        tijd = 10
         tijden = [0, 0, 0, 0, 0]
         tijden2 = [0, 0]
         for _ in range(tijd):
             # tijd = time.time()
+            
             # Determination
-            current_node.state.determine()
+            current_state.determine()
             # tijden2[0] += time.time()-tijd
             # tijd2 = time.time()
-            current_node.set_legal_children()
-            # current_node.set_legal_moves()
+            # current_node.set_legal_children()
+            current_node.set_legal_moves(current_state)
             # tijden2[1] += time.time()-tijd2
             # tijden[0] += time.time()-tijd
             
             # tijd = time.time()
             # Selection
-            while not current_node.state.round_complete() and current_node.legal_children-current_node.children == set():
-            # while not current_node.state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
-                prev_state = copy.deepcopy(current_node.state)
+            # while not current_node.state.round_complete() and current_node.legal_children-current_node.children == set():
+            while not current_state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
+                # prev_state = copy.deepcopy(current_node.state)
                 current_node = current_node.select_child_ucb()
-                prev_state.do_move(current_node.move)
-                current_node.state = prev_state
-                current_node.set_legal_children()
-                # current_node.set_legal_moves()
+                current_state.do_move(current_node.move)
+                # current_node.state = prev_state
+                # current_node.set_legal_children()
+                current_node.set_legal_moves(current_state)
             # tijden[1] += time.time()-tijd
             
             # tijd = time.time()
             # Expansion
-            if not current_node.state.round_complete():
+            if not current_state.round_complete():
                 current_node.expand()
                 current_node = current_node.select_child_random()
+                current_state.do_move(current_node.move)
             # tijden[2] += time.time()-tijd
             # tijd = time.time()
             # Simulation
             points = 0
-            current_state = current_node.state
             for _ in range(number_of_simulations):
                 moves = []
 
@@ -149,11 +153,13 @@ class AlphaZero_player:
             while current_node.parent is not None:
                 current_node.visits += 1
                 current_node.score += points
+                current_state.undo_move(current_node.move)
                 current_node = current_node.parent
-            root.visits += 1
+                
+            current_node.visits += 1
             # tijden[4] += time.time()-tijd
         best_score = -1
-        for child in root.children:
+        for child in current_node.children:
             score = child.visits
             if score > best_score:
                 best_score = score

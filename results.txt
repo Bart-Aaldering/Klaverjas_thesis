@@ -64,16 +64,25 @@
 [100695, 93445]
 1737.9773166179657 tijd 10 simulations 5 c 1
 
+1000 rounds rule vs alpha ismcts with updated possible_cards and removed deepcopy
+[104395, 88755]
+654.3433904647827 tijd 10 simulations 5 c 1
+[101404, 91476]
+801.258308172226 tijd 10 simulations 5 c 1
+
 1000 random vs alpha  tijd 10 simulations 5 c 1
 [115818, 80032]
 483.34387826919556
 [112594, 83316]
 471.4009642601013
 [12910, 6980]
-200.68251705169678 100 rounds
+200.68251705169678 100 rounds 
 
 [105109, 87561]
-6316.472996473312 latest working on google colab
+6316.472996473312 latest working on google colab tijd 20 
+
+[21361, 17809]
+588.0927436351776 simulation now with undo function tijd 20 
 
 test
 [94518, 95712]
