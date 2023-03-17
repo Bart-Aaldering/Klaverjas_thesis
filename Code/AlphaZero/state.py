@@ -62,6 +62,7 @@ class State:
         else:
             wont_work = False
             cards = possible_cards[player].copy()
+            # possible_cards_copy = copy.deepcopy(possible_cards)
             for card in cards:
                 has_card = []
                 for other_player in range(player+1, 3):

@@ -102,13 +102,19 @@ if __name__ == "__main__":
     # print(a,b)
 
     # tijd = time.time()
-    # # import numpy as np
+    # import numpy as np
+    # from AlphaZero.state import State
+
+    
     # asdf = [x for x in range(32)]
-    # for _ in range(1000000):
-    #     # if 17 in asdf:
-    #     #     a = True
-    #     if 17 in set(asdf):
-    #         a = True
+    # for _ in range(1000):
+    #     round = Round(0, 'k', 0)
+    #     state = State(round, 0)
+    #     moves = state.legal_moves()
+    #     choice = random.choice(list(moves))
+    #     state.play_card(choice)
+        
+        # state2 = copy.deepcopy(state)
 
     # print(a)
     # print(time.time() - tijd)

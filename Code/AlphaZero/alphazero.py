@@ -35,33 +35,34 @@ class Node:
         # raise NotImplementedError
         return hash(self.move)
 
-    # def set_legal_children(self):
-    #     legal_moves = self.state.legal_moves()
-    #     self.legal_children = set()
-    #     for move in legal_moves:
-    #         new_state = copy.deepcopy(self.state)
-    #         new_state.play_card(move)
-    #         self.legal_children.add(Node(new_state, self, move))
-    def set_legal_moves(self):
-        self.legal_moves = self.state.legal_moves()
-        
-    def expand(self):
-        for move in self.legal_moves - self.children_moves:
+    def set_legal_children(self):
+        legal_moves = self.state.legal_moves()
+        self.legal_children = set()
+        for move in legal_moves:
             new_state = copy.deepcopy(self.state)
             new_state.play_card(move)
-            self.children.add(Node(new_state, self, move))
+            self.legal_children.add(Node(new_state, self, move))
+    # def set_legal_moves(self):
+    #     self.legal_moves = self.state.legal_moves()
+        
+    def expand(self):
+        # for move in self.legal_moves - self.children_moves:
+        #     new_state = copy.deepcopy(self.state)
+        #     new_state.play_card(move)
+        #     self.children.add(Node(new_state, self, move))
             
-        # for node in self.legal_children:
-        #     self.children.add(node)
+        for node in self.legal_children:
+            self.children.add(node)
 
     def select_child_random(self) -> Node:
-        # return random.choice(list(self.legal_children.intersection(self.children)))
-        return random.choice([child for child in self.children if child.move in self.legal_moves])
+        return random.choice(list(self.legal_children.intersection(self.children)))
+        # return random.choice([child for child in self.children if child.move in self.legal_moves])
     
     def select_child_ucb(self) -> Node:
         c = 1
         ucbs = []
-        legal_children = [child for child in self.children if child.move in self.legal_moves]
+        # legal_children = [child for child in self.children if child.move in self.legal_moves]
+        legal_children = list(self.legal_children.intersection(self.children))
         for child in legal_children:
             if child.visits == 0:
                 return child
@@ -96,21 +97,21 @@ class AlphaZero_player:
             current_node.state.determine()
             # tijden2[0] += time.time()-tijd
             # tijd2 = time.time()
-            # current_node.set_legal_children()
-            current_node.set_legal_moves()
+            current_node.set_legal_children()
+            # current_node.set_legal_moves()
             # tijden2[1] += time.time()-tijd2
             # tijden[0] += time.time()-tijd
             
             # tijd = time.time()
             # Selection
-            # while not current_node.state.round_complete() and current_node.legal_children-current_node.children == set():
-            while not current_node.state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
+            while not current_node.state.round_complete() and current_node.legal_children-current_node.children == set():
+            # while not current_node.state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
                 prev_state = copy.deepcopy(current_node.state)
                 current_node = current_node.select_child_ucb()
                 prev_state.play_card(current_node.move)
                 current_node.state = prev_state
-                # current_node.set_legal_children()
-                current_node.set_legal_moves()
+                current_node.set_legal_children()
+                # current_node.set_legal_moves()
             # tijden[1] += time.time()-tijd
             
             # tijd = time.time()
