@@ -94,11 +94,25 @@ class AlphaZero_player:
         tijd = 10
         tijden = [0, 0, 0, 0, 0]
         tijden2 = [0, 0]
-        for _ in range(tijd):
+        print("possible moves", current_state.possible_cards)
+        determinizations = current_state.find_x_determinizations(tijd)
+        print("determinizations", determinizations)
+        
+        for i in range(tijd):
             # tijd = time.time()
             
             # Determination
-            current_state.determine()
+            # current_state.determine()
+            # 
+            other_players = [0,1,2,3]
+            other_players.pop(current_state.own_position)
+            for j in range(3):
+                print("DET", determinizations[i])
+                print("left", current_state.cards_left[other_players[j]])
+                if len(determinizations[i][j]) != current_state.cards_left[other_players[j]]:
+                    raise Exception("Determinization not correct")
+
+            current_state.set_determinization(determinizations[i])
             # tijden2[0] += time.time()-tijd
             # tijd2 = time.time()
             # current_node.set_legal_children()
