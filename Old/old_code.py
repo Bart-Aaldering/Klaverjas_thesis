@@ -562,3 +562,110 @@
         #         choice = random.sample(other_players_cards, 1)[0]
         #         self.hands[player].add(choice)
         #         other_players_cards.remove(choice)
+        
+#     def find_card_configuration(self, hand: list[set], possible_cards: list[list], player: int, num_cards_to_add: list[int]) -> bool:
+#         if player == 3:
+#             # if num_cards_to_add != [0, 0, 0]:
+#             #     raise Exception("Not all cards added")
+#             return True
+#         elif num_cards_to_add[player] == 0:
+#             return self.find_card_configuration(hand, possible_cards, player+1, num_cards_to_add)
+#         else:
+#             wont_work = False
+#             cards = possible_cards[player].copy()
+#             # possible_cards_copy = copy.deepcopy(possible_cards)
+#             for card in cards:
+#                 had_card = []
+#                 for other_player in range(player+1, 3):
+#                     if card in possible_cards[other_player]:
+#                         had_card.append(other_player)
+#                         possible_cards[other_player].remove(card)
+#                         if len(possible_cards[other_player]) < num_cards_to_add[other_player]:
+#                             wont_work = True
+#                             for player_had_card in had_card:
+#                                 possible_cards[player_had_card].append(card)
+#                             break
+                        
+#                 if wont_work:
+#                     wont_work = False
+#                     continue
+#                 all_possible_cards = set(possible_cards[0]) | set(possible_cards[1]) | set(possible_cards[2])
+#                 # print("all_possible_cards", all_possible_cards)
+#                 # print("num_cards_to_add", sum(num_cards_to_add))
+#                 if len(all_possible_cards) < sum(num_cards_to_add):
+#                     raise Exception("Not enough cards")
+#                     for player_had_card in had_card:
+#                         possible_cards[player_had_card].append(card)
+#                     continue
+                    
+#                 hand[player].add(card)
+#                 num_cards_to_add[player] -= 1
+
+#                 possible_cards[player].remove(card)
+
+#                 if self.find_card_configuration(hand, possible_cards, player, num_cards_to_add):
+#                     return True
+                
+#                 possible_cards[player].append(card)
+                
+#                 num_cards_to_add[player] += 1
+#                 hand[player].remove(card)
+#                 for player_had_card in had_card:
+#                     possible_cards[player_had_card].append(card)
+
+#             return False
+        
+#     def determine(self):         
+#         other_players = [0,1,2,3]
+#         other_players.pop(self.own_position)
+        
+#         # print("possible_cards", self.possible_cards)
+#         # possible_cards = copy.deepcopy(self.possible_cards)
+        
+#         # real_hands_id = [[card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
+#         #                     for card in self.round.player_hands[i]] for i in range(4)]
+#         # real_hands = [{Card(id) for id in hand} for hand in real_hands_id]
+
+#         # # print("real hand2", real_hands)
+#         # for i in range(4):
+#         #     if real_hands[i] - self.possible_cards[i] != set():
+#         #         # print(possible_cards)
+#         #         raise Exception("Real hand not possible")
+        
+#         possible_cards = [list(cards) for cards in self.possible_cards]
+#         # print("HIER", possible_cards)
+#         # print(self.own_position)
+#         possible_cards.pop(self.own_position)
+#         for i in possible_cards:
+#             random.shuffle(i)
+#         hand = [set(), set(), set()]
+#         cards_left = copy.deepcopy(self.cards_left)
+#         # cards_left = self.cards_left.copy()
+#         cards_left.pop(self.own_position)
+        
+#         print(random.choice([1,2,3,4,5,6,7,8,9,10,11,12,13]))
+#         if not self.find_card_configuration(hand, possible_cards, 0, cards_left):
+#             raise Exception("Could not find a card configuration")
+#         # if cards_left != [0, 0, 0]:
+#         #     # print(possible_cards)
+#         #     # print(hand)
+#         #     # print(cards_left)
+#         #     # print(self.cards_left)
+#         #     raise Exception("Not all cards added1")
+#         # possible_cards = copy.deepcopy(self.possible_cards)
+#         # possible_cards = [list(cards) for cards in possible_cards]
+#         # # print("HIER", possible_cards)
+#         # # print(self.own_position)
+#         # possible_cards.pop(self.own_position)
+#         # for i in range(3):
+#         #     if hand[i] - set(possible_cards[i]) != set():
+#         #         # print("hand", hand)
+#         #         # print(possible_cards)
+#         #         # print(self.round.player_hands)
+#         #         # print(self.round.trump_suit)
+#         #         # print(self.own_position)
+#         #         raise Exception("Not all cards added2")
+#         for index, player in enumerate(other_players):
+#             self.hands[player] = hand[index]
+#             # if len(hand[index]) != self.cards_left[player]:
+#             #     raise Exception("Not all cards added3")

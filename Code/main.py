@@ -1,5 +1,6 @@
 import random
 import time
+from multiprocessing import Pool
 
 from AlphaZero.alphazero import *
 from rule_based_agent import Rule_player
@@ -7,38 +8,38 @@ from rounds import Round
 from AlphaZero.state import State
 
     
-class Game:
-    def __init__(self, starting_player):
-        self.rounds = []
-        self.score = [0,0]
-        self.starting_player = starting_player
-        self.time = 0
+def simulation(rounds: int):
+    # random.seed(13)
     
-    #Plays a game of Klaverjas. Currently a game conists of 1 round
-    def play_game(self):
+    tijden = [0,0,0,0,0]
+    point_cumulative = [0,0]
+    scores_alpha = []
+    scores_round = []
 
-        self.round = Round(self.starting_player, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
+    starting_player = 0
+    for i in range(rounds):
+        if i % 50 == 0:
+            print(i)
+        starting_player = (starting_player + 1) % 4
+        round = Round(starting_player, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
         rule_player = Rule_player()
-        alpha_player_0 = AlphaZero_player(self.round, 0)
-        alpha_player_2 = AlphaZero_player(self.round, 2)
+        alpha_player_0 = AlphaZero_player(round, 0)
+        alpha_player_2 = AlphaZero_player(round, 2)
         for i in range(8):
-            # print("new trick")
             for j in range(4):
                 
-                current_player = self.round.current_player
+                current_player = round.current_player
                 if current_player == 1 or current_player == 3:
                     
-                    played_card = rule_player.get_card_good_player(self.round, current_player)
-                    # moves = self.round.legal_moves()
+                    played_card = rule_player.get_card_good_player(round, current_player)
+                    # moves = round.legal_moves()
                     # played_card = random.choice(moves)
                 else:
                     if current_player == 0:
-                        tijd = time.time()
-                        played_card = alpha_player_0.get_move(self.round.trump_suit)
-                        # print("get_move ", time.time()-tijd)
+                        played_card = alpha_player_0.get_move(round.trump_suit)
                     else:
-                        played_card = alpha_player_2.get_move(self.round.trump_suit)
-                    moves = self.round.legal_moves()
+                        played_card = alpha_player_2.get_move(round.trump_suit)
+                    moves = round.legal_moves()
                     
                     found = False
                     for move in moves:
@@ -49,118 +50,58 @@ class Game:
                     if not found:
                         raise Exception("move not found")
                             
-                    # moves = self.round.legal_moves()
+                    # moves = round.legal_moves()
                     # played_card = random.choice(moves)
-                self.round.play_card(played_card)
-                alpha_player_0.update_state(played_card.id, self.round.trump_suit)
-                alpha_player_2.update_state(played_card.id, self.round.trump_suit)
-                
-        self.score[0] += self.round.points[0]+self.round.meld[0]
-        self.score[1] += self.round.points[1]+self.round.meld[1]
+                    
+                round.play_card(played_card)
+                alpha_player_0.update_state(played_card.id, round.trump_suit)
+                alpha_player_2.update_state(played_card.id, round.trump_suit)
+        
+        for i in range(5):
+            tijden[i] += alpha_player_0.tijden[i]
+            
+        scores_alpha.append(alpha_player_0.state.get_score(0))
+        scores_round.append(round.get_score(0))
+        
+        point_cumulative[0] += round.points[0]+round.meld[0]
+        point_cumulative[1] += round.points[1]+round.meld[1]
+    return scores_round, point_cumulative, tijden
+
 
 def main():
-    # random.seed(13)
-    games = [0,0]
-    games_won = [0,0]
-
-    points = []
-    point_cumulative = [0,0]
-    #Simulates the 10000 pre-generated games
     start_time = time.time()
-    for i in range(1000):
-        if i % 1 == 0:
-            print(i)
-            
-        game = Game(random.choice([0,1,2,3]))
-        game.play_game()
-        starting_player = game.starting_player
-        if game.score[1] > game.score[0]:
-            games_won[starting_player%2] += 1
-        games[starting_player % 2] += 1
-        points.append(game.score)
-        point_cumulative[0] += game.score[0]
-        point_cumulative[1] += game.score[1]
+    scores_round = []
+    points_cumulative = [0, 0]
+    tijden = [0,0,0,0,0]
+
+    start_time = time.time()
+    rounds_per_sim = 1000
+    sims = 10
+
+    with Pool(processes=10) as pool:
+        results = pool.map(simulation, [rounds_per_sim for _ in range(sims)])
         
+    for result in results:
+        scores_round += result[0]
+        points_cumulative[0] += result[1][0]
+        points_cumulative[1] += result[1][1]
+        tijden = [tijden[i]+result[2][i] for i in range(5)]
+
+
+    # scores_alpha.append(sim.scores_alpha)
+    # points_cumulative.append(sim.point_cumulative)
+    # tijden = [tijden[i]+sim.tijden[i] for i in range(5)]
+    
+    if len(scores_round) != sims*rounds_per_sim:
+        print(len(scores_round))
+        print(scores_round)
+        raise Exception("wrong length")
     end_time = time.time()
-
-        
-    print('Games won when started: ', games_won[1]/games[1])
-    print('Games won when not started: ', games_won[0]/games[0])    
-    print(games_won)
-    print(point_cumulative)
-    print(end_time - start_time)
-    print()
-
-def print_state(state: State):
-    print("Current player: ", state.current_player)
-    print("Current trick: ", state.tricks[-1])
-    print("hands: ", state.hands)
-
-def main2():
-    # random.seed(13)
-    round = Round(0, 'k', 0)
-    state = State(round, 0)
-    played_moves = []
-    state.determine()
-    for i in range(4):
-        moves = state.legal_moves()
-        # print("Legal moves: ", moves)
-        move = random.choice(list(moves))
-        # print("Move: ", move)
-        state.do_move(move)
-        
-    state_copy = copy.deepcopy(state)
-    # state_copy = state
     
-    previous = state_copy
-    
-    # moves = state.legal_moves()
-    # move = random.choice(list(moves))
-    # print_state(state)
-    # state.do_move(move)
-    # print_state(state)
-    # state.undo_move(move)
-    # print_state(state)
-    players = [[], []]
-    # print("hands: ", round.player_hands)
-    for i in range(7):
-        for j in range(4):
-            # print("player: ", state.current_player)
-            moves = state.legal_moves()
-            # print("Legal moves: ", moves)
-            move = random.choice(list(moves))
-            # print("Move: ", move)
-            played_moves.append(move)
-            players[0].append(state.current_player)
-            state.do_move(move)
-            # print("hands: ", round.player_hands)
-    print(state.__dict__)
-    played_moves.reverse()
-    for move in played_moves:
-        
-        state.undo_move(move)
-        players[1].insert(0, state.current_player)
-        
-        
-    print(players[0])
-    print(players[1])
+    print("Tijden: ", tijden)
+    print(points_cumulative)
+    print("alpha mean score, std mean and time: ", round(np.mean(scores_round),1), round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), round(end_time - start_time))  
 
-    new = state
-    print(previous.__dict__)
-    print(new.__dict__)
-    if previous.__dict__ != new.__dict__:
-        raise Exception("not equal")
-    if previous.hands != new.hands:
-        raise Exception("hands not equal")
-    if previous.tricks != new.tricks:
-        raise Exception("tricks not equal")
-    if previous.current_player != new.current_player:
-        raise Exception("current_player not equal")
-    if previous.possible_cards != new.possible_cards:
-        raise Exception("possible_cards not equal")
-    print("equal")
-    
-        
 if __name__ == "__main__":
     main()
     # main2()
@@ -171,16 +112,18 @@ if __name__ == "__main__":
     # print(a,b)
 
     # tijd = time.time()
-    # # import numpy as np
-    # # from AlphaZero.state import State
+    # # # import numpy as np
+    # # # from AlphaZero.state import State
 
     # a = [1,2,3,4,5]
     # # asdf = [x for x in range(32)]
-    # b = 0
     # for _ in range(10000000):
-    #     if len(a) == 0:
-    #     # if a == []:
-    #         b = 10
+    #     # b = [0,1,2,3]
+    #     # b.pop(2) 
+    #     b = {0,1,2,3}
+    #     b.remove(2)
+    #     # b -= {2}
+        
 
     # print(b)
     # print(time.time() - tijd)

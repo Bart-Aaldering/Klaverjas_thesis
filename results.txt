@@ -1,3 +1,42 @@
+10000 10 processes 10 sim 1000 rounds per sims rule vs alpha ismcts tijd 10 simulations 5 c 1
+6.6 0.7 990 50000 rounds
+5.8 1.5 197
+5.7 1.5 208
+8.5 1.5 204
+11.8 1.5 203
+avr = 7.2
+9.9 1.5 193 no smart determinization
+16.2 1.5 923 tijd = 50
+16.3 1.5 900 tijd = 50
+19.6 1.5 1784 tijd = 100
+-0.9 1.5 77 sims = 1
+8.3 1.5 354 sims = 10
+5.0 1.5 205 c = 0.5
+9.6 1.5 207 c = 1.41
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 10000 rounds
 [842184, 1073626] random vs rule
 [837614, 1092306] "" "" 
@@ -69,6 +108,18 @@
 654.3433904647827 tijd 10 simulations 5 c 1
 [101404, 91476]
 801.258308172226 tijd 10 simulations 5 c 1
+
+1000 rounds rule vs alpha ismcts with updated possible_cards and removed deepcopy and faster possible_cards
+[82367, 112113] tijd 1
+[85469, 108601] tijd 2
+[91095, 104665] tijd 3
+[95193, 99647] tijd 5
+[101635, 91295] tijd 10
+[100478, 92362] tijd 10 sim 10
+[99353, 91727] tijd 10 sim 1
+[99788, 91472] tijd 20
+[99281, 92009] tijd 50
+
 
 1000 random vs alpha  tijd 10 simulations 5 c 1
 [115818, 80032]
