@@ -72,14 +72,24 @@ class AlphaZero_player:
         self.state.do_move(move, simulation=False)
 
     def get_move(self, trump_suit: str):
-        card_id = self.mcts().id
-        return card_untransform(card_id, ['k', 'h', 'r', 's'].index(trump_suit))
+        move = self.mcts().move
+        # self.store_move(move)
+        return card_untransform(move.id, ['k', 'h', 'r', 's'].index(trump_suit))
+    
+    def store_move(self, move):
+        # Open a file with access mode 'a'
+        file_object = open('Code\Data\state_scores.txt', 'a')
 
+        # Append 'hello' at the end of file
+        file_object.write(self.state.to_nparray().tostring() + " " + str(move.score/move.visits))
+        # Close the file
+        file_object.close()
+        
     def mcts(self):
         current_state = copy.deepcopy(self.state)
         current_node = Node()
         
-        tijd = 10
+        tijd = 500
         number_of_simulations = 5
         # current_state.set_determinization2()
         for i in range(tijd):
@@ -150,5 +160,7 @@ class AlphaZero_player:
             if score > best_score:
                 best_score = score
                 best_child = child
-                
-        return best_child.move
+        
+        
+        return best_child
+        

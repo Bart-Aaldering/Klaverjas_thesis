@@ -2,6 +2,7 @@ from __future__ import annotations # To use the class name in the type hinting
 
 import random
 import copy
+import numpy as np
 
 from rounds import Round
 from AlphaZero.trick import Trick
@@ -293,6 +294,34 @@ class State:
 
         self.hands[self.current_player].add(card)
 
+    def to_nparray(self):
+        own_position = self.own_position
+        
+        array = np.zeros((38, 1))
+        new_players = [1,-1,2,-2]
+        # add hand cards to cards section
+        for player in range(4):
+            new_player = new_players[(player - own_position) % 4]
+            for card in self.hands[player]:
+                array[card.id] = new_player
+        # add played cards to cards section
+        for trick in self.tricks:
+            for card in trick.cards:
+                array[card.id] = 0
+        # add centre to centre section starting from player_id's perspective
+        for i in range(4):
+            array[32+i] = -1
+        for index, card in enumerate(self.tricks[-1]):
+            array[32+(index-self.tricks[-1].starting_player+own_position)] = card.id
+        
+        if self.declaring_team == own_position % 2: # if player is on declaring team
+            array[36] = 1
+        else:
+            array[36] = -1
+
+        array[37] = self.get_score(own_position)
+        
+        return array
         
     def round_complete(self) -> bool:
         if len(self.hands[self.own_position]) == 0 and self.tricks[-1].trick_complete():
