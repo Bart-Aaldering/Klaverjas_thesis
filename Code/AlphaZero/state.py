@@ -135,7 +135,6 @@ class State:
                 
             return False
 
-
     def update_possible_cards(self, played_card: Card):
         
         # remove played card from all players possible_cards
@@ -149,6 +148,12 @@ class State:
         if leading_suit is None:
             return
 
+        if played_card.suit == 0:
+            if (highest_trump_order := self.tricks[-1].highest_trump().order()) > played_card.order():
+                # remove all trump cards higher then the highest trump card from the current player
+                self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
+                                                                if card.id in [0,1,5,6,3,7,2,4][highest_trump_order-8:]}
+
         if played_card.suit != leading_suit:
             # remove all cards of the leading suit from the current player
             self.possible_cards[self.current_player] -= {Card(leading_suit*10 + i) for i in range(8)}
@@ -157,11 +162,7 @@ class State:
                 # remove all trumps from the current player
                 self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
                                                              if card.id in {0,1,2,3,4,5,6,7}}
-            else:
-                if (highest_trump_order := self.tricks[-1].highest_trump().order()) > played_card.order():
-                    # remove all trump cards higher then the highest trump card from the current player
-                    self.possible_cards[self.current_player] -= {card for card in self.possible_cards[self.current_player] 
-                                                                 if card.id in [0,1,5,6,3,7,2,4][highest_trump_order-8:]}
+
         
         # for i in range(4):
         #     real_hand_id = [card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit)) 
@@ -190,8 +191,8 @@ class State:
                 if card.order() > highest_trump_value:
                     trump_higher.add(card)
 
-        if follow:
-        # if follow and leading_suit != 0:
+        # if follow:
+        if follow and leading_suit != 0:
             return follow
 
         # current_winner = self.tricks[-1].winner()
@@ -295,33 +296,40 @@ class State:
         self.hands[self.current_player].add(card)
 
     def to_nparray(self):
-        own_position = self.own_position
-        
-        array = np.zeros((38, 1))
-        new_players = [1,-1,2,-2]
-        # add hand cards to cards section
-        for player in range(4):
-            new_player = new_players[(player - own_position) % 4]
-            for card in self.hands[player]:
-                array[card.id] = new_player
-        # add played cards to cards section
-        for trick in self.tricks:
-            for card in trick.cards:
-                array[card.id] = 0
-        # add centre to centre section starting from player_id's perspective
-        for i in range(4):
-            array[32+i] = -1
-        for index, card in enumerate(self.tricks[-1]):
-            array[32+(index-self.tricks[-1].starting_player+own_position)] = card.id
-        
-        if self.declaring_team == own_position % 2: # if player is on declaring team
-            array[36] = 1
-        else:
-            array[36] = -1
+        card_location = np.zeros((32, 8))
+            
+        for index, cards in enumerate(self.possible_cards):
+            for card in cards:
+                card_location[8*(card.id//10) + card.id % 10][index] = 1
+        for i in range(32):
+            row_sum = np.sum(card_location[i][1:4])
+            for j in range(1,4):
+                if card_location[i][j] == 1:
+                    card_location[i][j] = 1/row_sum
 
-        array[37] = self.get_score(own_position)
+        for card in self.tricks[-1].cards:
+            card_location[8*(card.id//10) + card.id % 10][4 + self.tricks[-1].cards.index(card)] = 1
+        for trick in self.tricks[:-1]:
+            for card in trick.cards:
+                card_location[8*(card.id//10) + card.id % 10][7] = 1
+
+        if not (np.sum(card_location, axis=1)==1).all():
+            raise ValueError("Some cards are not in the array")
         
-        return array
+        array = np.zeros(12)
+        
+        array[self.tricks[-1].starting_player] = 1
+        
+        array[4] = len(self.tricks[-1].cards)
+        
+        array[self.current_player] = 1
+        
+        array[9] = self.declaring_team
+        
+        array[10] = self.points[0]
+        array[11] = self.points[1]
+
+        return np.concatenate((card_location.flatten(), array))
         
     def round_complete(self) -> bool:
         if len(self.hands[self.own_position]) == 0 and self.tricks[-1].trick_complete():

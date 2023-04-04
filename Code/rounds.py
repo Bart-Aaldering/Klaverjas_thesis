@@ -1,5 +1,5 @@
 from tricks import Trick
-from deck import Deck
+from deck import Deck, Card
 
 def team(player):
     return player % 2
@@ -34,6 +34,15 @@ class Round:
         deck.shuffle()
         self.player_hands = [deck.cards[0:8], deck.cards[8:16], deck.cards[16:24], deck.cards[24:32]]
         
+    def set_cards(self, cards: list[str]):
+        # self.player_hands = cards
+        self.player_hands = [[], [], [], []]
+        for index, hand in enumerate(cards):
+            hand = hand.split()
+            for card in hand:
+                # print(type(card[0]), type(card[1:]))
+                self.player_hands[index].append(Card(int(card[1:]), card[0]))
+        
     #Returns the legal moves a player could make based on the current hand and played cards
     def legal_moves(self, player=None):
         if player is None:
@@ -57,8 +66,8 @@ class Round:
                 if card.order(self.trump_suit) > highest_trump_value:
                     trump_higher.append(card)
 
-        # if follow and leading_suit != self.trump_suit:
-        if follow:
+        if follow and leading_suit != self.trump_suit:
+        # if follow:
             return follow
 
         # current_winner = trick.winner(self.trump_suit)

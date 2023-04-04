@@ -1,4 +1,10 @@
-10000 10 processes 10 sim 1000 rounds per sims rule vs alpha ismcts tijd 10 simulations 5 c 1
+10000 10 processes 10 sim 1000 rounds per sims rule vs alpha ismcts tijd 10 simulations 5 c 1 
+
+With Predifined Cards
+7.1 0.6 1321 50000 rounds
+
+
+No Predifined Cards
 6.6 0.7 990 50000 rounds
 5.8 1.5 197
 5.7 1.5 208
