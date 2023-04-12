@@ -39,7 +39,7 @@ def create_train_data():
     # np.savetxt("Data/train_data.csv", train_data, delimiter=",")
     
 if __name__ == "__main__":
-    # process_data()
-    create_train_data()
+    process_data()
+    # create_train_data()
     
     
