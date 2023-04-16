@@ -10,6 +10,9 @@ class Card:
     def __repr__(self):
         return str(self.id)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     #Returns the rank of the card given the trump suit
     def order(self, trump_suit):
         if self.suit == trump_suit:

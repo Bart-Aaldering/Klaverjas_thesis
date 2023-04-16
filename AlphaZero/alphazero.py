@@ -58,16 +58,18 @@ class Node:
 
 
 class AlphaZero_player:
-    def __init__(self, round: Round, player_position: int):
+    def __init__(self):
+        self.tijden = [0, 0, 0, 0, 0]
+        self.policy_network = Value_network()
+    
+    def new_round(self, round: Round, player_position: int):
         self.player_position = player_position
         self.state = State(round, player_position)
-        self.tijden = [0, 0, 0, 0, 0]
-        # self.policy_network = Value_network()
-    
+        
     def update_state(self, move: int, trump_suit: str):
         move = Card(card_transform(move, ['k', 'h', 'r', 's'].index(trump_suit)))
         self.state.do_move(move, simulation=False)
-
+        
     def get_move(self, trump_suit: str):
         move, score = self.mcts()
         # self.store_move(move)
@@ -88,16 +90,16 @@ class AlphaZero_player:
         
         tijd = 50
         number_of_simulations = 5
-        nn_scaler = 0.01
+        nn_scaler = 0.5
         # current_state.set_determinization2()
         for i in range(tijd):
-            # tijd = time.time()
+            tijd = time.time()
             
             # Determination
             current_state.set_determinization()
             
-            # self.tijden[0] += time.time()-tijd
-            # tijd = time.time()
+            self.tijden[0] += time.time()-tijd
+            tijd = time.time()
             
             # Selection
             current_node.set_legal_moves(current_state)
@@ -107,8 +109,8 @@ class AlphaZero_player:
                 current_node.set_legal_moves(current_state)
 
                 
-            # self.tijden[1] += time.time()-tijd
-            # tijd = time.time()
+            self.tijden[1] += time.time()-tijd
+            tijd = time.time()
             
             # Expansion
             if not current_state.round_complete():
@@ -116,8 +118,8 @@ class AlphaZero_player:
                 current_node = current_node.select_child_random()
                 current_state.do_move(current_node.move)
                 
-            # self.tijden[2] += time.time()-tijd
-            # tijd = time.time()
+            self.tijden[2] += time.time()-tijd
+            tijd = time.time()
             
             # Simulation
             sim_score = 0
@@ -140,10 +142,10 @@ class AlphaZero_player:
             sim_score /= number_of_simulations
             
             nn_score = 0
-            # nn_score = self.policy_network.predict(current_state.to_nparray())
+            nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
             
-            # self.tijden[3] += time.time()-tijd
-            # tijd = time.time()
+            self.tijden[3] += time.time()-tijd
+            tijd = time.time()
             
             # Backpropagation
             while current_node.parent is not None:
@@ -154,7 +156,7 @@ class AlphaZero_player:
             current_node.visits += 1
             current_node.score += sim_score + nn_scaler*nn_score
             
-            # self.tijden[4] += time.time()-tijd
+            self.tijden[4] += time.time()-tijd
             
         best_score = -10
         for child in current_node.children:

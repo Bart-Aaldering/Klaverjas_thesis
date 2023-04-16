@@ -24,19 +24,24 @@ def simulation(rounds_amount: int, process_num: int):
     if rounds_amount*(process_num+1) > 50000:
         raise "too many rounds"
     
-    rounds = pd.read_csv("Data/HistoryDB2.csv", low_memory=False, converters={"Cards": pd.eval})
+    rounds = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
+    
+    rule_player = Rule_player()
+    alpha_player_0 = AlphaZero_player()
+    alpha_player_2 = AlphaZero_player()
+    
     for round_num in range(rounds_amount*process_num, rounds_amount*(process_num+1)):
         if not process_num and round_num % 50 == 0:
             print(round_num)
-            
+        print(round_num)
         # round = Round((starting_player + 1) % 4, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
         
         round = Round(rounds.loc[round_num]["FirstPlayer"], rounds.loc[round_num]["Troef"][0] , rounds.loc[round_num]["Gaat"])
         round.set_cards(rounds.loc[round_num]["Cards"])
         
-        rule_player = Rule_player()
-        alpha_player_0 = AlphaZero_player(round, 0)
-        alpha_player_2 = AlphaZero_player(round, 2)
+        
+        alpha_player_0.new_round(round, 0)
+        alpha_player_2.new_round(round, 2)
         for trick in range(8):
             for j in range(4):
                 
@@ -89,8 +94,8 @@ def main():
     tijden = [0,0,0,0,0]
 
     start_time = time.time()
-    rounds_per_sim = 5000
-    sims = 10
+    rounds_per_sim = 10
+    sims = 1
 
     if multiprocessing:
         with Pool(processes=10) as pool:
@@ -192,7 +197,7 @@ def train_nn(num_rounds: int, process_num: int):
     network.train_model(X_train, y_train, 50)
     
     network.save_model()
-    
+
 def train_nn_on_data():
     data = np.load("Data/train_data.npy")
     X = data[:, :268]
@@ -201,20 +206,47 @@ def train_nn_on_data():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     network = Value_network()
-    network.train_model(X_train, y_train, 10)
+    network.train_model(X_train, y_train, 4)
+
     network.save_model()
     
     y_pred_test = network(X_test)
+    
+    print(X_test[:10][-5:])
     
     print(y_pred_test[:10])
     print(y_test[:10])
     
     network.model.evaluate(X_test,  y_test, verbose=2)
+    
+    network.save_model()
 
-    
 if __name__ == "__main__":
-    # main()
-    train_nn_on_data()
-    
-    
+    main()
+    # tijd = time.time()
+    # network = Value_network()
+    # print(time.time() - tijd)
+    # tijd = time.time()
+    # round = Round(0, 'k', 0)
+    # print(time.time() - tijd)
+    # tijd = time.time()
+    # alpha = AlphaZero_player()
+    # print(time.time() - tijd)
+    # tijd = time.time()
+    # alpha.new_round(round, 0)
+    # print(time.time() - tijd)
+    # tijd = time.time()
+    # b = np.array([alpha.state.to_nparray()])
+    # print(time.time() - tijd)
+    # tijd = time.time()
+    # a = network(b)
+    # print(a)
+    # print(int(a))
+    # print(type(a))
+    # print(time.time() - tijd)
+    # train_nn_on_data()
+    # network = Value_random_forest()
+    # arr = np.load("Data/train_data.npy")
+    # np.savetxt("foo.csv", arr[:10], delimiter=",")
+
     pass

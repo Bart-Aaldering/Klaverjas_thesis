@@ -4,7 +4,6 @@ import tensorflow as tf
 from AlphaZero.state import State
 
 
-
 class Value_network:
     def __init__(self) -> None:
         try:
@@ -13,16 +12,14 @@ class Value_network:
         except:
             print("Creating model")
             self.model = tf.keras.models.Sequential([
-                tf.keras.layers.Dense(268, activation='relu', input_shape=(268, )),
-            
-                tf.keras.layers.Dense(512, activation='relu'),
-                tf.keras.layers.Dense(512, activation='relu'),
-                tf.keras.layers.Dense(512, activation='relu'),
+                tf.keras.layers.Dense(268, activation='relu'),
+                tf.keras.layers.Dense(256, activation='relu'),
+                tf.keras.layers.Dense(256, activation='relu'),
                 tf.keras.layers.Dense(1, activation='linear')
             ])
             
             # define how to train the model
-            self.model.compile(optimizer='adam', loss='mse')
+            self.model.compile(optimizer='adam', loss='rmse')
         
     def __call__(self, game_state):
         return self.model(game_state)
@@ -38,11 +35,22 @@ class Value_network:
     def save_model(self):
         self.model.save("Data/value_network.h5")
 
+class Value_resnet50v2():
+    def __init__(self) -> None:
+        try:
+            print("Loading model")
+            self.model = tf.keras.models.load_model("Data/value_resnet50v2.h5")
+        except:
+            print("Creating model")
+            self.model = tf.keras.applications.ResNet50V2(weights=None, input_shape=268)
+        
+        
+        
 class Value_random_forest():
     def __init__(self) -> None:  
         
         import joblib
-        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.ensemble import RandomForestRegressor
         from sklearn.model_selection import train_test_split
         from sklearn.model_selection import cross_val_score
         from sklearn.metrics import accuracy_score
@@ -56,8 +64,8 @@ class Value_random_forest():
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         # Create a random forest classifier object
-        rfc = RandomForestClassifier(n_estimators=200, max_depth=2, random_state=0)
-    
+        rfc = RandomForestRegressor(n_estimators=200, max_depth=2, random_state=0)
+
         # Train the random forest classifier using the training set
         rfc.fit(X_train, y_train)
         

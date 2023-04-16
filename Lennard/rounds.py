@@ -81,9 +81,9 @@ class Round:
         return len(self.tricks) == 8 and self.tricks[-1].is_complete()
 
     #Plays the card in a trick
-    def play_card(self, card, player=None):
+    def play_card(self, card, player=None, check=True):
 
-        if card not in self.legal_moves():
+        if check and card not in self.legal_moves():
             print("HIER", card.value, card.suit)
             print([(card.value, card.suit) for card in self.legal_moves()])
             raise Exception("Illegal move")
