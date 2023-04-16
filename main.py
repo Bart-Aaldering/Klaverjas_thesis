@@ -8,8 +8,8 @@ from sklearn.metrics import accuracy_score
 
 from AlphaZero.alphazero import *
 from AlphaZero.value_network import Value_random_forest
-from rule_based_agent import Rule_player
-from rounds import Round
+from Lennard.rule_based_agent import Rule_player
+from Lennard.rounds import Round
 from AlphaZero.state import State
 
     

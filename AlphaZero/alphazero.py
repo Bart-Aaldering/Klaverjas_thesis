@@ -7,7 +7,7 @@ import time
 
 from typing import List
 
-from rounds import Round
+from Lennard.rounds import Round
 from AlphaZero.card import Card
 from AlphaZero.state import State
 from AlphaZero.helper import card_transform, card_untransform

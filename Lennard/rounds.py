@@ -1,5 +1,5 @@
-from tricks import Trick
-from deck import Deck, Card
+from Lennard.tricks import Trick
+from Lennard.deck import Deck, Card
 
 def team(player):
     return player % 2

@@ -4,7 +4,7 @@ import random
 import copy
 import numpy as np
 
-from rounds import Round
+from Lennard.rounds import Round
 from AlphaZero.trick import Trick
 from AlphaZero.card import Card
 from AlphaZero.helper import *

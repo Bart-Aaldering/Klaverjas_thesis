@@ -1,5 +1,5 @@
-from deck import Deck, Card
-from helper import card_to_suit, card_to_value
+from Lennard.deck import Deck, Card
+from Lennard.helper import card_to_suit, card_to_value
 
 class Trick:
     def __init__(self, starting_player):

@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import json
 
-from rounds import Round
-from deck import Card
+from Lennard.rounds import Round
+from Lennard.deck import Card
 from AlphaZero.alphazero import AlphaZero_player
 
 
