@@ -1,6 +1,7 @@
 import random
 import time
 import pandas as pd
+import os 
 
 from multiprocessing import Pool
 from sklearn.model_selection import train_test_split
@@ -94,12 +95,21 @@ def main():
     tijden = [0,0,0,0,0]
 
     start_time = time.time()
-    rounds_per_sim = 10
-    sims = 1
 
+    
+    try:
+        n_cores = int(os.environ['SLURM_JOB_CPUS_PER_NODE'])
+        print("Cores: ", n_cores)
+    except:
+        print("not on cluster")
+        n_cores = 10
+    
+    total_rounds = 100
+    rounds_per_sim = total_rounds//n_cores
+    
     if multiprocessing:
-        with Pool(processes=10) as pool:
-            results = pool.starmap(simulation, [(rounds_per_sim, i) for i in range(sims)])
+        with Pool(processes=n_cores) as pool:
+            results = pool.starmap(simulation, [(rounds_per_sim, i) for i in range(n_cores)])
             
         for result in results:
             scores_round += result[0]
@@ -113,7 +123,7 @@ def main():
     # points_cumulative.append(sim.point_cumulative)
     # tijden = [tijden[i]+sim.tijden[i] for i in range(5)]
     
-    if len(scores_round) != sims*rounds_per_sim:
+    if len(scores_round) != n_cores*rounds_per_sim:
         print(len(scores_round))
         print(scores_round)
         raise Exception("wrong length")
@@ -224,6 +234,7 @@ def train_nn_on_data():
 if __name__ == "__main__":
     main()
     # # train_nn_on_data()
+    # print("starting")
     # tijd = time.time()
     # network = Value_network()
     # print(time.time() - tijd)
