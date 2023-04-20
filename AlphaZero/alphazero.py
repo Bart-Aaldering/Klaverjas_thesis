@@ -60,7 +60,7 @@ class Node:
 class AlphaZero_player:
     def __init__(self):
         self.tijden = [0, 0, 0, 0, 0]
-        self.policy_network = Value_network()
+        # self.policy_network = Value_network()
     
     def new_round(self, round: Round, player_position: int):
         self.player_position = player_position
@@ -142,7 +142,7 @@ class AlphaZero_player:
             sim_score /= number_of_simulations
             
             nn_score = 0
-            nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
+            # nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
             
             self.tijden[3] += time.time()-tijd
             tijd = time.time()

@@ -223,6 +223,7 @@ def train_nn_on_data():
 
 if __name__ == "__main__":
     main()
+    # # train_nn_on_data()
     # tijd = time.time()
     # network = Value_network()
     # print(time.time() - tijd)
@@ -240,10 +241,11 @@ if __name__ == "__main__":
     # print(time.time() - tijd)
     # tijd = time.time()
     # a = network(b)
+    # print(time.time() - tijd)
     # print(a)
     # print(int(a))
     # print(type(a))
-    # print(time.time() - tijd)
+    
     # train_nn_on_data()
     # network = Value_random_forest()
     # arr = np.load("Data/train_data.npy")
