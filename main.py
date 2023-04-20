@@ -14,7 +14,7 @@ from Lennard.rounds import Round
 from AlphaZero.state import State
 
     
-def simulation(rounds_amount: int, process_num: int):
+def simulation(rounds_amount: int, process_num: int, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int):
     # random.seed(13)
     
     tijden = [0,0,0,0,0]
@@ -28,8 +28,8 @@ def simulation(rounds_amount: int, process_num: int):
     rounds = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
     
     rule_player = Rule_player()
-    alpha_player_0 = AlphaZero_player()
-    alpha_player_2 = AlphaZero_player()
+    alpha_player_0 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value)
+    alpha_player_2 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value)
     
     for round_num in range(rounds_amount*process_num, rounds_amount*(process_num+1)):
         if not process_num and round_num % 50 == 0:
@@ -107,9 +107,15 @@ def main():
     total_rounds = 100
     rounds_per_sim = total_rounds//n_cores
     
+    # hyperparameters
+    mcts_steps = 10
+    number_of_simulations = 5
+    nn_scaler = 0.3
+    ucb_c_value = 1
+    
     if multiprocessing:
         with Pool(processes=n_cores) as pool:
-            results = pool.starmap(simulation, [(rounds_per_sim, i) for i in range(n_cores)])
+            results = pool.starmap(simulation, [(rounds_per_sim, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value) for i in range(n_cores)])
             
         for result in results:
             scores_round += result[0]
@@ -131,7 +137,8 @@ def main():
     
     print("Tijden: ", tijden)
     print(points_cumulative)
-    print("alpha mean score, std mean and time: ", round(np.mean(scores_round),1), round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), round(end_time - start_time))  
+    print("alpha mean score, std mean and time: ", round(np.mean(scores_round),1), round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), round(end_time - start_time),
+          "rounds: ", total_rounds, "steps: ", mcts_steps, "sims: ", number_of_simulations, "nn_scaler: ", nn_scaler, "ucb_c: ", ucb_c_value)
 
 def train_nn(num_rounds: int, process_num: int):
 
@@ -233,6 +240,7 @@ def train_nn_on_data():
 
 if __name__ == "__main__":
     main()
+    # import tensorrt
     # # train_nn_on_data()
     # print("starting")
     # tijd = time.time()

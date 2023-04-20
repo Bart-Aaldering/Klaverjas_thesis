@@ -1,0 +1,23 @@
+[/bin/bash] #### Starting Python test
+[/bin/bash] ## This is s2969866 on node855 and this job has the ID 1398268
+[/bin/bash] ## current working directory: /home/s2969866/data1/thesis
+[/bin/bash] ## Run script
+1 Physical GPUs, 1 Logical GPU
+Cores:  15
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+Tijden:  [2.078165292739868, 1.0804390907287598, 0.27011823654174805, 21.60180640220642, 0.28224754333496094]
+[9406, 8124]
+alpha mean score, std mean and time:  14.2 12.3 24 rounds:  100 steps:  10 sims:  5 nn_scaler:  0.3 ucb_c:  1
+[/bin/bash] ## Script finished
+[/bin/bash] #### Finished Python test. Have a nice day

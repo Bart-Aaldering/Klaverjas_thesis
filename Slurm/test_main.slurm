@@ -2,7 +2,7 @@
 #SBATCH --job-name=run_main
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --mem-per-cpu=1G
+#SBATCH --mem-per-cpu=500M
 #SBATCH --time=00:30:00
 #SBATCH --partition=testing
 #SBATCH --nodes=1

@@ -44,8 +44,7 @@ class Node:
     def select_child_random(self) -> Node:
         return random.choice([child for child in self.children if child.move in self.legal_moves])
     
-    def select_child_ucb(self) -> Node:
-        c = 1
+    def select_child_ucb(self, c: int = 1) -> Node:
         ucbs = []
         legal_children = [child for child in self.children if child.move in self.legal_moves]
         for child in legal_children:
@@ -58,9 +57,13 @@ class Node:
 
 
 class AlphaZero_player:
-    def __init__(self):
+    def __init__(self, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int):
         self.tijden = [0, 0, 0, 0, 0]
         # self.policy_network = Value_network()
+        self.mcts_steps = mcts_steps
+        self.number_of_simulations = number_of_simulations
+        self.nn_scaler = nn_scaler
+        self.ucb_c_value = ucb_c_value
     
     def new_round(self, round: Round, player_position: int):
         self.player_position = player_position
@@ -88,11 +91,8 @@ class AlphaZero_player:
         current_state = copy.deepcopy(self.state)
         current_node = Node()
         
-        tijd = 50
-        number_of_simulations = 5
-        nn_scaler = 0.5
         # current_state.set_determinization2()
-        for i in range(tijd):
+        for i in range(self.mcts_steps):
             tijd = time.time()
             
             # Determination
@@ -104,7 +104,7 @@ class AlphaZero_player:
             # Selection
             current_node.set_legal_moves(current_state)
             while not current_state.round_complete() and current_node.legal_moves-current_node.children_moves == set():
-                current_node = current_node.select_child_ucb()
+                current_node = current_node.select_child_ucb(self.ucb_c_value)
                 current_state.do_move(current_node.move)
                 current_node.set_legal_moves(current_state)
 
@@ -123,7 +123,7 @@ class AlphaZero_player:
             
             # Simulation
             sim_score = 0
-            for _ in range(number_of_simulations):
+            for _ in range(self.number_of_simulations):
                 moves = []
 
                 # Do random moves until round is complete
@@ -139,7 +139,7 @@ class AlphaZero_player:
                 moves.reverse()
                 for move in moves:
                     current_state.undo_move(move)
-            sim_score /= number_of_simulations
+            sim_score /= self.number_of_simulations
             
             nn_score = 0
             # nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
@@ -150,11 +150,11 @@ class AlphaZero_player:
             # Backpropagation
             while current_node.parent is not None:
                 current_node.visits += 1
-                current_node.score += sim_score + nn_scaler*nn_score
+                current_node.score += sim_score + self.nn_scaler*nn_score
                 current_state.undo_move(current_node.move)
                 current_node = current_node.parent
             current_node.visits += 1
-            current_node.score += sim_score + nn_scaler*nn_score
+            current_node.score += sim_score + self.nn_scaler*nn_score
             
             self.tijden[4] += time.time()-tijd
             
