@@ -99,12 +99,14 @@ def main():
     
     try:
         n_cores = int(os.environ['SLURM_JOB_CPUS_PER_NODE'])
-        print("Cores: ", n_cores)
+        cluster = "cluster"
     except:
-        print("not on cluster")
         n_cores = 10
+        cluster = "local"
+        
+    print(cluster, "n_cores: ", n_cores)
     
-    total_rounds = 100
+    total_rounds = 1000
     rounds_per_sim = total_rounds//n_cores
     
     # hyperparameters
@@ -137,8 +139,8 @@ def main():
     
     print("Tijden: ", tijden)
     print(points_cumulative)
-    print("alpha mean score, std mean and time: ", round(np.mean(scores_round),1), round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), round(end_time - start_time),
-          "rounds: ", total_rounds, "steps: ", mcts_steps, "sims: ", number_of_simulations, "nn_scaler: ", nn_scaler, "ucb_c: ", ucb_c_value)
+    print("score:", round(np.mean(scores_round),1), "std_score:", round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), cluster, " time:", round(end_time - start_time),
+          " PARAMETERS: ", "rounds: ", total_rounds, "steps: ", mcts_steps, "sims: ", number_of_simulations, "nn_scaler: ", nn_scaler, "ucb_c: ", ucb_c_value)
 
 def train_nn(num_rounds: int, process_num: int):
 
