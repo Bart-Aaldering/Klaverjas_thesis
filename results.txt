@@ -1,6 +1,17 @@
 10000 10 processes 10 sim 1000 rounds per sims rule vs alpha ismcts tijd 10 simulations 5 c 1 
 
-With Predifined Cards
+Neural Network trained on data
+score: 7.8 std_score: 0.6 cluster time: 2095  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 1
+
+No Neural Network
+score: 7.0 std_score: 0.6 cluster  time: 618  PARAMETERS:  rounds:  50000 steps:  10 sims:  5 nn_scaler:  0.3 ucb_c:  1
+score: 17.8 std_score: 0.6 cluster time: 2623  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.3 ucb_c: 1
+
+
+score: 6.2 std_score: 0.6 cluster time: 609  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
+score: 6.2 std_score: 0.6 cluster time: 755  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
+score: 6.0 std_score: 0.6 cluster time: 688  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
+
 7.1 0.6 1321 50000 rounds
 
 

@@ -3,20 +3,13 @@
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --mem-per-cpu=500M
-#SBATCH --time=00:10:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=cpu-short
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=15
 #SBATCH --gpus=1
 
-
-# load modules (assuming you start from the default environment)
-# we explicitly call the modules to improve reproducibility
-# in case the default settings change
-
-
-# Source the Python virtual environment
 
 echo "[$SHELL] #### Starting Python test"
 echo "[$SHELL] ## This is $SLURM_JOB_USER on $HOSTNAME and this job has the ID $SLURM_JOB_ID"

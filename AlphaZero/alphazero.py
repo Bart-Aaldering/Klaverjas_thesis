@@ -150,7 +150,7 @@ class AlphaZero_player:
             # Backpropagation
             while current_node.parent is not None:
                 current_node.visits += 1
-                current_node.score += sim_score + self.nn_scaler*nn_score
+                current_node.score += (1-self.nn_scaler)*sim_score + self.nn_scaler*nn_score
                 current_state.undo_move(current_node.move)
                 current_node = current_node.parent
             current_node.visits += 1

@@ -1,0 +1,6 @@
+[/bin/bash] #### Starting Python test
+[/bin/bash] ## This is s2969866 on nodelogin02 and this job has the ID 1398377
+[/bin/bash] ## current working directory: /home/s2969866/data1/thesis
+[/bin/bash] ## Run script
+cluster n_cores:  15
+10 5 1 1
