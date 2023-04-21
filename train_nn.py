@@ -126,6 +126,10 @@ def train_nn_on_data():
             verbose=1,
             validation_data=(X_test, y_test)
             )
+    network = Value_network()
+    length = len(X_train)//10
+    for i in range(10):
+        network.train_model(X_train[i*length:(i+1)*length], y_train[i*length:(i+1)*length], epochs)
     
     y_pred_test = network(X_test)
     
