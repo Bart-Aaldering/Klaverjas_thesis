@@ -92,6 +92,8 @@ def train_nn_on_data():
     data = np.load("Data/train_data.npy")
     print("data loaded")
     
+    np.random.shuffle(data)
+    
     X = data[:, :268]
     y = data[:, 268]
     

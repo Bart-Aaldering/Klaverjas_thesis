@@ -9,7 +9,7 @@ from Lennard.rule_based_agent import Rule_player
 from Lennard.rounds import Round
 
     
-def simulation(rounds_amount: int, process_num: int, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int):
+def simulation(rounds_amount: int, process_num: int, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int, model_name: str):
     # random.seed(13)
     
     tijden = [0,0,0,0,0]
@@ -23,8 +23,8 @@ def simulation(rounds_amount: int, process_num: int, mcts_steps: int, number_of_
     rounds = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
     
     rule_player = Rule_player()
-    alpha_player_0 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value)
-    alpha_player_2 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value)
+    alpha_player_0 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+    alpha_player_2 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
     
     for round_num in range(rounds_amount*process_num, rounds_amount*(process_num+1)):
         if not process_num and round_num % 50 == 0:
@@ -100,20 +100,21 @@ def main():
         
     print(cluster, "n_cores: ", n_cores)
     
-    total_rounds = 50000
+    total_rounds = 500
     rounds_per_sim = total_rounds//n_cores
     
     # hyperparameters
-    mcts_steps = 100
+    mcts_steps = 10
     number_of_simulations = 5
-    nn_scaler = 0.3
-    ucb_c_value = 1.41
+    nn_scaler = 0.23
+    ucb_c_value = 1
+    model_name = "SV_nn_5_epochs.h5"
     
     print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value)
     
     if multiprocessing:
         with Pool(processes=n_cores) as pool:
-            results = pool.starmap(simulation, [(rounds_per_sim, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value) for i in range(n_cores)])
+            results = pool.starmap(simulation, [(rounds_per_sim, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name) for i in range(n_cores)])
             
         for result in results:
             scores_round += result[0]
@@ -136,7 +137,7 @@ def main():
     print("Tijden: ", tijden)
     print(points_cumulative)
     print("score:", round(np.mean(scores_round),1), "std_score:", round(np.std(scores_round)/np.sqrt(len(scores_round)), 1), cluster, "time:", round(end_time - start_time),
-          " PARAMETERS:", "rounds:", total_rounds, "steps:", mcts_steps, "sims:", number_of_simulations, "nn_scaler:", nn_scaler, "ucb_c:", ucb_c_value)
+          " PARAMETERS:", "rounds:", total_rounds, "steps:", mcts_steps, "sims:", number_of_simulations, "nn_scaler:", nn_scaler, "ucb_c:", ucb_c_value, "model:", model_name)
 
 if __name__ == "__main__":
     main()

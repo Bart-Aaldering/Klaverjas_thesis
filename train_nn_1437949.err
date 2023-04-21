@@ -1,6 +1,0 @@
-2023-04-21 14:50:47.291914: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-2023-04-21 14:50:50.222324: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
-2023-04-21 14:52:59.913477: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1635] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 13593 MB memory:  -> device: 0, name: Tesla T4, pci bus id: 0000:d8:00.0, compute capability: 7.5
-/cm/local/apps/slurm/var/spool/job1437949/slurm_script: line 22: 71411 Killed                  python3 train_nn.py
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=1437949.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.

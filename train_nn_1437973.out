@@ -1,8 +1,0 @@
-[/bin/bash] #### Starting Python test
-[/bin/bash] ## This is s2969866 on nodelogin01 and this job has the ID 1437973
-[/bin/bash] ## current working directory: /home/s2969866/data1/thesis
-[/bin/bash] ## Run script
-Creating model
-Epoch 1/5
-[/bin/bash] ## Script finished
-[/bin/bash] #### Finished Python test. Have a nice day

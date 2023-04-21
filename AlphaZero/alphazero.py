@@ -57,13 +57,16 @@ class Node:
 
 
 class AlphaZero_player:
-    def __init__(self, mcts_steps: int = 10, number_of_simulations: int = 5, nn_scaler: float = 0.3, ucb_c_value: int = 1):
-        self.tijden = [0, 0, 0, 0, 0]
-        # self.policy_network = Value_network()
+    # def __init__(self, mcts_steps: int = 10, number_of_simulations: int = 5, nn_scaler: float = 0.3, ucb_c_value: int = 1, model_name: str = None):
+    def __init__(self, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int, model_name: str):
+        self.tijden = [0, 0, 0, 0, 0]           
         self.mcts_steps = mcts_steps
         self.number_of_simulations = number_of_simulations
         self.nn_scaler = nn_scaler
         self.ucb_c_value = ucb_c_value
+        self.model_name = model_name
+        if model_name is not None:
+            self.policy_network = Value_network(model_name)
     
     def new_round(self, round: Round, player_position: int):
         self.player_position = player_position
@@ -141,8 +144,10 @@ class AlphaZero_player:
                     current_state.undo_move(move)
             sim_score /= self.number_of_simulations
             
-            nn_score = 0
-            # nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
+            if self.model_name is not None:
+                nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
+            else:
+                nn_score = 0
             
             self.tijden[3] += time.time()-tijd
             tijd = time.time()
