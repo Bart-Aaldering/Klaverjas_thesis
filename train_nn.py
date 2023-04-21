@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import time
 
-from multiprocess import Pool
+from multiprocessing import Pool
 from sklearn.model_selection import train_test_split
 
 from AlphaZero.alphazero import *
@@ -88,7 +88,10 @@ def run_RL():
         
 def train_nn_on_data():
     epochs = 5
+    print("loading data")
     data = np.load("Data/train_data.npy")
+    print("data loaded")
+    
     X = data[:, :268]
     y = data[:, 268]
     
