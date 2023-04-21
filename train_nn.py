@@ -98,7 +98,9 @@ def train_nn_on_data():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
     
     network = Value_network()
-    network.train_model(X_train, y_train, epochs)
+    length = len(X_train)//10
+    for i in range(10):
+        network.train_model(X_train[i*length:(i+1)*length], y_train[i*length:(i+1)*length], epochs)
     
     y_pred_test = network(X_test)
     

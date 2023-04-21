@@ -15,7 +15,7 @@ from AlphaZero.state import State
 #     # Visible devices must be set before GPUs have been initialized
 #     print(e)
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 class Value_network:
     def __init__(self, file_name: str = None) -> None:
