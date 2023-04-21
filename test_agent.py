@@ -1,10 +1,11 @@
 import time
 import pandas as pd
-import os 
+import os
+import numpy as np 
 
 from multiprocessing import Pool
 
-from AlphaZero.alphazero import *
+from AlphaZero.alphazero import AlphaZero_player
 from Lennard.rule_based_agent import Rule_player
 from Lennard.rounds import Round
 
@@ -20,7 +21,7 @@ def simulation(rounds_amount: int, process_num: int, mcts_steps: int, number_of_
     if rounds_amount*(process_num+1) > 50000:
         raise "too many rounds"
     
-    rounds = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
+    rounds = pd.read_csv("Data/SV_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
     
     rule_player = Rule_player()
     alpha_player_0 = AlphaZero_player(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
@@ -100,7 +101,7 @@ def main():
         
     print(cluster, "n_cores: ", n_cores)
     
-    total_rounds = 500
+    total_rounds = 50000
     rounds_per_sim = total_rounds//n_cores
     
     # hyperparameters

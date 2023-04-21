@@ -17,36 +17,6 @@ from AlphaZero.state import State
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-class Value_network:
-    def __init__(self, file_name: str = None) -> None:
-        if file_name is not None:
-            print("Loading model")
-            self.model = tf.keras.models.load_model(f"Data/{file_name}")
-        else:
-            print("Creating model")
-            self.model = tf.keras.models.Sequential([
-                tf.keras.layers.Dense(268, activation='relu'),
-                tf.keras.layers.Dense(256, activation='relu'),
-                tf.keras.layers.Dense(256, activation='relu'),
-                tf.keras.layers.Dense(1, activation='linear')
-            ])
-            
-            # define how to train the model
-            self.model.compile(optimizer='adam', loss='mse')
-        
-    def __call__(self, game_state):
-        return self.model(game_state)
-    
-    def train_model(self, X_train, y_train, epochs):
-        self.model.fit(
-            X_train,
-            y_train,
-            batch_size=32,
-            epochs=epochs,
-            )
-
-    def save_model(self, name: str):
-        self.model.save(f"Data/{name}")
 
 class Value_resnet50v2():
     def __init__(self) -> None:

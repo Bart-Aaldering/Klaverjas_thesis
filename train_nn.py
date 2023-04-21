@@ -1,14 +1,27 @@
 import pandas as pd
 import os
 import time
+import numpy as np
+import tensorflow as tf
 
 from multiprocessing import Pool
 from sklearn.model_selection import train_test_split
 
-from AlphaZero.alphazero import *
-from Lennard.rule_based_agent import Rule_player
+from AlphaZero.alphazero import AlphaZero_player
 from Lennard.rounds import Round
 
+def create_simple_nn():
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(268, activation='relu'),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(1, activation='linear')
+    ])
+    
+    # define how to train the model
+    model.compile(optimizer='adam', loss='mse')
+    
+    return model
 
 def train_nn_RL(num_rounds: int, process_num: int):
 
@@ -19,6 +32,11 @@ def train_nn_RL(num_rounds: int, process_num: int):
     X_train = np.zeros((num_rounds*8*4, 268))
     y_train = np.zeros(num_rounds*8*4)
     
+    alpha_player_0 = AlphaZero_player()
+    alpha_player_1 = AlphaZero_player()
+    alpha_player_2 = AlphaZero_player()   
+    alpha_player_3 = AlphaZero_player()
+        
     for round_num in range(num_rounds*process_num, num_rounds*(process_num+1)):
         if not process_num and round_num % 50 == 0:
             print(round_num)
@@ -66,8 +84,8 @@ def train_nn_RL(num_rounds: int, process_num: int):
                 alpha_player_3.update_state(played_card.id, round.trump_suit)
         
     print("training")
-    np.savetxt("Data/traindata.csv", X_train, delimiter=",")
-    np.savetxt("Data/trainlabels.csv", y_train, delimiter=",")
+    np.savetxt("Data/SV_data/traindata.csv", X_train, delimiter=",")
+    np.savetxt("Data/SV_data/trainlabels.csv", y_train, delimiter=",")
 
     network = Value_network()
     network.train_model(X_train, y_train, 50)
@@ -89,7 +107,7 @@ def run_RL():
 def train_nn_on_data():
     epochs = 5
     print("loading data")
-    data = np.load("Data/train_data.npy")
+    data = np.load("Data/SV_data/train_data.npy")
     print("data loaded")
     
     np.random.shuffle(data)
@@ -99,8 +117,15 @@ def train_nn_on_data():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
     
-    network = Value_network()
-    network.train_model(X_train, y_train, epochs)
+    network = create_simple_nn()
+    network.fit(
+            X_train,
+            y_train,
+            batch_size=32,
+            epochs=epochs,
+            verbose=1,
+            validation_data=(X_test, y_test)
+            )
     
     y_pred_test = network(X_test)
     

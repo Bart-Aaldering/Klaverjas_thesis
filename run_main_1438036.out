@@ -4,3 +4,16 @@
 [/bin/bash] ## Run script
 cluster n_cores:  15
 10 5 0.23 1
+Loading model
+Loading model
+Loading model
+Loading model
+Loading model
+Loading model
+Loading model
+Loading model
+Tijden:  [622542.570281744, 396947.86386346817, 84030.19537138939, 23850850.629070044, 165705.18666481972]
+[5037757, 4641323]
+score: 7.9 std_score: 0.6 cluster time: 2100  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: SV_nn_5_epochs.h5
+[/bin/bash] ## Script finished
+[/bin/bash] #### Finished Python test. Have a nice day

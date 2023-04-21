@@ -13,17 +13,17 @@ from AlphaZero.alphazero import AlphaZero_player
 
 def process_data():
     """Create the originalDB.csv file from the originalDB.txt file"""
-    data = pd.read_csv("Data/originalDB.txt", sep=";",low_memory=False)
+    data = pd.read_csv("Data/SV_data/originalDB.txt", sep=";",low_memory=False)
     data = data.drop(columns=["ID", "TableKey", "TableDbID", "ScoreDbID", "TimeStamp", "Settings"])
     data = data.drop([1313, 1374]) # remove rows with no starting cards
-    data.reset_index(drop=True).to_csv("Data/originalDB.csv")
+    data.reset_index(drop=True).to_csv("Data/SV_data/originalDB.csv")
 
 # process_data.sample(n=50000).reset_index(drop=True).to_csv("Data/HistoryDB2.csv")
 # print(data.head())
 
 def create_train_data(process_num: int, total_processes: int):
     
-    data = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval, "Rounds": eval})
+    data = pd.read_csv("Data/SV_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval, "Rounds": eval})
     # data = data[:5000]
     data_per_process = len(data.index)//total_processes
     data = data[process_num*data_per_process:(process_num+1)*data_per_process].reset_index(drop=True)
@@ -135,16 +135,16 @@ def create_train_data(process_num: int, total_processes: int):
     
     train_data = np.concatenate((X_train, y_train), axis=1)
 
-    np.save(f"Data/train_data_{process_num}.npy", train_data)
+    np.save(f"Data/SV_data/train_data_{process_num}.npy", train_data)
     # np.savetxt(f"Data/train_data_{process_num}.csv", train_data, delimiter=",")
     
 def merge_npy(files):
     arrays = []
     for num in range(files):
-        array = np.load(f"Data/train_data_{num}.npy")
+        array = np.load(f"Data/SV_data/train_data_{num}.npy")
         arrays.append(array)
     train_data = np.concatenate(arrays, axis=0)
-    np.save(f"Data/train_data.npy", train_data)
+    np.save(f"Data/SV_data/train_data.npy", train_data)
     
 def run_create_data():
     try:
