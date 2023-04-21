@@ -88,7 +88,10 @@ def run_RL():
         
 def train_nn_on_data():
     epochs = 5
+    print("loading data")
     data = np.load("Data/train_data.npy")
+    print("data loaded")
+    
     X = data[:, :268]
     y = data[:, 268]
     
