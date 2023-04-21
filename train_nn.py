@@ -1,5 +1,8 @@
 import pandas as pd
+import os
+import time
 
+from multiprocess import Pool
 from sklearn.model_selection import train_test_split
 
 from AlphaZero.alphazero import *
@@ -7,10 +10,10 @@ from Lennard.rule_based_agent import Rule_player
 from Lennard.rounds import Round
 
 
-def train_nn(num_rounds: int, process_num: int):
+def train_nn_RL(num_rounds: int, process_num: int):
 
     print("starting training")
-    rounds = pd.read_csv("Data/HistoryDB2.csv", low_memory=False, converters={"Cards": pd.eval})
+    rounds = pd.read_csv("Data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
     print("rounds loaded")
     
     X_train = np.zeros((num_rounds*8*4, 268))
@@ -21,7 +24,6 @@ def train_nn(num_rounds: int, process_num: int):
             print(round_num)
             
         # round = Round((starting_player + 1) % 4, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
-        
         round = Round(rounds.loc[round_num]["FirstPlayer"], rounds.loc[round_num]["Troef"][0] , rounds.loc[round_num]["Gaat"])
         round.set_cards(rounds.loc[round_num]["Cards"])
         
@@ -104,3 +106,21 @@ def train_nn_on_data():
     network.model.evaluate(X_test,  y_test, verbose=2)
     
     network.save_model()
+    
+    
+def run_RL():
+    try:
+        n_cores = int(os.environ['SLURM_JOB_CPUS_PER_NODE'])
+        cluster = "cluster"
+    except:
+        n_cores = 10
+        cluster = "local"
+    print(cluster, "n_cores: ", n_cores)
+
+    with Pool(processes=n_cores) as pool:
+        pool.starmap(train_nn_RL, [(i, n_cores) for i in range(n_cores)])
+        
+if __name__ == "__main__":
+    tijd = time.time()
+    run_RL()
+    print(time.time() - tijd)

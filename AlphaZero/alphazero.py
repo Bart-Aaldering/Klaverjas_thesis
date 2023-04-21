@@ -57,7 +57,7 @@ class Node:
 
 
 class AlphaZero_player:
-    def __init__(self, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int):
+    def __init__(self, mcts_steps: int = 10, number_of_simulations: int = 5, nn_scaler: float = 0.3, ucb_c_value: int = 1):
         self.tijden = [0, 0, 0, 0, 0]
         # self.policy_network = Value_network()
         self.mcts_steps = mcts_steps

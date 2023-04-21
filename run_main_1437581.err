@@ -1,0 +1,27 @@
+2023-04-21 13:05:01.380771: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-04-21 13:05:05.790358: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/s2969866/data1/miniconda3/envs/tf/lib/python3.9/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/home/s2969866/data1/miniconda3/envs/tf/lib/python3.9/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "/data1/s2969866/thesis/process_data.py", line 128, in create_train_data
+    raise Exception("Something went wrong")
+Exception: Something went wrong
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/data1/s2969866/thesis/process_data.py", line 157, in <module>
+    run_create_data()
+  File "/data1/s2969866/thesis/process_data.py", line 150, in run_create_data
+    pool.starmap(create_train_data, [(i, n_cores) for i in range(n_cores)])
+  File "/home/s2969866/data1/miniconda3/envs/tf/lib/python3.9/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/home/s2969866/data1/miniconda3/envs/tf/lib/python3.9/multiprocessing/pool.py", line 771, in get
+    raise self._value
+Exception: Something went wrong
