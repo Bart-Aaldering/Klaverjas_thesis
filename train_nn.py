@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import time
 
-from multiprocess import Pool
+from multiprocessing import Pool
 from sklearn.model_selection import train_test_split
 
 from AlphaZero.alphazero import *
@@ -96,8 +96,6 @@ def train_nn_on_data():
     
     network = Value_network()
     network.train_model(X_train, y_train, epochs)
-
-    network.save_model()
     
     y_pred_test = network(X_test)
     

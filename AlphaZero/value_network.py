@@ -32,7 +32,7 @@ class Value_network:
             ])
             
             # define how to train the model
-            self.model.compile(optimizer='adam', loss='rmse')
+            self.model.compile(optimizer='adam', loss='mse')
         
     def __call__(self, game_state):
         return self.model(game_state)

@@ -2,7 +2,7 @@
 #SBATCH --job-name=train_nn
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --mem-per-cpu=6G
+#SBATCH --mem-per-cpu=100G
 #SBATCH --time=01:00:00
 #SBATCH --partition=testing
 #SBATCH --nodes=1
