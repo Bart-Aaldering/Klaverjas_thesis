@@ -125,7 +125,8 @@ def create_train_data(process_num: int, total_processes: int):
             if scores["WeNat"] or scores["TheyNat"]:
                 pass
             else:
-                raise Exception("Something went wrong")
+                print("Something went wrong")
+                print(process_num*data_per_process+round_num)
         
         index += 4
 
@@ -134,9 +135,17 @@ def create_train_data(process_num: int, total_processes: int):
     
     train_data = np.concatenate((X_train, y_train), axis=1)
 
-    np.save("Data/train_data.npy", train_data)
+    np.save(f"Data/train_data_{process_num}.npy", train_data)
     # np.savetxt(f"Data/train_data_{process_num}.csv", train_data, delimiter=",")
-
+    
+def merge_npy(files):
+    arrays = []
+    for num in range(files):
+        array = np.load(f"Data/train_data_{num}.npy")
+        arrays.append(array)
+    train_data = np.concatenate(arrays, axis=0)
+    np.save(f"Data/train_data.npy", train_data)
+    
 def run_create_data():
     try:
         n_cores = int(os.environ['SLURM_JOB_CPUS_PER_NODE'])
@@ -149,12 +158,11 @@ def run_create_data():
     with Pool(processes=n_cores) as pool:
         pool.starmap(create_train_data, [(i, n_cores) for i in range(n_cores)])
 
-        
 if __name__ == "__main__":
     
     tijd = time.time()
     # process_data()
-    run_create_data()
+    # run_create_data()
     print(time.time()-tijd)
     
     

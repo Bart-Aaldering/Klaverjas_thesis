@@ -27,7 +27,6 @@ def train_nn_RL(num_rounds: int, process_num: int):
         round = Round(rounds.loc[round_num]["FirstPlayer"], rounds.loc[round_num]["Troef"][0] , rounds.loc[round_num]["Gaat"])
         round.set_cards(rounds.loc[round_num]["Cards"])
         
-        rule_player = Rule_player()
         alpha_player_0 = AlphaZero_player(round, 0)
         alpha_player_1 = AlphaZero_player(round, 1)
         alpha_player_2 = AlphaZero_player(round, 2)
@@ -37,22 +36,16 @@ def train_nn_RL(num_rounds: int, process_num: int):
             for j in range(4):
                 
                 current_player = round.current_player
-                if current_player == 1 or current_player == 3:
-                    
-                    # played_card = rule_player.get_card_good_player(round, current_player)
-                    # moves = round.legal_moves()
-                    # played_card = random.choice(moves)
-                    if current_player == 1:
-                        played_card, score = alpha_player_1.get_move(round.trump_suit)
-                    else:
-                        played_card, score = alpha_player_3.get_move(round.trump_suit)
-                    
+
+                if current_player == 0:
+                    played_card, score = alpha_player_0.get_move(round.trump_suit)
+                elif current_player == 1:
+                    played_card, score = alpha_player_1.get_move(round.trump_suit)
+                elif current_player == 2:
+                    played_card, score = alpha_player_2.get_move(round.trump_suit)
                 else:
-                    if current_player == 0:
-                        played_card, score = alpha_player_0.get_move(round.trump_suit)
-                    else:
-                        played_card, score = alpha_player_2.get_move(round.trump_suit)
-                
+                    played_card, score = alpha_player_3.get_move(round.trump_suit)
+
                 moves = round.legal_moves()
 
                 X_train[round_num*8*4+trick*4+j] = alpha_player_0.state.to_nparray()
@@ -65,9 +58,6 @@ def train_nn_RL(num_rounds: int, process_num: int):
                         break
                 if not found:
                     raise Exception("move not found")
-                            
-                    # moves = round.legal_moves()
-                    # played_card = random.choice(moves)
 
                 round.play_card(played_card)
                 alpha_player_0.update_state(played_card.id, round.trump_suit)
@@ -84,30 +74,6 @@ def train_nn_RL(num_rounds: int, process_num: int):
     
     network.save_model()
 
-def train_nn_on_data():
-    data = np.load("Data/train_data.npy")
-    X = data[:, :268]
-    y = data[:, 268]
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    network = Value_network()
-    network.train_model(X_train, y_train, 4)
-
-    network.save_model()
-    
-    y_pred_test = network(X_test)
-    
-    print(X_test[:10][-5:])
-    
-    print(y_pred_test[:10])
-    print(y_test[:10])
-    
-    network.model.evaluate(X_test,  y_test, verbose=2)
-    
-    network.save_model()
-    
-    
 def run_RL():
     try:
         n_cores = int(os.environ['SLURM_JOB_CPUS_PER_NODE'])
@@ -120,7 +86,32 @@ def run_RL():
     with Pool(processes=n_cores) as pool:
         pool.starmap(train_nn_RL, [(i, n_cores) for i in range(n_cores)])
         
+def train_nn_on_data():
+    epochs = 5
+    data = np.load("Data/train_data.npy")
+    X = data[:, :268]
+    y = data[:, 268]
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+    
+    network = Value_network()
+    network.train_model(X_train, y_train, epochs)
+
+    network.save_model()
+    
+    y_pred_test = network(X_test)
+    
+    print(X_test[:10][-5:])
+    
+    print(y_pred_test[:10])
+    print(y_test[:10])
+    
+    network.model.evaluate(X_test,  y_test, verbose=2)
+    
+    network.save_model(f"SV_nn_{epochs}_epochs.h5")
+  
 if __name__ == "__main__":
     tijd = time.time()
-    run_RL()
+    # run_RL()
+    train_nn_on_data()
     print(time.time() - tijd)

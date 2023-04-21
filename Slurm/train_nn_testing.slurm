@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=run_main
+#SBATCH --job-name=train_nn
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --mem-per-cpu=500M
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=01:00:00
 #SBATCH --partition=testing
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=15
+#SBATCH --cpus-per-task=1
 #SBATCH --gpus=1
 
 
@@ -19,7 +19,7 @@ echo "[$SHELL] ## current working directory: "$CWD
 
 # Run the file
 echo "[$SHELL] ## Run script"
-python3 main.py
+python3 train_nn.py
 echo "[$SHELL] ## Script finished"
 
 echo "[$SHELL] #### Finished Python test. Have a nice day"

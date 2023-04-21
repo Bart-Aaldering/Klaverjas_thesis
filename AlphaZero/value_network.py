@@ -15,14 +15,14 @@ from AlphaZero.state import State
 #     # Visible devices must be set before GPUs have been initialized
 #     print(e)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 class Value_network:
-    def __init__(self) -> None:
-        try:
+    def __init__(self, file_name: str = None) -> None:
+        if file_name is not None:
             print("Loading model")
-            self.model = tf.keras.models.load_model("Data/value_network.h5")
-        except:
+            self.model = tf.keras.models.load_model(f"Data/{file_name}")
+        else:
             print("Creating model")
             self.model = tf.keras.models.Sequential([
                 tf.keras.layers.Dense(268, activation='relu'),
@@ -45,8 +45,8 @@ class Value_network:
             epochs=epochs,
             )
 
-    def save_model(self):
-        self.model.save("Data/value_network.h5")
+    def save_model(self, name: str):
+        self.model.save(f"Data/{name}")
 
 class Value_resnet50v2():
     def __init__(self) -> None:
