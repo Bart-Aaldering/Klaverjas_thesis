@@ -335,16 +335,20 @@ class State:
         
         array[4 + (self.current_player+self.own_position)%4] = 1
         
-        if self.declaring_team == self.own_position % 2:
+        own_team = self.own_position % 2
+        
+        if self.declaring_team == own_team:
             array[9] = 1
         else:
             array[9] = 0
+            
+        # Set the points
         if self.round_complete():
-            array[10] = self.final_score[self.own_position % 2]
-            array[11] = self.final_score[1-(self.own_position % 2)]
+            array[10] = self.final_score[own_team]
+            array[11] = self.final_score[1-own_team]
         else:
-            array[10] = self.points[self.own_position % 2] + self.meld[self.own_position % 2]
-            array[11] = self.points[1-(self.own_position % 2)] + self.meld[1-(self.own_position % 2)]
+            array[10] = self.points[own_team] + self.meld[own_team]
+            array[11] = self.points[1-own_team] + self.meld[1-own_team]
 
         return np.concatenate((card_location.flatten(), array))
         
@@ -354,6 +358,8 @@ class State:
         return False
 
     def get_score(self, player: int) -> int:
+        if self.final_score[0] == 0 and self.final_score[1] == 0:
+            print("=======================Game not finished yet=======================")
         local_team = team(player)
         return self.final_score[local_team] - self.final_score[1-local_team]
 

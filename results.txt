@@ -1,21 +1,41 @@
 10000 10 processes 10 sim 1000 rounds per sims rule vs alpha ismcts tijd 10 simulations 5 c 1 
 
 Neural Network trained on data
-score: 7.8 std_score: 0.6 cluster time: 2095  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 1
-score: -38.0 std_score: 0.6 cluster time: 608  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 1 ucb_c: 1
+score: 7.8 std_score: 0.6 cluster time: 2095  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: SV_nn_simple_5.h5
+score: -38.0 std_score: 0.6 cluster time: 608  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 1 ucb_c: 1 model: SV_nn_simple_5.h5
+score: 7.9 std_score: 0.6 cluster time: 2100  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: SV_nn_simple_5.h5
+score: 31.5 std_score: 1.3 cluster time: 2861  PARAMETERS: rounds: 10000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: SV_nn_simple_5.h5
+score: 32.6 std_score: 1.3 cluster time: 4066  PARAMETERS: rounds: 10000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: SV_nn_normal_3_8490.h5
 
 No Neural Network
-score: 6.2 std_score: 0.6 cluster time: 609  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
-score: 6.2 std_score: 0.6 cluster time: 755  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
-score: 6.0 std_score: 0.6 cluster time: 688  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
-score: 7.0 std_score: 0.6 cluster  time: 618  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1
-score: 8.4 std_score: 0.6 cluster time: 2382  PARAMETERS: rounds: 50000 steps: 10 sims: 25 nn_scaler: 0.3 ucb_c: 1
-score: 17.8 std_score: 0.6 cluster time: 2623  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.3 ucb_c: 1
-score: 20.8 std_score: 0.6 cluster time: 5367  PARAMETERS: rounds: 50000 steps: 100 sims: 5 nn_scaler: 0.3 ucb_c: 1.41
-
-
-
+score: 6.2 std_score: 0.6 cluster time: 609  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1 model: None
+score: 6.2 std_score: 0.6 cluster time: 755  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1 model: None
+score: 6.0 std_score: 0.6 cluster time: 688  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1 model: None
+score: 7.0 std_score: 0.6 cluster  time: 618  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.3 ucb_c: 1 model: None
 7.1 0.6 1321 50000 rounds
+
+score: 8.4 std_score: 0.6 cluster time: 2382  PARAMETERS: rounds: 50000 steps: 10 sims: 25 nn_scaler: 0.3 ucb_c: 1 model: None
+score: 7.8 std_score: 0.6 cluster time: 1522  PARAMETERS: rounds: 50000 steps: 10 sims: 15 nn_scaler: 0.23 ucb_c: 1 model: None
+score: 7.8 std_score: 0.6 cluster time: 1645  PARAMETERS: rounds: 50000 steps: 10 sims: 11 nn_scaler: 0.23 ucb_c: 1 model: None
+score: 7.5 std_score: 0.6 cluster time: 877  PARAMETERS: rounds: 50000 steps: 10 sims: 8 nn_scaler: 0.23 ucb_c: 1 model: None
+score: 4.8 std_score: 0.6 cluster time: 424  PARAMETERS: rounds: 50000 steps: 10 sims: 3 nn_scaler: 0.23 ucb_c: 1 model: None
+
+score: 17.8 std_score: 0.6 cluster time: 2623  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: None
+score: 30.2 std_score: 0.6 cluster time: 2649  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
+score: 29.8 std_score: 0.6 cluster time: 3653  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
+score: 35.3 std_score: 0.6 cluster time: 7406  PARAMETERS: rounds: 50000 steps: 100 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
+score: 20.8 std_score: 0.6 cluster time: 5367  PARAMETERS: rounds: 50000 steps: 100 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: None
+score: 48.9 std_score: 1.3 cluster time: 7520  PARAMETERS: rounds: 10000 steps: 500 sims: 5 nn_scaler: 0.23 ucb_c: 200 model: None
+
+
+score: 4.6 std_score: 0.6 cluster time: 612  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 200 model: None
+score: 7.8 std_score: 0.6 cluster time: 615  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 130 model: None
+score: 8.6 std_score: 0.6 cluster time: 630  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 100 model: None
+score: 8.6 std_score: 0.6 cluster time: 625  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
+score: 8.5 std_score: 0.6 cluster time: 619  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 25 model: None
+score: 6.8 std_score: 0.6 cluster time: 623  PARAMETERS: rounds: 50000 steps: 10 sims: 5 nn_scaler: 0.23 ucb_c: 10 model: None
+
+
 
 
 No Predifined Cards

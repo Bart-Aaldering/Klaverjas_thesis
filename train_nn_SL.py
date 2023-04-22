@@ -3,27 +3,20 @@ import pandas as pd
 import json
 import time
 import os
+import tensorflow as tf
 
 from multiprocessing import Pool
+from sklearn.model_selection import train_test_split
 
 from Lennard.rounds import Round
 from Lennard.deck import Card
 from AlphaZero.alphazero import AlphaZero_player
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # Disable GPU
 
-def process_data():
-    """Create the originalDB.csv file from the originalDB.txt file"""
-    data = pd.read_csv("Data/SV_data/originalDB.txt", sep=";",low_memory=False)
-    data = data.drop(columns=["ID", "TableKey", "TableDbID", "ScoreDbID", "TimeStamp", "Settings"])
-    data = data.drop([1313, 1374]) # remove rows with no starting cards
-    data.reset_index(drop=True).to_csv("Data/SV_data/originalDB.csv")
-
-# process_data.sample(n=50000).reset_index(drop=True).to_csv("Data/HistoryDB2.csv")
-# print(data.head())
-
-def create_train_data(process_num: int, total_processes: int):
+def create_train_data_SV(process_num: int, total_processes: int):
     
-    data = pd.read_csv("Data/SV_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval, "Rounds": eval})
+    data = pd.read_csv("Data/SL_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval, "Rounds": eval})
     # data = data[:5000]
     data_per_process = len(data.index)//total_processes
     data = data[process_num*data_per_process:(process_num+1)*data_per_process].reset_index(drop=True)
@@ -31,10 +24,10 @@ def create_train_data(process_num: int, total_processes: int):
     X_train = np.zeros((total_rounds*132, 268), dtype=np.float16)
     y_train = np.zeros((total_rounds*132, 1), dtype=np.float16)
     
-    alpha_player_0 = AlphaZero_player()
-    alpha_player_1 = AlphaZero_player()
-    alpha_player_2 = AlphaZero_player()   
-    alpha_player_3 = AlphaZero_player()
+    alpha_player_0 = AlphaZero_player(0)
+    alpha_player_1 = AlphaZero_player(1)
+    alpha_player_2 = AlphaZero_player(2)   
+    alpha_player_3 = AlphaZero_player(3)
     index = 0
     for round_num in range(total_rounds):
         scores = json.loads(data.loc[round_num]["Scores"])
@@ -50,10 +43,10 @@ def create_train_data(process_num: int, total_processes: int):
         round = Round(data.loc[round_num]["FirstPlayer"], data.loc[round_num]["Troef"][0] , data.loc[round_num]["Gaat"])
         round.set_cards(data.loc[round_num]["Cards"])
 
-        alpha_player_0.new_round(round, 0)
-        alpha_player_1.new_round(round, 1)
-        alpha_player_2.new_round(round, 2)   
-        alpha_player_3.new_round(round, 3)
+        alpha_player_0.new_round(round)
+        alpha_player_1.new_round(round)
+        alpha_player_2.new_round(round)
+        alpha_player_3.new_round(round)
         
         round_score_we = scores["We"]+scores["WeRoem"]
         round_scores_they = scores["They"]+scores["TheyRoem"]
@@ -135,16 +128,17 @@ def create_train_data(process_num: int, total_processes: int):
     
     train_data = np.concatenate((X_train, y_train), axis=1)
 
-    np.save(f"Data/SV_data/train_data_{process_num}.npy", train_data)
+    np.save(f"Data/SL_data/train_data_{process_num}.npy", train_data)
     # np.savetxt(f"Data/train_data_{process_num}.csv", train_data, delimiter=",")
+    
     
 def merge_npy(files):
     arrays = []
     for num in range(files):
-        array = np.load(f"Data/SV_data/train_data_{num}.npy")
+        array = np.load(f"Data/SL_data/train_data_{num}.npy")
         arrays.append(array)
     train_data = np.concatenate(arrays, axis=0)
-    np.save(f"Data/SV_data/train_data.npy", train_data)
+    np.save(f"Data/SL_data/train_data.npy", train_data)
     
 def run_create_data():
     try:
@@ -156,13 +150,51 @@ def run_create_data():
     print(cluster, "n_cores: ", n_cores)
 
     with Pool(processes=n_cores) as pool:
-        pool.starmap(create_train_data, [(i, n_cores) for i in range(n_cores)])
+        pool.starmap(create_train_data_SV, [(i, n_cores) for i in range(n_cores)])
+
+def train_nn_on_data():
+    epochs = 1
+    print("loading data")
+    data = np.load("Data/SL_data/train_data.npy")
+    print("data loaded")
+    
+    X = data[:, :268]
+    y = data[:, 268]
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+    
+    # network_name = "simple"
+    # network = create_simple_nn()
+    network_name = "normal"
+    network = tf.keras.models.load_model("Data/Models/SV_nn_normal_7_8135.h5")
+    done_epochs = 7
+    
+    length = len(X_train)//10
+    for i in range(10):
+        network.fit(
+        X_train[i*length:(i+1)*length],
+        y_train[i*length:(i+1)*length],
+        batch_size=32,
+        epochs=epochs,
+        verbose=2,
+        validation_data=(X_test, y_test)
+        )
+    
+    y_pred_test = network(X_test)
+    
+    print(X_test[:10][-5:])
+    
+    print(y_pred_test[:10])
+    print(y_test[:10])
+    
+    loss = round(network.evaluate(X_test,  y_test, verbose=2))
+
+    network.save(f"Data/Models/SV_nn_{network_name}_{done_epochs+epochs}_{loss}.h5")
 
 if __name__ == "__main__":
     
     tijd = time.time()
-    # process_data()
-    # run_create_data()
+    train_nn_on_data()
     print(time.time()-tijd)
     
     

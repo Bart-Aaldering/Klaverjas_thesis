@@ -4,6 +4,7 @@ import numpy as np
 import random
 import copy
 import time
+import os
 import tensorflow as tf
 
 from typing import List
@@ -12,6 +13,8 @@ from Lennard.rounds import Round
 from AlphaZero.card import Card
 from AlphaZero.state import State
 from AlphaZero.helper import card_transform, card_untransform
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # Disable GPU
 
 class Node:
     def __init__(self, parent: Node = None, move: Card = None):
@@ -57,8 +60,8 @@ class Node:
 
 
 class AlphaZero_player:
-    # def __init__(self, mcts_steps: int = 10, number_of_simulations: int = 5, nn_scaler: float = 0.23, ucb_c_value: int = 1, model_name: str = None):
-    def __init__(self, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int, model_name: str):
+    def __init__(self, player_position: int, mcts_steps: int = 10, number_of_simulations: int = 5, nn_scaler: float = 0.23, ucb_c_value: int = 1, model_name: str = None):
+        self.player_position = player_position
         self.tijden = [0, 0, 0, 0, 0]           
         self.mcts_steps = mcts_steps
         self.number_of_simulations = number_of_simulations
@@ -68,12 +71,14 @@ class AlphaZero_player:
         if model_name is not None:
             self.policy_network = tf.keras.models.load_model(f"Data/Models/{model_name}")
     
-    def new_round(self, round: Round, player_position: int):
-        self.player_position = player_position
-        self.state = State(round, player_position)
+    def new_round(self, round: Round):
+        self.state = State(round, self.player_position)
         
     def update_state(self, move: int, trump_suit: str):
         move = Card(card_transform(move, ['k', 'h', 'r', 's'].index(trump_suit)))
+        self.state.do_move(move, simulation=False)
+    
+    def update_state2(self, move: Card):
         self.state.do_move(move, simulation=False)
         
     def get_move(self, trump_suit: str):
@@ -81,6 +86,9 @@ class AlphaZero_player:
         # self.store_move(move)
         return card_untransform(move.id, ['k', 'h', 'r', 's'].index(trump_suit)), score
     
+    def get_move2(self) :
+        return self.mcts()
+
     def store_move(self, move):
         # Open a file with access mode 'a'
         file_object = open('Code/Data/state_scores.txt', 'a')
@@ -159,7 +167,7 @@ class AlphaZero_player:
                 current_state.undo_move(current_node.move)
                 current_node = current_node.parent
             current_node.visits += 1
-            current_node.score += sim_score + self.nn_scaler*nn_score
+            current_node.score += (1-self.nn_scaler)*sim_score + self.nn_scaler*nn_score
             
             self.tijden[4] += time.time()-tijd
             

@@ -101,15 +101,16 @@ def run_test_multiprocess():
         
     print(cluster, "n_cores: ", n_cores)
     
-    total_rounds = 50000
+    total_rounds = 10000
     rounds_per_sim = total_rounds//n_cores
     
     # hyperparameters
-    mcts_steps = 10
-    number_of_simulations = 15
+    mcts_steps = 50
+    number_of_simulations = 5
     nn_scaler = 0.23
-    ucb_c_value = 1
+    ucb_c_value = 50
     model_name = None
+    model_name = "SV_nn_normal_7_8135.h5"
     # model_name = "SV_nn_simple_5.h5"
     
     print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
@@ -125,10 +126,6 @@ def run_test_multiprocess():
             tijden = [tijden[i]+result[2][i] for i in range(5)]
     else:
         scores_round, points_cumulative, tijden = test_agent(rounds_per_sim, 0)
-
-    # scores_alpha.append(sim.scores_alpha)
-    # points_cumulative.append(sim.point_cumulative)
-    # tijden = [tijden[i]+sim.tijden[i] for i in range(5)]
     
     if len(scores_round) != n_cores*rounds_per_sim:
         print(len(scores_round))
