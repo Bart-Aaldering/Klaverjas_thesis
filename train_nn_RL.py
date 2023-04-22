@@ -67,14 +67,14 @@ def generate_data_RL(num_rounds: int, mcts_steps: int, number_of_simulations: in
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card, score = alpha_player_0.get_move2(round.trump_suit)
+                    played_card, score = alpha_player_0.get_move2()
                 elif current_player == 1:
-                    played_card, score = alpha_player_1.get_move2(round.trump_suit)
+                    played_card, score = alpha_player_1.get_move2()
                     score = -score
                 elif current_player == 2:
-                    played_card, score = alpha_player_2.get_move2(round.trump_suit)
+                    played_card, score = alpha_player_2.get_move2()
                 else:
-                    played_card, score = alpha_player_3.get_move2(round.trump_suit)
+                    played_card, score = alpha_player_3.get_move2()
                     score = -score
 
                 X_train[round_num*132+trick*16+j*4] = alpha_player_0.state.to_nparray()
@@ -110,7 +110,7 @@ def train_nn():
     
     # budget parameters
     budget_hours = 0
-    budget_minutes = 5
+    budget_minutes = 0.5
     total_budget = budget_hours*3600 + budget_minutes*60
     
     # training parameters
