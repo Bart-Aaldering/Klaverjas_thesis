@@ -133,7 +133,6 @@ def train_nn():
         model = create_normal_nn()
         model.save(f"Data/Models/{model_name}")
     
-    print('Starting 1')
     while time.time() - tijd < total_budget:
         # generate data and save it
         try:
@@ -142,17 +141,17 @@ def train_nn():
         except:
             n_cores = 10
             cluster = "local"
-        print('Starting 2')
+
         data = generate_data_RL(rounds_per_step, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-        # with Pool(processes=n_cores) as pool:
-            # data = pool.starmap(generate_data_RL, [(rounds_per_step, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name) for i in range(n_cores)])
-        # print('Starting 2.5')
-        # data = np.concatenate(data, axis=0)
+        with Pool(processes=n_cores) as pool:
+            data = pool.starmap(generate_data_RL, [(rounds_per_step, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name) for i in range(n_cores)])
+        
+        data = np.concatenate(data, axis=0)
         np.save(f"Data/RL_data/train_data_{step}.npy", data)
         
         X = data[:, :268]
         y = data[:, 268]
-        print('Starting 3')
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
         
         # train model
@@ -168,13 +167,13 @@ def train_nn():
             verbose=2,
             validation_data=(X_test, y_test)
             )
-        print('Starting 4')
+
         # save model
         step += 1
         model_name = f"RL_nn_normal_{step}.h5"
         
         network.save(f"Data/Models/{model_name}")
-        
+    print(time.time() - tijd)    
           
 if __name__ == "__main__":
     tijd = time.time()
