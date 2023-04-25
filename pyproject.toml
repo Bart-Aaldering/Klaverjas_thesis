@@ -1,5 +1,5 @@
 [tool.black]
-line-length = 110
+line-length = 119
 include = '\.pyi?$'
 exclude = '.git, .env, __pycache__'
 
