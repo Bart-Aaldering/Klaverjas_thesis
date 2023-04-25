@@ -39,6 +39,7 @@ score: 6.8 std_score: 0.6 cluster time: 623  PARAMETERS: rounds: 50000 steps: 10
 
 
 
+
 No Predifined Cards
 6.6 0.7 990 50000 rounds
 5.8 1.5 197
