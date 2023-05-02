@@ -11,8 +11,8 @@ from Lennard.rounds import Round
 
 
 def test_agent(
-    rounds_amount: int,
-    process_num: int,
+    num_rounds: int,
+    process_id: int,
     mcts_steps: int,
     number_of_simulations: int,
     nn_scaler: float,
@@ -20,23 +20,24 @@ def test_agent(
     model_name: str,
 ):
     # random.seed(13)
-
-    tijden = [0, 0, 0, 0, 0]
+    alpha_eval_time = 0
+    mcts_times = [0, 0, 0, 0, 0]
     point_cumulative = [0, 0]
     scores_alpha = []
     scores_round = []
 
-    if rounds_amount * (process_num + 1) > 50000:
+    if num_rounds * (process_id + 1) > 50000:
         raise "too many rounds"
 
     rounds = pd.read_csv("Data/SL_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
 
     rule_player = Rule_player()
+
     alpha_player_0 = AlphaZero_player(0, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
     alpha_player_2 = AlphaZero_player(2, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 
-    for round_num in range(rounds_amount * process_num, rounds_amount * (process_num + 1)):
-        if not process_num and round_num % 50 == 0:
+    for round_num in range(num_rounds * process_id, num_rounds * (process_id + 1)):
+        if not process_id and round_num % 50 == 0:
             print(round_num)
         # print(round_num)
         # round = Round((starting_player + 1) % 4, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
@@ -58,10 +59,12 @@ def test_agent(
                     # moves = round.legal_moves()
                     # played_card = random.choice(moves)
                 else:
+                    tijd = time.time()
                     if current_player == 0:
                         played_card, _ = alpha_player_0.get_move(round.trump_suit)
                     else:
                         played_card, _ = alpha_player_2.get_move(round.trump_suit)
+                    alpha_eval_time += time.time() - tijd
                     moves = round.legal_moves()
 
                     found = False
@@ -81,25 +84,24 @@ def test_agent(
                 alpha_player_2.update_state(played_card.id, round.trump_suit)
 
         for i in range(5):
-            tijden[i] += alpha_player_0.tijden[i]
+            mcts_times[i] += alpha_player_0.tijden[i]
 
         scores_alpha.append(alpha_player_0.state.get_score(0))
         scores_round.append(round.get_score(0))
 
         point_cumulative[0] += round.points[0] + round.meld[0]
         point_cumulative[1] += round.points[1] + round.meld[1]
-    return scores_round, point_cumulative, tijden
+
+    return scores_round, point_cumulative, mcts_times, alpha_eval_time
 
 
 def run_test_multiprocess():
     multiprocessing = False
     multiprocessing = True
-    start_time = time.time()
+    start_tijd = time.time()
     scores_round = []
     points_cumulative = [0, 0]
-    tijden = [0, 0, 0, 0, 0]
-
-    start_time = time.time()
+    mcts_times = [0, 0, 0, 0, 0]
 
     try:
         n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
@@ -110,25 +112,26 @@ def run_test_multiprocess():
 
     print(cluster, "n_cores: ", n_cores)
 
-    total_rounds = 50000
-    rounds_per_sim = total_rounds // n_cores
+    total_rounds = 10000
+    rounds_per_process = total_rounds // n_cores
 
     # hyperparameters
     mcts_steps = 10
-    number_of_simulations = 15
-    nn_scaler = 0.23
+    number_of_simulations = 0
+    nn_scaler = 1
     ucb_c_value = 1
     model_name = None
-    # model_name = "SV_nn_simple_5.h5"
+    model_name = "RL_nn_normal_10.h5"
 
     print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 
+    alpha_eval_time = 0
     if multiprocessing:
         with Pool(processes=n_cores) as pool:
             results = pool.starmap(
                 test_agent,
                 [
-                    (rounds_per_sim, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+                    (rounds_per_process, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
                     for i in range(n_cores)
                 ],
             )
@@ -137,21 +140,20 @@ def run_test_multiprocess():
             scores_round += result[0]
             points_cumulative[0] += result[1][0]
             points_cumulative[1] += result[1][1]
-            tijden = [tijden[i] + result[2][i] for i in range(5)]
+            mcts_times = [mcts_times[i] + result[2][i] for i in range(5)]
+            alpha_eval_time += result[3]
+
     else:
-        scores_round, points_cumulative, tijden = test_agent(rounds_per_sim, 0)
+        scores_round, points_cumulative, mcts_times, alpha_eval_time = test_agent(rounds_per_process, 0)
 
-    # scores_alpha.append(sim.scores_alpha)
-    # points_cumulative.append(sim.point_cumulative)
-    # tijden = [tijden[i]+sim.tijden[i] for i in range(5)]
-
-    if len(scores_round) != n_cores * rounds_per_sim:
+    if len(scores_round) != n_cores * rounds_per_process:
         print(len(scores_round))
         print(scores_round)
         raise Exception("wrong length")
-    end_time = time.time()
 
-    print("Tijden: ", tijden)
+    alpha_eval_time /= total_rounds * 8 * 2
+
+    print("Tijden: ", mcts_times)
     print(points_cumulative)
     print(
         "score:",
@@ -159,8 +161,8 @@ def run_test_multiprocess():
         "std_score:",
         round(np.std(scores_round) / np.sqrt(len(scores_round)), 1),
         cluster,
-        "time:",
-        round(end_time - start_time),
+        "eval_time(ms):",
+        round(alpha_eval_time * 1000, 1),
         " PARAMETERS:",
         "rounds:",
         total_rounds,
@@ -178,6 +180,7 @@ def run_test_multiprocess():
 
 
 if __name__ == "__main__":
+    tijd = time.time()
     run_test_multiprocess()
-
+    print(time.time() - tijd)
     pass

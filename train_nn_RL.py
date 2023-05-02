@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import random
 
-from multiprocessing import Pool
+from multiprocessing import Pool, get_context
 from sklearn.model_selection import train_test_split
 
 from AlphaZero.alphazero import AlphaZero_player
@@ -52,7 +52,6 @@ def create_normal_nn():
 def generate_data_RL(
     num_rounds: int, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int, model_name: str
 ):
-
     X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
     y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
 
@@ -72,7 +71,6 @@ def generate_data_RL(
         # generate a state and score and play a card
         for trick in range(8):
             for j in range(4):
-
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
@@ -115,55 +113,59 @@ def generate_data_RL(
 
 
 def train_nn():
-    tijd = time.time()
+    start_time = time.time()
     # Initialize the model and set parameters
 
     # budget parameters
-    budget_hours = 0
-    budget_minutes = 0.5
+    budget_hours = 21
+    budget_minutes = 0
     total_budget = budget_hours * 3600 + budget_minutes * 60
 
     # training parameters
-    rounds_per_step = 10
+    rounds_per_step = 10000
     epochs = 1
     batch_size = 32
-    data_split_size = 1  # 1/x of the data is trained on at one time
 
     # model hyperparameters
-    mcts_steps = 10
+    mcts_steps = 200
     number_of_simulations = 5
-    nn_scaler = 0.23
-    ucb_c_value = 1
+    nn_scaler = 0
+    ucb_c_value = 300
 
     step = 0
+    self_play_time = 0
+    training_time = 0
 
-    model_name = f"RL_nn_normal_{step}.h5"
-
+    # create model
+    model_name = f"RL_nn_normal_{step}_2.h5"
     if step == 0:
         model = create_normal_nn()
         model.save(f"Data/Models/{model_name}")
 
-    while time.time() - tijd < total_budget:
-        # generate data and save it
-        try:
-            n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
-            cluster = "cluster"
-        except:
-            n_cores = 10
-            cluster = "local"
+    # set cores
+    try:
+        n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
+        cluster = "cluster"
+    except:
+        n_cores = 10
+        cluster = "local"
+    print(f"Using {n_cores} cores on {cluster}")
 
-        data = generate_data_RL(rounds_per_step, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-        with Pool(processes=n_cores) as pool:
+    while time.time() - start_time < total_budget:
+
+        tijd = time.time()
+        # generate data and save it
+        with get_context("spawn").Pool(processes=n_cores) as pool:
             data = pool.starmap(
                 generate_data_RL,
                 [
-                    (rounds_per_step, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-                    for i in range(n_cores)
+                    (rounds_per_step // n_cores, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+                    for _ in range(n_cores)
                 ],
             )
-
+        self_play_time += time.time() - tijd
         data = np.concatenate(data, axis=0)
-        np.save(f"Data/RL_data/train_data_{step}.npy", data)
+        np.save(f"Data/RL_data/train_data_{step}_2.npy", data)
 
         X = data[:, :268]
         y = data[:, 268]
@@ -173,23 +175,25 @@ def train_nn():
         # train model
         network = tf.keras.models.load_model(f"Data/Models/{model_name}")
 
-        length = len(X_train) // data_split_size
-        for i in range(data_split_size):
-            network.fit(
-                X_train[i * length : (i + 1) * length],
-                y_train[i * length : (i + 1) * length],
-                batch_size=batch_size,
-                epochs=epochs,
-                verbose=2,
-                validation_data=(X_test, y_test),
-            )
+        tijd = time.time()
+        network.fit(
+            X_train,
+            y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            verbose=2,
+            validation_data=(X_test, y_test),
+        )
+        training_time += time.time() - tijd
 
         # save model
         step += 1
-        model_name = f"RL_nn_normal_{step}.h5"
+        model_name = f"RL_nn_normal_{step}_2.h5"
 
         network.save(f"Data/Models/{model_name}")
-    print(time.time() - tijd)
+    print(time.time() - start_time)
+    print(f"Self play time: {self_play_time}")
+    print(f"Training time: {training_time}")
 
 
 if __name__ == "__main__":

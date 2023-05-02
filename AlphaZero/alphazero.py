@@ -159,7 +159,8 @@ class AlphaZero_player:
                 moves.reverse()
                 for move in moves:
                     current_state.undo_move(move)
-            sim_score /= self.number_of_simulations
+            if self.number_of_simulations > 0:
+                sim_score /= self.number_of_simulations
 
             if self.model_name is not None:
                 nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
