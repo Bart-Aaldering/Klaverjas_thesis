@@ -1,5 +1,4 @@
 Data/
 *.pyc
 __pycache__/
-results.py
 wandb/
