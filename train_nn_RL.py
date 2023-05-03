@@ -114,33 +114,6 @@ def generate_data_RL(
 
 def train_nn():
     start_time = time.time()
-    # Initialize the model and set parameters
-
-    # budget parameters
-    budget_hours = 21
-    budget_minutes = 0
-    total_budget = budget_hours * 3600 + budget_minutes * 60
-
-    # training parameters
-    rounds_per_step = 10000
-    epochs = 1
-    batch_size = 32
-
-    # model hyperparameters
-    mcts_steps = 200
-    number_of_simulations = 5
-    nn_scaler = 0
-    ucb_c_value = 300
-
-    step = 0
-    self_play_time = 0
-    training_time = 0
-
-    # create model
-    model_name = f"RL_nn_normal_{step}_2.h5"
-    if step == 0:
-        model = create_normal_nn()
-        model.save(f"Data/Models/{model_name}")
 
     # set cores
     try:
@@ -150,6 +123,64 @@ def train_nn():
         n_cores = 10
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
+
+    # Initialize the model and set parameters
+
+    # budget parameters
+    budget_hours = 21
+    budget_minutes = 30
+    total_budget = budget_hours * 3600 + budget_minutes * 60
+
+    # self play parameters
+    rounds_per_step = 1800
+    rounds_per_step = rounds_per_step // n_cores * n_cores
+
+    mcts_steps = 200
+    number_of_simulations = 0
+    nn_scaler = 1
+    ucb_c_value = 300
+
+    # training parameters
+    epochs = 5
+    batch_size = 2048
+
+    max_memory = rounds_per_step * 132 * 10
+
+    step = 0
+    self_play_time = 0
+    training_time = 0
+    replay_memory = None
+
+    # create model
+    model_name = f"RL_nn_normal_{step}.h5"
+    if step == 0:
+        model = create_normal_nn()
+        model.save(f"Data/Models/{model_name}")
+
+    print(
+        "total budget",
+        total_budget,
+        "rounds per step",
+        rounds_per_step,
+        "epochs",
+        epochs,
+        "batch size",
+        batch_size,
+        "\n",
+        "mcts steps",
+        mcts_steps,
+        "number of simulations",
+        number_of_simulations,
+        "nn scaler",
+        nn_scaler,
+        "\n",
+        "ucb c value",
+        ucb_c_value,
+        "max memory",
+        max_memory,
+        "step",
+        step,
+    )
 
     while time.time() - start_time < total_budget:
 
@@ -164,16 +195,31 @@ def train_nn():
                 ],
             )
         self_play_time += time.time() - tijd
+
         data = np.concatenate(data, axis=0)
-        np.save(f"Data/RL_data/train_data_{step}_2.npy", data)
+        np.save(f"Data/RL_data/RL_nn_normal_{step}.npy", data)
+        print(len(data), "data points saved")
+        if replay_memory is None:
+            replay_memory = data
+        else:
+            replay_memory = np.concatenate((replay_memory, data), axis=0)
 
-        X = data[:, :268]
-        y = data[:, 268]
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+        if len(replay_memory) > max_memory:
+            replay_memory = np.delete(replay_memory, np.s_[0 : len(replay_memory) - max_memory], axis=0)
 
         # train model
         network = tf.keras.models.load_model(f"Data/Models/{model_name}")
+
+        # Set up early stopping and TensorBoard
+        early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", verbose=1, restore_best_weights=True)
+        log_dir = "Data/logs/" + time.time().__str__()
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+
+        train_data = replay_memory[np.random.choice(len(replay_memory), rounds_per_step * 132, replace=False), :]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
+        )
 
         tijd = time.time()
         network.fit(
@@ -183,12 +229,14 @@ def train_nn():
             epochs=epochs,
             verbose=2,
             validation_data=(X_test, y_test),
+            callbacks=[early_stopping, tensorboard_callback],
         )
+
         training_time += time.time() - tijd
 
         # save model
         step += 1
-        model_name = f"RL_nn_normal_{step}_2.h5"
+        model_name = f"RL_nn_normal_{step}.h5"
 
         network.save(f"Data/Models/{model_name}")
     print(time.time() - start_time)

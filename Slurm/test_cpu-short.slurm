@@ -18,7 +18,7 @@ echo "[$SHELL] ## current working directory: "$CWD
 
 # Run the file
 echo "[$SHELL] ## Run script"
-python3 short_test_agent.py
+python3 test_agent.py
 echo "[$SHELL] ## Script finished"
 
 echo "[$SHELL] #### Finished Python test. Have a nice day"

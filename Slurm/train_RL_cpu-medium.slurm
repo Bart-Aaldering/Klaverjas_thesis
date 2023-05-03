@@ -2,7 +2,7 @@
 #SBATCH --job-name=train_nn_RL_cpu-medium
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=3G
+#SBATCH --mem-per-cpu=5G
 #SBATCH --time=23:50:00
 #SBATCH --partition=cpu-medium
 #SBATCH --nodes=1

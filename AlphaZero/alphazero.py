@@ -111,14 +111,14 @@ class AlphaZero_player:
         current_node = Node()
 
         # current_state.set_determinization2()
-        for i in range(self.mcts_steps):
-            tijd = time.time()
+        for _ in range(self.mcts_steps):
+            # tijd = time.time()
 
             # Determination
             current_state.set_determinization()
 
-            self.tijden[0] += time.time() - tijd
-            tijd = time.time()
+            # self.tijden[0] += time.time() - tijd
+            # tijd = time.time()
 
             # Selection
             current_node.set_legal_moves(current_state)
@@ -129,8 +129,8 @@ class AlphaZero_player:
                 current_state.do_move(current_node.move)
                 current_node.set_legal_moves(current_state)
 
-            self.tijden[1] += time.time() - tijd
-            tijd = time.time()
+            # self.tijden[1] += time.time() - tijd
+            # tijd = time.time()
 
             # Expansion
             if not current_state.round_complete():
@@ -138,8 +138,8 @@ class AlphaZero_player:
                 current_node = current_node.select_child_random()
                 current_state.do_move(current_node.move)
 
-            self.tijden[2] += time.time() - tijd
-            tijd = time.time()
+            # self.tijden[2] += time.time() - tijd
+            # tijd = time.time()
 
             # Simulation
             sim_score = 0
@@ -167,8 +167,8 @@ class AlphaZero_player:
             else:
                 nn_score = 0
 
-            self.tijden[3] += time.time() - tijd
-            tijd = time.time()
+            # self.tijden[3] += time.time() - tijd
+            # tijd = time.time()
 
             # Backpropagation
             while current_node.parent is not None:
@@ -179,9 +179,9 @@ class AlphaZero_player:
             current_node.visits += 1
             current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
 
-            self.tijden[4] += time.time() - tijd
+            # self.tijden[4] += time.time() - tijd
 
-        best_score = -10
+        best_score = -500
         for child in current_node.children:
             score = child.visits
             if score > best_score:

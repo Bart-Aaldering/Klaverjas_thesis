@@ -112,16 +112,16 @@ def run_test_multiprocess():
 
     print(cluster, "n_cores: ", n_cores)
 
-    total_rounds = 10000
+    total_rounds = 5000
     rounds_per_process = total_rounds // n_cores
 
     # hyperparameters
-    mcts_steps = 10
+    mcts_steps = 200
     number_of_simulations = 0
     nn_scaler = 1
-    ucb_c_value = 1
+    ucb_c_value = 300
     model_name = None
-    model_name = "RL_nn_normal_10.h5"
+    model_name = "RL_nn_normal_5.h5"
 
     print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 
