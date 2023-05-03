@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=test_cpu-short2
+#SBATCH --job-name=run_results
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=500M
-#SBATCH --time=04:00:00
+#SBATCH --mem-per-cpu=10M
+#SBATCH --time=00:10:00 
 #SBATCH --partition=cpu-short
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=20
+#SBATCH --cpus-per-task=1
 
 
 echo "[$SHELL] #### Starting Python test"
@@ -18,7 +18,7 @@ echo "[$SHELL] ## current working directory: "$CWD
 
 # Run the file
 echo "[$SHELL] ## Run script"
-python3 test_agent2.py
+python3 results.py
 echo "[$SHELL] ## Script finished"
 
 echo "[$SHELL] #### Finished Python test. Have a nice day"
