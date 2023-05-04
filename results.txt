@@ -47,6 +47,7 @@ score: 4.8 std_score: 0.6 cluster time: 424  PARAMETERS: rounds: 50000 steps: 10
 score: 17.8 std_score: 0.6 cluster time: 2623  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: None
 score: 30.2 std_score: 0.6 cluster time: 2649  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
 score: 29.8 std_score: 0.6 cluster time: 3653  PARAMETERS: rounds: 50000 steps: 50 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
+
 score: 35.3 std_score: 0.6 cluster time: 7406  PARAMETERS: rounds: 50000 steps: 100 sims: 5 nn_scaler: 0.23 ucb_c: 50 model: None
 score: 20.8 std_score: 0.6 cluster time: 5367  PARAMETERS: rounds: 50000 steps: 100 sims: 5 nn_scaler: 0.23 ucb_c: 1 model: None
 score: 48.9 std_score: 1.3 cluster time: 7520  PARAMETERS: rounds: 10000 steps: 500 sims: 5 nn_scaler: 0.23 ucb_c: 200 model: None
