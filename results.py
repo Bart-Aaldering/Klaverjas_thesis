@@ -1,3 +1,23 @@
+# import wandb
+
+
+# # start a new wandb run to track this script
+# wandb.init(
+#     # set the wandb project where this run will be logged
+#     project="Thesis",
+
+#     # track hyperparameters and run metadata
+#     config={
+#     "learning_rate": 0.02,
+#     "architecture": "CNN",
+#     "dataset": "CIFAR-100",
+#     "epochs": 10,
+#     }
+# )
+
+
+# wandb.log({"acc": acc, "loss": loss})
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -5,7 +25,7 @@ X_10_5 = [200, 130, 100, 50, 25, 10]
 y_10_5 = [4.6, 7.8, 8.6, 8.6, 8.5, 6.8]
 std_10_5 = 0.6
 
-X_50_5  = [3000, 1000, 500, 300, 200, 130, 50, 25, 10]
+X_50_5 = [3000, 1000, 500, 300, 200, 130, 50, 25, 10]
 y_50_5 = [15.0, 28.8, 33.0, 32.7, 35.2, 35.1, 30, 28.5, 22.5]
 std_50_5 = 1.8
 
@@ -18,21 +38,20 @@ y_500_5 = [50.1, 51.6, 52.6, 49.5, 51.2, 49.3, 49.3, 36.8]
 std_500_5 = 1.8
 
 
-
 marker = ".-"
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(21, 7))
 ax1.plot(X_10_5, y_10_5, marker, label="10 steps")
-ax1.fill_between(X_10_5, np.array(y_10_5)-std_10_5*1.98, np.array(y_10_5)+std_10_5*1.98, alpha=0.2)
+ax1.fill_between(X_10_5, np.array(y_10_5) - std_10_5 * 1.98, np.array(y_10_5) + std_10_5 * 1.98, alpha=0.2)
 
 ax1.plot(X_50_5, y_50_5, marker, label="50 steps")
-ax1.fill_between(X_50_5, np.array(y_50_5)-std_50_5*1.98, np.array(y_50_5)+std_50_5*1.98, alpha=0.2)
+ax1.fill_between(X_50_5, np.array(y_50_5) - std_50_5 * 1.98, np.array(y_50_5) + std_50_5 * 1.98, alpha=0.2)
 
 ax1.plot(X_200_5, y_200_5, marker, label="200 steps")
-ax1.fill_between(X_200_5, np.array(y_200_5)-std_200_5*1.98, np.array(y_200_5)+std_200_5*1.98, alpha=0.2)
+ax1.fill_between(X_200_5, np.array(y_200_5) - std_200_5 * 1.98, np.array(y_200_5) + std_200_5 * 1.98, alpha=0.2)
 
 ax1.plot(X_500_5, y_500_5, marker, label="500 steps")
-ax1.fill_between(X_500_5, np.array(y_500_5)-std_500_5*1.98, np.array(y_500_5)+std_500_5*1.98, alpha=0.2)
+ax1.fill_between(X_500_5, np.array(y_500_5) - std_500_5 * 1.98, np.array(y_500_5) + std_500_5 * 1.98, alpha=0.2)
 
 ax1.set_title("Effect of different number of steps with different \n C values on the average score (sims=5)")
 # ax1.set_title("Average Score vs C value (Exploration Rate) \n for different number of steps and sims=5")
@@ -63,16 +82,39 @@ ax2.plot(time_steps200_c300, score_steps200_c300, marker2, label="Sims with step
 number_base = 130
 number_scale = 10
 for xp, yp, m in zip(time_step10_c1, score_step10_c1, sims_step10_c1):
-    ax2.scatter(xp, yp, marker=f"${m}$", s=number_base*(np.floor(np.emath.logn(number_scale, m))+1), color="black", zorder=10)
-    
+    ax2.scatter(
+        xp,
+        yp,
+        marker=f"${m}$",
+        s=number_base * (np.floor(np.emath.logn(number_scale, m)) + 1),
+        color="black",
+        zorder=10,
+    )
+
 for xp, yp, m in zip(time_sims5_c1, score_sims5_c1, steps_sims5_c1):
-    ax2.scatter(xp, yp, marker=f"${m}$", s=number_base*(np.floor(np.emath.logn(number_scale, m))+1), color="black", zorder=10)
-    
+    ax2.scatter(
+        xp,
+        yp,
+        marker=f"${m}$",
+        s=number_base * (np.floor(np.emath.logn(number_scale, m)) + 1),
+        color="black",
+        zorder=10,
+    )
+
 for xp, yp, m in zip(time_steps200_c300, score_steps200_c300, sims__steps200_c300):
-    ax2.scatter(xp, yp, marker=f"${m}$", s=number_base*(np.floor(np.emath.logn(number_scale, m))+1), color="black", zorder=10) 
+    ax2.scatter(
+        xp,
+        yp,
+        marker=f"${m}$",
+        s=number_base * (np.floor(np.emath.logn(number_scale, m)) + 1),
+        color="black",
+        zorder=10,
+    )
 ax2.set_xscale("log")
 ax2.set_yscale("log")
-ax2.set_title("Effect of different number of simulations compared to different \n number of steps on the average score and thinking time")
+ax2.set_title(
+    "Effect of different number of simulations compared to different \n number of steps on the average score and thinking time"
+)
 # ax2.set_title("Score vs Think time \n for different steps and sims settings")
 ax2.set_xlabel("Think time per move (ms)")
 ax2.set_ylabel("Average Score")
