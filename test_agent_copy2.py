@@ -88,9 +88,7 @@ def test_agent(
 
         scores_alpha.append(alpha_player_0.state.get_score(0))
         scores_round.append(round.get_score(0))
-        if scores_alpha[-1] != scores_round[-1]:
-            print("scores_alpha not always equal to scores_round")
-            print(scores_alpha[-1], scores_round[-1])
+
         point_cumulative[0] += round.points[0] + round.meld[0]
         point_cumulative[1] += round.points[1] + round.meld[1]
 
@@ -110,17 +108,17 @@ def run_test_multiprocess():
 
     print(cluster, "n_cores: ", n_cores)
 
-    total_rounds = 5000
+    total_rounds = 10000
     rounds_per_process = total_rounds // n_cores
 
     # hyperparameters
     mcts_steps = 200
-    number_of_simulations = 0
-    nn_scaler = 1
+    number_of_simulations = 1
+    nn_scaler = 0.5
     ucb_c_value = 300
     # model_name = None
-    # model_name = "RL_nn_normal_30.h5", "RL_nn_normal_1_no_CL.h5", "RL_nn_normal_45_no_CL.h5"
-    for model_name in ["RL_nn_normal_55.h5", "RL_nn_normal_60.h5", "RL_nn_normal_65.h5"]:
+    # model_name = "RL_nn_normal_30.h5", ,
+    for model_name in ["RL_nn_normal_45_no_CL.h5"]:
         # for i in range(1):
         print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 

@@ -127,8 +127,8 @@ def train_nn():
     # Initialize the model and set parameters
 
     # budget parameters
-    budget_hours = 21
-    budget_minutes = 30
+    budget_hours = 22
+    budget_minutes = 0
     total_budget = budget_hours * 3600 + budget_minutes * 60
 
     # self play parameters
@@ -146,7 +146,7 @@ def train_nn():
 
     max_memory = rounds_per_step * 132 * 10
 
-    step = 0
+    step = 38
     self_play_time = 0
     training_time = 0
     replay_memory = None

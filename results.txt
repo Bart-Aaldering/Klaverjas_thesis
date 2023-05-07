@@ -5,11 +5,48 @@ score: 19.4 std_score: 1.3 cluster time: 7669  PARAMETERS: rounds: 10000 steps: 
 score: 21.0 std_score: 1.3 cluster time: 7786  PARAMETERS: rounds: 10000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: SV_nn_normal_8_8162.h5 within 5 hours?
 
 
+score: 42.0 std_score: 1.3 cluster eval_time(ms): 71.9  PARAMETERS: rounds: 10000 steps: 200 sims: 1 nn_scaler: 0.23 ucb_c: 300 model: None
+score: 37.4 std_score: 1.3 cluster eval_time(ms): 1013.3  PARAMETERS: rounds: 10000 steps: 200 sims: 1 nn_scaler: 0.5 ucb_c: 300 model: RL_nn_normal_50.h5
+score: 43.0 std_score: 1.3 cluster eval_time(ms): 976.4  PARAMETERS: rounds: 10000 steps: 200 sims: 1 nn_scaler: 0.5 ucb_c: 300 model: RL_nn_normal_1_no_CL.h5
+score: 39.2 std_score: 1.3 cluster eval_time(ms): 980.9  PARAMETERS: rounds: 10000 steps: 200 sims: 1 nn_scaler: 0.5 ucb_c: 300 model: RL_nn_normal_45_no_CL.h5
+
+score: 5.8 std_score: 1.8 cluster  PARAMETERS: rounds: 5000 steps: 200 sims: 1 nn_scaler: 0.5 ucb_c: 300 model1: RL_nn_normal_1_no_CL.h5 model2: RL_nn_normal_45_no_CL.h5
+
 score: -30.2 std_score: 1.8 cluster eval_time(ms): 970.8  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_0.h5 0 hours
 score: -13.7 std_score: 1.9 cluster eval_time(ms): 941.2  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_5.h5 4.2 hours
 score: -11.5 std_score: 1.9 cluster eval_time(ms): 938.7  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_10.h5 8.4 hours
 score: -8.1 std_score: 1.9 cluster eval_time(ms): 941.0  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_15.h5 12.6 hours
 score: -3.9 std_score: 1.9 cluster eval_time(ms): 926.9  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_20.h5 16.8 hours
+score: 1.3 std_score: 1.9 cluster eval_time(ms): 929.0  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_25.h5 21 hours
+score: 4.7 std_score: 1.8 cluster eval_time(ms): 931.0  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_30.h5 25.2 hours
+score: 6.0 std_score: 1.8 cluster eval_time(ms): 978.7  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_35.h5 29.4 hours
+score: 10.8 std_score: 1.8 cluster eval_time(ms): 983.2  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_40.h5 33.6 hours
+score: 16.3 std_score: 1.8 cluster eval_time(ms): 980.8  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_45.h5 37.8 hours
+score: 17.7 std_score: 1.8 cluster eval_time(ms): 935.3  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_50.h5 42 hours
+score: 19.8 std_score: 1.8 cluster eval_time(ms): 976.1  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_55.h5 46.2 hours
+score: 19.1 std_score: 1.8 cluster eval_time(ms): 974.6  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_60.h5 50.4 hours
+score: 20.1 std_score: 1.8 cluster eval_time(ms): 974.3  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_65.h5 54.6 hours
+
+
+score: -40.5 std_score: 2.0 cluster eval_time(ms): 938.1  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_0_no_CL.h5 0 hours
+score: 22.6 std_score: 1.8 cluster eval_time(ms): 943.1  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_1_no_CL.h5 1 hours
+score: 18.9 std_score: 1.8 cluster eval_time(ms): 935.5  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_3_no_CL.h5 2.9 hours
+score: 17.9 std_score: 1.8 cluster eval_time(ms): 954.0  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_5_no_CL.h5 4.8 hours
+score: 14.7 std_score: 1.8 cluster eval_time(ms): 951.9  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_10_no_CL.h5 9.6 hours
+score: 16.1 std_score: 1.8 cluster eval_time(ms): 958.3  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_15_no_CL.h5 14.4 hours
+score: 14.9 std_score: 1.8 cluster eval_time(ms): 941.3  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_20_no_CL.h5 19.2 hours
+score: 17.1 std_score: 1.8 cluster eval_time(ms): 979.7  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_25_no_CL.h5 24 hours
+score: 15.9 std_score: 1.8 cluster eval_time(ms): 941.1  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_30_no_CL.h5 28.8 hours
+score: 18.1 std_score: 1.8 cluster eval_time(ms): 938.7  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_35_no_CL.h5 33.6 hours
+score: 18.5 std_score: 1.8 cluster eval_time(ms): 922.1  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_40_no_CL.h5 38.4 hours
+score: 16.8 std_score: 1.8 cluster eval_time(ms): 927.8  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_45_no_CL.h5 43.2 hours
+
+score: 17.5 std_score: 1.8 cluster eval_time(ms): 978.6  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_10_SL_boosted.h5 4.1 hours
+score: 17.2 std_score: 1.8 cluster eval_time(ms): 938.3  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_15_SL_boosted.h5 8.2 hours
+score: 16.6 std_score: 1.8 cluster eval_time(ms): 948.4  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_20_SL_boosted.h5 12.3 hours
+score: 17.4 std_score: 1.8 cluster eval_time(ms): 937.6  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_25_SL_boosted.h5 16.4 hours
+score: 15.3 std_score: 1.8 cluster eval_time(ms): 932.2  PARAMETERS: rounds: 5000 steps: 200 sims: 0 nn_scaler: 1 ucb_c: 300 model: RL_nn_normal_30_SL_boosted.h5 20.5 hours
+
 
 score: 50.1 std_score: 1.8 cluster eval_time(ms): 477.1  PARAMETERS: rounds: 5000 steps: 500 sims: 5 nn_scaler: 0.23 ucb_c: 12000 model: None
 score: 51.6 std_score: 1.8 cluster eval_time(ms): 461.0  PARAMETERS: rounds: 5000 steps: 500 sims: 5 nn_scaler: 0.23 ucb_c: 6000 model: None
@@ -31,7 +68,10 @@ score: 46.8 std_score: 1.8 cluster eval_time(ms): 192.1  PARAMETERS: rounds: 500
 score: 43.8 std_score: 1.8 cluster eval_time(ms): 197.9  PARAMETERS: rounds: 5000 steps: 200 sims: 5 nn_scaler: 0.23 ucb_c: 4000 model: None
 score: 37.1 std_score: 1.8 cluster eval_time(ms): 204.0  PARAMETERS: rounds: 5000 steps: 200 sims: 5 nn_scaler: 0.23 ucb_c: 6000 model: None
 
-
+No smart determinization
+score: 40.5 std_score: 1.8 local eval_time(ms): 225.1  PARAMETERS: rounds: 5000 steps: 200 sims: 5 nn_scaler: 0.23 ucb_c: 300 model: None
+Take current score instead of simulation 
+score: 6.0 std_score: 1.8 local eval_time(ms): 41.6  PARAMETERS: rounds: 5000 steps: 200 sims: 1 nn_scaler: 0.23 ucb_c: 300 model: None
 
 score: 47.5 std_score: 1.8 cluster eval_time(ms): 693.0  PARAMETERS: rounds: 5000 steps: 200 sims: 20 nn_scaler: 0.23 ucb_c: 300 model: None
 score: 46.7 std_score: 1.8 cluster eval_time(ms): 353.0  PARAMETERS: rounds: 5000 steps: 200 sims: 10 nn_scaler: 0.23 ucb_c: 300 model: None

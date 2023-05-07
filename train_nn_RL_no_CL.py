@@ -146,7 +146,7 @@ def train_nn():
 
     max_memory = rounds_per_step * 132 * 10
 
-    step = 0
+    step = 23
     self_play_time = 0
     training_time = 0
     replay_memory = None
