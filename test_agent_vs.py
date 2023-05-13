@@ -99,11 +99,11 @@ def run_test_multiprocess():
 
     # hyperparameters
     mcts_steps = 200
-    number_of_simulations = 1
-    nn_scaler = 0.5
+    number_of_simulations = 0
+    nn_scaler = 1
     ucb_c_value = 300
-    model_name1 = "RL_nn_normal_1_no_CL.h5"
-    model_name2 = "RL_nn_normal_45_no_CL.h5"
+    model_name1 = "RL_nn_normal_65.h5"
+    model_name2 = "RL_nn_normal_25.h5"
 
     print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name1, model_name2)
 

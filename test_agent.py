@@ -120,7 +120,7 @@ def run_test_multiprocess():
     ucb_c_value = 300
     # model_name = None
     # model_name = "RL_nn_normal_30.h5", "RL_nn_normal_1_no_CL.h5", "RL_nn_normal_45_no_CL.h5"
-    for model_name in ["RL_nn_normal_55.h5", "RL_nn_normal_60.h5", "RL_nn_normal_65.h5"]:
+    for model_name in ["RL_nn_normal_70.h5", "RL_nn_normal_75.h5", "RL_nn_normal_80.h5"]:
         # for i in range(1):
         print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 

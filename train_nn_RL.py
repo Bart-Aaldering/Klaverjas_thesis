@@ -13,23 +13,6 @@ from Lennard.rounds import Round
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 
 
-def create_simple_nn():
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Dense(268, activation="relu"),
-            tf.keras.layers.Dense(256, activation="relu"),
-            tf.keras.layers.Dense(256, activation="relu"),
-            tf.keras.layers.Dense(1, activation="linear"),
-        ]
-    )
-
-    # define how to train the model
-    model.compile(optimizer="adam", loss="mse")
-    model.build(input_shape=(1, 268))
-
-    return model
-
-
 def create_normal_nn():
     model = tf.keras.models.Sequential(
         [
@@ -44,6 +27,26 @@ def create_normal_nn():
     )
     # define how to train the model
     model.compile(optimizer="adam", loss="mse")
+    model.build(input_shape=(1, 268))
+
+    return model
+
+
+def create_large_nn():
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(512, activation="relu"),
+            tf.keras.layers.Dense(1024, activation="relu"),
+            tf.keras.layers.Dense(2048, activation="relu"),
+            tf.keras.layers.Dense(512, activation="relu"),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dense(16, activation="relu"),
+            tf.keras.layers.Dense(1, activation="linear"),
+        ]
+    )
+    # define how to train the model
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss="mse")
     model.build(input_shape=(1, 268))
 
     return model
@@ -132,13 +135,13 @@ def train_nn():
     total_budget = budget_hours * 3600 + budget_minutes * 60
 
     # self play parameters
-    rounds_per_step = 1800
+    rounds_per_step = 600
     rounds_per_step = rounds_per_step // n_cores * n_cores
 
-    mcts_steps = 200
-    number_of_simulations = 0
-    nn_scaler = 1
-    ucb_c_value = 300
+    mcts_steps = 10
+    number_of_simulations = 1
+    nn_scaler = 0.5
+    ucb_c_value = 200
 
     # training parameters
     epochs = 5
@@ -146,7 +149,7 @@ def train_nn():
 
     max_memory = rounds_per_step * 132 * 10
 
-    step = 38
+    step = 0
     self_play_time = 0
     training_time = 0
     replay_memory = None
