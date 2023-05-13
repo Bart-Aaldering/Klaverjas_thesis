@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=train_nn_RL_cpu-medium_SL_boosted
+#SBATCH --job-name=test_agent_vs
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=2G
-#SBATCH --time=23:50:00
-#SBATCH --partition=cpu-medium
+#SBATCH --mem-per-cpu=500M
+#SBATCH --time=04:00:00
+#SBATCH --partition=cpu-short
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=20
@@ -18,7 +18,7 @@ echo "[$SHELL] ## current working directory: "$CWD
 
 # Run the file
 echo "[$SHELL] ## Run script"
-python3 train_nn_RL_SL_boosted.py
+python3 test_agent_vs.py
 echo "[$SHELL] ## Script finished"
 
 echo "[$SHELL] #### Finished Python test. Have a nice day"

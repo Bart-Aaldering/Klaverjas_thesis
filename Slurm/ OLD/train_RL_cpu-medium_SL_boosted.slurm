@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_nn_RL_cpu-medium_no_CL
+#SBATCH --job-name=train_nn_RL_cpu-medium_SL_boosted
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
 #SBATCH --mem-per-cpu=1G
@@ -18,7 +18,7 @@ echo "[$SHELL] ## current working directory: "$CWD
 
 # Run the file
 echo "[$SHELL] ## Run script"
-python3 train_nn_RL_no_CL.py
+python3 train_nn_RL_SL_boosted.py
 echo "[$SHELL] ## Script finished"
 
 echo "[$SHELL] #### Finished Python test. Have a nice day"

@@ -108,76 +108,77 @@ def run_test_multiprocess():
 
     print(cluster, "n_cores: ", n_cores)
 
-    total_rounds = 5000
+    total_rounds = 10000
     rounds_per_process = total_rounds // n_cores
 
     # hyperparameters
-    mcts_steps = 500
-    number_of_simulations = 5
-    nn_scaler = 0.23
-    ucb_c_value = 6000
-    model_name = None
-    # model_name = "RL_nn_normal_15.h5"
-    # for ucb_c_value in [1000, 3000, 6000]:
-    print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+    mcts_steps = 200
+    number_of_simulations = 1
+    nn_scaler = 0.5
+    ucb_c_value = 300
+    # model_name = None
+    # model_name = "RL_nn_normal_30.h5", , "RL_nn_normal_45_no_CL.h5"
+    for model_name in ["RL_nn_normal_1_no_CL.h5"]:
+        # for i in range(1):
+        print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
 
-    start_time = time.time()
-    scores_round = []
-    points_cumulative = [0, 0]
-    mcts_times = [0, 0, 0, 0, 0]
-    alpha_eval_time = 0
-    if multiprocessing:
-        with Pool(processes=n_cores) as pool:
-            results = pool.starmap(
-                test_agent,
-                [
-                    (rounds_per_process, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-                    for i in range(n_cores)
-                ],
-            )
+        start_time = time.time()
+        scores_round = []
+        points_cumulative = [0, 0]
+        mcts_times = [0, 0, 0, 0, 0]
+        alpha_eval_time = 0
+        if multiprocessing:
+            with Pool(processes=n_cores) as pool:
+                results = pool.starmap(
+                    test_agent,
+                    [
+                        (rounds_per_process, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+                        for i in range(n_cores)
+                    ],
+                )
 
-        for result in results:
-            scores_round += result[0]
-            points_cumulative[0] += result[1][0]
-            points_cumulative[1] += result[1][1]
-            mcts_times = [mcts_times[i] + result[2][i] for i in range(5)]
-            alpha_eval_time += result[3]
+            for result in results:
+                scores_round += result[0]
+                points_cumulative[0] += result[1][0]
+                points_cumulative[1] += result[1][1]
+                mcts_times = [mcts_times[i] + result[2][i] for i in range(5)]
+                alpha_eval_time += result[3]
 
-    else:
-        scores_round, points_cumulative, mcts_times, alpha_eval_time = test_agent(rounds_per_process, 0)
+        else:
+            scores_round, points_cumulative, mcts_times, alpha_eval_time = test_agent(rounds_per_process, 0)
 
-    if len(scores_round) != n_cores * rounds_per_process:
-        print(len(scores_round))
-        print(scores_round)
-        raise Exception("wrong length")
+        if len(scores_round) != n_cores * rounds_per_process:
+            print(len(scores_round))
+            print(scores_round)
+            raise Exception("wrong length")
 
-    alpha_eval_time /= total_rounds * 8 * 2
+        alpha_eval_time /= total_rounds * 8 * 2
 
-    print("Tijden: ", mcts_times)
-    print(points_cumulative)
-    print(
-        "score:",
-        round(np.mean(scores_round), 1),
-        "std_score:",
-        round(np.std(scores_round) / np.sqrt(len(scores_round)), 1),
-        cluster,
-        "eval_time(ms):",
-        round(alpha_eval_time * 1000, 1),
-        " PARAMETERS:",
-        "rounds:",
-        total_rounds,
-        "steps:",
-        mcts_steps,
-        "sims:",
-        number_of_simulations,
-        "nn_scaler:",
-        nn_scaler,
-        "ucb_c:",
-        ucb_c_value,
-        "model:",
-        model_name,
-    )
-    print("time:", round(time.time() - start_time, 1))
+        print("Tijden: ", mcts_times)
+        print(points_cumulative)
+        print(
+            "score:",
+            round(np.mean(scores_round), 1),
+            "std_score:",
+            round(np.std(scores_round) / np.sqrt(len(scores_round)), 1),
+            cluster,
+            "eval_time(ms):",
+            round(alpha_eval_time * 1000, 1),
+            " PARAMETERS:",
+            "rounds:",
+            total_rounds,
+            "steps:",
+            mcts_steps,
+            "sims:",
+            number_of_simulations,
+            "nn_scaler:",
+            nn_scaler,
+            "ucb_c:",
+            ucb_c_value,
+            "model:",
+            model_name,
+        )
+        print("time:", round(time.time() - start_time, 1))
 
 
 if __name__ == "__main__":
