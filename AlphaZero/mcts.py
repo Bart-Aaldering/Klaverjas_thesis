@@ -7,6 +7,7 @@ import numpy as np
 from AlphaZero.Klaverjas.card import Card
 from AlphaZero.Klaverjas.state import State
 
+
 class MCTS_Node:
     def __init__(self, parent: MCTS_Node = None, move: Card = None):
         self.children = set()
@@ -47,8 +48,9 @@ class MCTS_Node:
             ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
-    
-class MCTS():
+
+
+class MCTS:
     def __init__(self, params: dict, model):
         self.mcts_steps = params["mcts_steps"]
         self.n_of_sims = params["n_of_sims"]
@@ -56,7 +58,7 @@ class MCTS():
         self.nn_scaler = params["nn_scaler"]
         self.player_position = params["player_position"]
         self.model = model
-        
+
     def search(self, state: State):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
@@ -100,7 +102,7 @@ class MCTS():
                 moves.reverse()
                 for move in moves:
                     current_state.undo_move(move)
-                    
+
             # Average the score
             if self.n_of_sims > 0:
                 sim_score /= self.n_of_sims

@@ -121,8 +121,7 @@ ax2.set_ylabel("Average Score")
 ax2.legend()
 
 
-
-scores_no_sims = [-30.2,-13.7,-11.5,-8.1, -3.9, 1.3, 4.7, 6.0, 10.8, 16.3, 17.7, 19.8, 19.1, 20.1, 14.5, 16.8, 18.2]
+scores_no_sims = [-30.2, -13.7, -11.5, -8.1, -3.9, 1.3, 4.7, 6.0, 10.8, 16.3, 17.7, 19.8, 19.1, 20.1, 14.5, 16.8, 18.2]
 times_no_sims = [0, 4.2, 8.4, 12.6, 16.8, 21, 25.2, 29.4, 33.6, 37.8, 42, 46.2, 50.4, 54.6, 58.8, 63, 67.2]
 std_no_sims = 1.8
 
@@ -135,11 +134,23 @@ times_boosted = [0, 4.1, 8.2, 12.3, 16.4, 20.5]
 std_boosted = 1.8
 
 ax3.plot(times_no_sims, scores_no_sims, marker, label="RL without sims")
-ax3.fill_between(times_no_sims, np.array(scores_no_sims) - std_no_sims * 1.98, np.array(scores_no_sims) + std_no_sims * 1.98, alpha=0.2)
+ax3.fill_between(
+    times_no_sims,
+    np.array(scores_no_sims) - std_no_sims * 1.98,
+    np.array(scores_no_sims) + std_no_sims * 1.98,
+    alpha=0.2,
+)
 ax3.plot(times_sims, scores_sims, marker, label="RL with sims")
-ax3.fill_between(times_sims, np.array(scores_sims) - std_sims * 1.98, np.array(scores_sims) + std_sims * 1.98, alpha=0.2)
+ax3.fill_between(
+    times_sims, np.array(scores_sims) - std_sims * 1.98, np.array(scores_sims) + std_sims * 1.98, alpha=0.2
+)
 ax3.plot(times_boosted, scores_boosted, marker, label="RL boosted")
-ax3.fill_between(times_boosted, np.array(scores_boosted) - std_boosted * 1.98, np.array(scores_boosted) + std_boosted * 1.98, alpha=0.2)
+ax3.fill_between(
+    times_boosted,
+    np.array(scores_boosted) - std_boosted * 1.98,
+    np.array(scores_boosted) + std_boosted * 1.98,
+    alpha=0.2,
+)
 ax3.set_title("Progression of the average score while training")
 ax3.set_ylabel("Average Score")
 ax3.set_xlabel("Training time (hours)")

@@ -21,12 +21,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 
 
 class AlphaZero_play:
-    def __init__(
-        self,
-        player_position: int,
-        mcts_params: dict,
-        model
-    ):
+    def __init__(self, player_position: int, mcts_params: dict, model):
         self.player_position = player_position
         # self.mcts_steps = mcts_steps
         # self.n_of_sims = n_of_sims
@@ -54,7 +49,7 @@ class AlphaZero_play:
         return self.mcts(self.state)
 
 
-class AlphaZero_train():       
+class AlphaZero_train:
     def selfplay(self, mcts_params, model, num_rounds):
         X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
         y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
@@ -65,7 +60,9 @@ class AlphaZero_train():
         alpha_player_3 = AlphaZero_play(3, mcts_params, model)
 
         for round_num in range(num_rounds):
-            round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
+            round = Round(
+                random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3])
+            )
 
             alpha_player_0.new_round(round)
             alpha_player_1.new_round(round)
@@ -114,7 +111,7 @@ class AlphaZero_train():
 
         train_data = np.concatenate((X_train, y_train), axis=1)
         return train_data
-    
+
     def train_nn(self, train_data, model, batch_size, epochs, callbacks):
         X_train, X_test, y_train, y_test = train_test_split(
             train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
@@ -129,15 +126,15 @@ class AlphaZero_train():
             validation_data=(X_test, y_test),
             callbacks=callbacks,
         )
-        
+
     def train(self, budget, model_name, n_cores, step, selfplay_params, fit_params, max_memory):
         start_time = time.time()
         self_play_time = 0
         training_time = 0
-        
+
         # budget in seconds
         budget = budget * 3600
-        
+
         # self play parameters
         rounds_per_step = selfplay_params["rounds_per_step"]
         mcts_params = selfplay_params["mcts_params"]
@@ -150,11 +147,11 @@ class AlphaZero_train():
             memory = None
         else:
             memory = np.load(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy")
-        
+
         early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", verbose=1, restore_best_weights=True)
-        
+
         model = tf.keras.models.load_model(f"Data/Models/{model_name}/{model_name}_{step}.h5")
-        
+
         while time.time() - start_time < budget:
             step += 1
             # generate data
@@ -162,18 +159,14 @@ class AlphaZero_train():
             with get_context("spawn").Pool(processes=n_cores) as pool:
                 data = pool.starmap(
                     self.selfplay,
-                    [
-                        (mcts_params, model, rounds_per_step // n_cores)
-                        for _ in range(n_cores)
-                    ],
+                    [(mcts_params, model, rounds_per_step // n_cores) for _ in range(n_cores)],
                 )
             self_play_time += time.time() - tijd
 
             # concatenate data and save it
             data = np.concatenate(data, axis=0)
             np.save(f"Data/RL_data/{model_name}/{model_name}_{step}.npy", data)
-            
-            
+
             # add data to memory and remove old data if memory is full
             if memory is None:
                 memory = data
@@ -187,7 +180,7 @@ class AlphaZero_train():
             tijd = time.time()
             self.train_nn(train_data, model, batch_size, epochs, [early_stopping])
             training_time += time.time() - tijd
-            
+
             # save model
             model.save(f"Data/Models/{model_name}/{model_name}_{step}.h5")
 
