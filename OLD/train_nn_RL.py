@@ -7,27 +7,10 @@ import random
 from multiprocessing import Pool, get_context
 from sklearn.model_selection import train_test_split
 
-from AlphaZero.alphazero_depth_1 import AlphaZero_player
+from AlphaZero.alphazero import AlphaZero_play
 from Lennard.rounds import Round
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
-
-
-def create_simple_nn():
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Dense(268, activation="relu"),
-            tf.keras.layers.Dense(256, activation="relu"),
-            tf.keras.layers.Dense(256, activation="relu"),
-            tf.keras.layers.Dense(1, activation="linear"),
-        ]
-    )
-
-    # define how to train the model
-    model.compile(optimizer="adam", loss="mse")
-    model.build(input_shape=(1, 268))
-
-    return model
 
 
 def create_normal_nn():
@@ -49,16 +32,36 @@ def create_normal_nn():
     return model
 
 
+def create_large_nn():
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(512, activation="relu"),
+            tf.keras.layers.Dense(1024, activation="relu"),
+            tf.keras.layers.Dense(2048, activation="relu"),
+            tf.keras.layers.Dense(512, activation="relu"),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dense(16, activation="relu"),
+            tf.keras.layers.Dense(1, activation="linear"),
+        ]
+    )
+    # define how to train the model
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss="mse")
+    model.build(input_shape=(1, 268))
+
+    return model
+
+
 def generate_data_RL(
-    num_rounds: int, mcts_steps: int, number_of_simulations: int, nn_scaler: float, ucb_c_value: int, model_name: str
+    num_rounds: int, mcts_steps: int, n_of_sims: int, nn_scaler: float, ucb_c: int, model_name: str
 ):
     X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
     y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
 
-    alpha_player_0 = AlphaZero_player(0, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-    alpha_player_1 = AlphaZero_player(1, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-    alpha_player_2 = AlphaZero_player(2, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-    alpha_player_3 = AlphaZero_player(3, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+    alpha_player_0 = AlphaZero_play(0, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    alpha_player_1 = AlphaZero_play(1, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    alpha_player_2 = AlphaZero_play(2, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    alpha_player_3 = AlphaZero_play(3, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
 
     for round_num in range(num_rounds):
         round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
@@ -132,13 +135,13 @@ def train_nn():
     total_budget = budget_hours * 3600 + budget_minutes * 60
 
     # self play parameters
-    rounds_per_step = 1800
+    rounds_per_step = 600
     rounds_per_step = rounds_per_step // n_cores * n_cores
 
-    mcts_steps = 50
-    number_of_simulations = 0
-    nn_scaler = 1
-    ucb_c_value = 200
+    mcts_steps = 10
+    n_of_sims = 1
+    nn_scaler = 0.5
+    ucb_c = 200
 
     # training parameters
     epochs = 5
@@ -146,7 +149,7 @@ def train_nn():
 
     max_memory = rounds_per_step * 132 * 10
 
-    step = 66
+    step = 0
     self_play_time = 0
     training_time = 0
     replay_memory = None
@@ -170,12 +173,12 @@ def train_nn():
         "mcts steps",
         mcts_steps,
         "number of simulations",
-        number_of_simulations,
+        n_of_sims,
         "nn scaler",
         nn_scaler,
         "\n",
-        "ucb c value",
-        ucb_c_value,
+        "ucb_c",
+        ucb_c,
         "max memory",
         max_memory,
         "step",
@@ -190,7 +193,7 @@ def train_nn():
             data = pool.starmap(
                 generate_data_RL,
                 [
-                    (rounds_per_step // n_cores, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+                    (rounds_per_step // n_cores, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
                     for _ in range(n_cores)
                 ],
             )

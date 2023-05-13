@@ -1,191 +1,197 @@
 from __future__ import annotations  # To use the class name in the type hinting
 
+import os
 import numpy as np
 import random
 import copy
 import time
-import os
 import tensorflow as tf
 
-from typing import List
+# from typing import List
+from sklearn.model_selection import train_test_split
+from multiprocessing import Pool, get_context
 
 from Lennard.rounds import Round
-from AlphaZero.card import Card
-from AlphaZero.state import State
-from AlphaZero.helper import card_transform, card_untransform
+from AlphaZero.Klaverjas.card import Card
+from AlphaZero.Klaverjas.state import State
+from AlphaZero.mcts import MCTS
+
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 
 
-class Node:
-    def __init__(self, parent: Node = None, move: Card = None):
-        self.children = set()
-        self.children_moves = set()
-        self.parent = parent
-        self.move = move
-        self.score = 0
-        self.visits = 0
-
-    def __repr__(self) -> str:
-        return f"Node({self.move}, {self.parent.move}, {self.score}, {self.visits})"
-
-    def __eq__(self, other: Node) -> bool:
-        # raise NotImplementedError
-        return self.move == other.move
-
-    def __hash__(self) -> int:
-        # raise NotImplementedError
-        return hash(self.move)
-
-    def set_legal_moves(self, state: State):
-        self.legal_moves = state.legal_moves()
-
-    def expand(self):
-        for move in self.legal_moves - self.children_moves:
-            self.children.add(Node(self, move))
-            self.children_moves.add(move)
-
-    def select_child_random(self) -> Node:
-        return random.choice([child for child in self.children if child.move in self.legal_moves])
-
-    def select_child_ucb(self, c: int = 1) -> Node:
-        ucbs = []
-        legal_children = [child for child in self.children if child.move in self.legal_moves]
-        for child in legal_children:
-            if child.visits == 0:
-                return child
-            ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
-        index_max = np.argmax(np.array([ucbs]))
-        return legal_children[index_max]
-
-
-class AlphaZero_player:
+class AlphaZero_play:
     def __init__(
         self,
         player_position: int,
-        mcts_steps: int = 10,
-        number_of_simulations: int = 5,
-        nn_scaler: float = 0.23,
-        ucb_c_value: int = 1,
-        model_name: str = None,
+        mcts_params: dict,
+        model
     ):
         self.player_position = player_position
-        self.tijden = [0, 0, 0, 0, 0]
-        self.mcts_steps = mcts_steps
-        self.number_of_simulations = number_of_simulations
-        self.nn_scaler = nn_scaler
-        self.ucb_c_value = ucb_c_value
-        self.model_name = model_name
-        if model_name is not None:
-            self.policy_network = tf.keras.models.load_model(f"Data/Models/{model_name}")
+        # self.mcts_steps = mcts_steps
+        # self.n_of_sims = n_of_sims
+        # self.nn_scaler = nn_scaler
+        # self.ucb_c = ucb_c
+        self.model = model
+        self.mcts = MCTS(mcts_params, model)
 
     def new_round(self, round: Round):
         self.state = State(round, self.player_position)
 
-    def update_state(self, move: int, trump_suit: str):
-        move = Card(card_transform(move, ["k", "h", "r", "s"].index(trump_suit)))
-        self.state.do_move(move, simulation=False)
+    # def update_state(self, move: int, trump_suit: str):
+    #     move = Card(card_transform(move, ["k", "h", "r", "s"].index(trump_suit)))
+    #     self.state.do_move(move, simulation=False)
 
     def update_state2(self, move: Card):
         self.state.do_move(move, simulation=False)
 
-    def get_move(self, trump_suit: str):
-        move, score = self.mcts()
-        # self.store_move(move)
-        return card_untransform(move.id, ["k", "h", "r", "s"].index(trump_suit)), score
+    # def get_move(self, trump_suit: str):
+    #     move, score = self.mcts()
+    #     # self.store_move(move)
+    #     return card_untransform(move.id, ["k", "h", "r", "s"].index(trump_suit)), score
 
     def get_move2(self):
-        return self.mcts()
+        return self.mcts(self.state)
 
-    def store_move(self, move):
-        # Open a file with access mode 'a'
-        file_object = open("Code/Data/state_scores.txt", "a")
 
-        # Append 'hello' at the end of file
-        file_object.write(self.state.to_nparray().tostring() + " " + str(move.score / move.visits))
-        # Close the file
-        file_object.close()
+class AlphaZero_train():       
+    def selfplay(self, mcts_params, model, num_rounds):
+        X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
+        y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
 
-    def mcts(self):
-        current_state = copy.deepcopy(self.state)
-        current_node = Node()
+        alpha_player_0 = AlphaZero_play(0, mcts_params, model)
+        alpha_player_1 = AlphaZero_play(1, mcts_params, model)
+        alpha_player_2 = AlphaZero_play(2, mcts_params, model)
+        alpha_player_3 = AlphaZero_play(3, mcts_params, model)
 
-        # current_state.set_determinization2()
-        for _ in range(self.mcts_steps):
-            # tijd = time.time()
+        for round_num in range(num_rounds):
+            round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
 
-            # Determination
-            current_state.set_determinization()
+            alpha_player_0.new_round(round)
+            alpha_player_1.new_round(round)
+            alpha_player_2.new_round(round)
+            alpha_player_3.new_round(round)
 
-            # self.tijden[0] += time.time() - tijd
-            # tijd = time.time()
+            # generate a state and score and play a card
+            for trick in range(8):
+                for j in range(4):
+                    current_player = alpha_player_0.state.current_player
 
-            # Selection
-            current_node.set_legal_moves(current_state)
-            while (
-                not current_state.round_complete() and current_node.legal_moves - current_node.children_moves == set()
-            ):
-                current_node = current_node.select_child_ucb(self.ucb_c_value)
-                current_state.do_move(current_node.move)
-                current_node.set_legal_moves(current_state)
+                    if current_player == 0:
+                        played_card, score = alpha_player_0.get_move2()
+                    elif current_player == 1:
+                        played_card, score = alpha_player_1.get_move2()
+                        score = -score
+                    elif current_player == 2:
+                        played_card, score = alpha_player_2.get_move2()
+                    else:
+                        played_card, score = alpha_player_3.get_move2()
+                        score = -score
 
-            # self.tijden[1] += time.time() - tijd
-            # tijd = time.time()
+                    X_train[round_num * 132 + trick * 16 + j * 4] = alpha_player_0.state.to_nparray()
+                    X_train[round_num * 132 + trick * 16 + j * 4 + 1] = alpha_player_1.state.to_nparray()
+                    X_train[round_num * 132 + trick * 16 + j * 4 + 2] = alpha_player_2.state.to_nparray()
+                    X_train[round_num * 132 + trick * 16 + j * 4 + 3] = alpha_player_3.state.to_nparray()
+                    y_train[round_num * 132 + trick * 16 + j * 4] = score
+                    y_train[round_num * 132 + trick * 16 + j * 4 + 1] = -score
+                    y_train[round_num * 132 + trick * 16 + j * 4 + 2] = score
+                    y_train[round_num * 132 + trick * 16 + j * 4 + 3] = -score
 
-            # Expansion
-            if not current_state.round_complete():
-                current_node.expand()
-                current_node = current_node.select_child_random()
-                current_state.do_move(current_node.move)
+                    alpha_player_0.update_state2(played_card)
+                    alpha_player_1.update_state2(played_card)
+                    alpha_player_2.update_state2(played_card)
+                    alpha_player_3.update_state2(played_card)
 
-            # self.tijden[2] += time.time() - tijd
-            # tijd = time.time()
+            # generate state and score for end state
+            X_train[round_num * 132 + 128] = alpha_player_0.state.to_nparray()
+            X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
+            X_train[round_num * 132 + 128 + 2] = alpha_player_2.state.to_nparray()
+            X_train[round_num * 132 + 128 + 3] = alpha_player_3.state.to_nparray()
+            y_train[round_num * 132 + 128] = alpha_player_0.state.get_score(0)
+            y_train[round_num * 132 + 128 + 1] = alpha_player_1.state.get_score(1)
+            y_train[round_num * 132 + 128 + 2] = alpha_player_2.state.get_score(2)
+            y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
 
-            # Simulation
-            sim_score = 0
-            for _ in range(self.number_of_simulations):
-                moves = []
+        train_data = np.concatenate((X_train, y_train), axis=1)
+        return train_data
+    
+    def train_nn(self, train_data, model, batch_size, epochs, callbacks):
+        X_train, X_test, y_train, y_test = train_test_split(
+            train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
+        )
 
-                # Do random moves until round is complete
-                while not current_state.round_complete():
-                    move = random.choice(list(current_state.legal_moves()))
-                    moves.append(move)
-                    current_state.do_move(move)
+        model.fit(
+            X_train,
+            y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            verbose=2,
+            validation_data=(X_test, y_test),
+            callbacks=callbacks,
+        )
+        
+    def train(self, budget, model_name, n_cores, step, selfplay_params, fit_params, max_memory):
+        start_time = time.time()
+        self_play_time = 0
+        training_time = 0
+        
+        # budget in seconds
+        budget = budget * 3600
+        
+        # self play parameters
+        rounds_per_step = selfplay_params["rounds_per_step"]
+        mcts_params = selfplay_params["mcts_params"]
 
-                # Add score to points
-                sim_score += current_state.get_score(self.player_position)
+        # training parameters
+        epochs = fit_params["epochs"]
+        batch_size = fit_params["batch_size"]
 
-                # Undo moves
-                moves.reverse()
-                for move in moves:
-                    current_state.undo_move(move)
-            if self.number_of_simulations > 0:
-                sim_score /= self.number_of_simulations
+        if step == 0:
+            memory = None
+        else:
+            memory = np.load(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy")
+        
+        early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", verbose=1, restore_best_weights=True)
+        
+        model = tf.keras.models.load_model(f"Data/Models/{model_name}/{model_name}_{step}.h5")
+        
+        while time.time() - start_time < budget:
+            step += 1
+            # generate data
+            tijd = time.time()
+            with get_context("spawn").Pool(processes=n_cores) as pool:
+                data = pool.starmap(
+                    self.selfplay,
+                    [
+                        (mcts_params, model, rounds_per_step // n_cores)
+                        for _ in range(n_cores)
+                    ],
+                )
+            self_play_time += time.time() - tijd
 
-            if self.model_name is not None:
-                nn_score = int(self.policy_network(np.array([current_state.to_nparray()])))
+            # concatenate data and save it
+            data = np.concatenate(data, axis=0)
+            np.save(f"Data/RL_data/{model_name}/{model_name}_{step}.npy", data)
+            
+            
+            # add data to memory and remove old data if memory is full
+            if memory is None:
+                memory = data
             else:
-                nn_score = 0
+                memory = np.concatenate((memory, data), axis=0)
+            if len(memory) > max_memory:
+                memory = np.delete(memory, np.s_[0 : len(memory) - max_memory], axis=0)
 
-            # self.tijden[3] += time.time() - tijd
-            # tijd = time.time()
+            # select train data and train model
+            train_data = memory[np.random.choice(len(memory), rounds_per_step * 132, replace=False), :]
+            tijd = time.time()
+            self.train_nn(train_data, model, batch_size, epochs, [early_stopping])
+            training_time += time.time() - tijd
+            
+            # save model
+            model.save(f"Data/Models/{model_name}/{model_name}_{step}.h5")
 
-            # Backpropagation
-            while current_node.parent is not None:
-                current_node.visits += 1
-                current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
-                current_state.undo_move(current_node.move)
-                current_node = current_node.parent
-            current_node.visits += 1
-            current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
-
-            # self.tijden[4] += time.time() - tijd
-
-        best_score = -500
-        for child in current_node.children:
-            score = child.visits
-            if score > best_score:
-                best_score = score
-                best_child = child
-
-        return best_child.move, current_node.score / current_node.visits
+        np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
+        print(time.time() - start_time)
+        print(f"Self play time: {self_play_time}")
+        print(f"Training time: {training_time}")

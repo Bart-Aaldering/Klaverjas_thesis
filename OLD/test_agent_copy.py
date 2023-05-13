@@ -5,7 +5,7 @@ import numpy as np
 
 from multiprocessing import Pool
 
-from AlphaZero.alphazero import AlphaZero_player
+from AlphaZero.alphazero import AlphaZero_play
 from Lennard.rule_based_agent import Rule_player
 from Lennard.rounds import Round
 
@@ -14,9 +14,9 @@ def test_agent(
     num_rounds: int,
     process_id: int,
     mcts_steps: int,
-    number_of_simulations: int,
+    n_of_sims: int,
     nn_scaler: float,
-    ucb_c_value: int,
+    ucb_c: int,
     model_name: str,
 ):
     # random.seed(13)
@@ -33,8 +33,8 @@ def test_agent(
 
     rule_player = Rule_player()
 
-    alpha_player_0 = AlphaZero_player(0, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
-    alpha_player_2 = AlphaZero_player(2, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+    alpha_player_0 = AlphaZero_play(0, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    alpha_player_2 = AlphaZero_play(2, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
 
     for round_num in range(num_rounds * process_id, num_rounds * (process_id + 1)):
         if not process_id and round_num % 50 == 0:
@@ -113,14 +113,14 @@ def run_test_multiprocess():
 
     # hyperparameters
     mcts_steps = 200
-    number_of_simulations = 1
+    n_of_sims = 1
     nn_scaler = 0.5
-    ucb_c_value = 300
+    ucb_c = 300
     # model_name = None
     # model_name = "RL_nn_normal_30.h5", , "RL_nn_normal_45_no_CL.h5"
     for model_name in ["RL_nn_normal_1_no_CL.h5"]:
         # for i in range(1):
-        print(mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+        print(mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
 
         start_time = time.time()
         scores_round = []
@@ -132,7 +132,7 @@ def run_test_multiprocess():
                 results = pool.starmap(
                     test_agent,
                     [
-                        (rounds_per_process, i, mcts_steps, number_of_simulations, nn_scaler, ucb_c_value, model_name)
+                        (rounds_per_process, i, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
                         for i in range(n_cores)
                     ],
                 )
@@ -170,11 +170,11 @@ def run_test_multiprocess():
             "steps:",
             mcts_steps,
             "sims:",
-            number_of_simulations,
+            n_of_sims,
             "nn_scaler:",
             nn_scaler,
             "ucb_c:",
-            ucb_c_value,
+            ucb_c,
             "model:",
             model_name,
         )
