@@ -16,7 +16,7 @@ def main():
     budget = 0.1 # hours
     step = 0
     
-    rounds = 60
+    rounds = 10
     rounds = rounds // n_cores * n_cores # make sure rounds is divisible by n_cores
     mcts_steps = 10
     n_of_sims = 1
@@ -28,7 +28,10 @@ def main():
     
     # model_name = f"{mcts_steps}_{n_of_sims}_{nn_scaler}_{ucb_c}"
     model_name = "fast_test_1"
-    
+    try:
+        os.mkdir(f"Data/RL_data/{model_name}/")
+    except:
+        print("\n\n\n============model already exists============\n\n\n")
     model = create_normal_nn()
     model.save(f"Data/Models/{model_name}/{model_name}_0.h5")
     
@@ -73,7 +76,7 @@ def main():
         "batch_size": batch_size,
     }
     
-    AlphaZero_train().train(model, budget, selfplay_params, fit_params)
+    AlphaZero_train().train(budget, model_name, n_cores, step, selfplay_params, fit_params, max_memory)
 
 if __name__ == "__main__":
     main()

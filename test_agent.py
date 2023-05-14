@@ -6,18 +6,16 @@ import numpy as np
 from multiprocessing import Pool
 
 from AlphaZero.alphazero import AlphaZero_play
+from AlphaZero.Klaverjas.helper import card_transform, card_untransform
+from AlphaZero.Klaverjas.card import Card
 from Lennard.rule_based_agent import Rule_player
 from Lennard.rounds import Round
-
 
 def test_agent(
     num_rounds: int,
     process_id: int,
-    mcts_steps: int,
-    n_of_sims: int,
-    nn_scaler: float,
-    ucb_c: int,
-    model_name: str,
+    mcts_params: dict,
+    model
 ):
     # random.seed(13)
     alpha_eval_time = 0
@@ -33,8 +31,8 @@ def test_agent(
 
     rule_player = Rule_player()
 
-    alpha_player_0 = AlphaZero_play(0, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
-    alpha_player_2 = AlphaZero_play(2, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    alpha_player_0 = AlphaZero_play(0, mcts_params, model)
+    alpha_player_2 = AlphaZero_play(2, mcts_params, model)
 
     for round_num in range(num_rounds * process_id, num_rounds * (process_id + 1)):
         if not process_id and round_num % 50 == 0:
@@ -61,9 +59,11 @@ def test_agent(
                 else:
                     tijd = time.time()
                     if current_player == 0:
-                        played_card, _ = alpha_player_0.get_move(round.trump_suit)
+                        played_card, _ = alpha_player_0.get_move2()
+                        played_card = card_untransform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit))
                     else:
-                        played_card, _ = alpha_player_2.get_move(round.trump_suit)
+                        played_card, _ = alpha_player_2.get_move2()
+                        played_card = card_untransform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit))
                     alpha_eval_time += time.time() - tijd
                     moves = round.legal_moves()
 
@@ -80,8 +80,9 @@ def test_agent(
                     # played_card = random.choice(moves)
 
                 round.play_card(played_card)
-                alpha_player_0.update_state(played_card.id, round.trump_suit)
-                alpha_player_2.update_state(played_card.id, round.trump_suit)
+                move = Card(card_transform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit)))
+                alpha_player_0.update_state2(move)
+                alpha_player_2.update_state2(move)
 
         for i in range(5):
             mcts_times[i] += alpha_player_0.tijden[i]
@@ -114,15 +115,18 @@ def run_test_multiprocess():
     rounds_per_process = total_rounds // n_cores
 
     # hyperparameters
-    mcts_steps = 200
-    n_of_sims = 0
-    nn_scaler = 1
-    ucb_c = 300
-    # model_name = None
+    mcts_params = {
+        "mcts_steps": 200,
+        "n_of_sims": 1,
+        "nn_scaler": 0.23,
+        "ucb_c": 300,
+        }
+    
+    model = None
     # model_name = "RL_nn_normal_30.h5", "RL_nn_normal_1_no_CL.h5", "RL_nn_normal_45_no_CL.h5"
-    for model_name in ["RL_nn_normal_70.h5", "RL_nn_normal_75.h5", "RL_nn_normal_80.h5"]:
-        # for i in range(1):
-        print(mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+    # for model_name in ["RL_nn_normal_70.h5", "RL_nn_normal_75.h5", "RL_nn_normal_80.h5"]:
+    for i in range(1):
+        print(mcts_params, model)
 
         start_time = time.time()
         scores_round = []
@@ -134,7 +138,7 @@ def run_test_multiprocess():
                 results = pool.starmap(
                     test_agent,
                     [
-                        (rounds_per_process, i, mcts_steps, n_of_sims, nn_scaler, ucb_c, model_name)
+                        (rounds_per_process, i, mcts_params, model)
                         for i in range(n_cores)
                     ],
                 )
@@ -170,15 +174,15 @@ def run_test_multiprocess():
             "rounds:",
             total_rounds,
             "steps:",
-            mcts_steps,
+            mcts_params["mcts_steps"],
             "sims:",
-            n_of_sims,
+            mcts_params["n_of_sims"],
             "nn_scaler:",
-            nn_scaler,
+            mcts_params["nn_scaler"],
             "ucb_c:",
-            ucb_c,
+            mcts_params["ucb_c"],
             "model:",
-            model_name,
+            model,
         )
         print("time:", round(time.time() - start_time, 1))
 

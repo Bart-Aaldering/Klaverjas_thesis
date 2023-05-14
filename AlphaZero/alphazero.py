@@ -33,9 +33,14 @@ class AlphaZero_play:
         # self.nn_scaler = nn_scaler
         # self.ucb_c = ucb_c
         self.model = model
-        self.mcts = MCTS(mcts_params, model)
+        self.mcts = MCTS(mcts_params, model, player_position)
+        self.tijden = [0, 0, 0, 0, 0]
+        self.state = None
 
     def new_round(self, round: Round):
+        if self.state is not None:
+            for i in range(len(self.tijden)):
+                self.tijden[i] += self.state.tijden[i]
         self.state = State(round, self.player_position)
 
     # def update_state(self, move: int, trump_suit: str):
@@ -43,7 +48,7 @@ class AlphaZero_play:
     #     self.state.do_move(move, simulation=False)
 
     def update_state2(self, move: Card):
-        self.state.do_move(move, simulation=False)
+        self.state.do_move(move)
 
     # def get_move(self, trump_suit: str):
     #     move, score = self.mcts()
@@ -56,6 +61,8 @@ class AlphaZero_play:
 
 class AlphaZero_train():       
     def selfplay(self, mcts_params, model, num_rounds):
+        start_time = time.time()
+        tijden = [0,0]
         X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
         y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
 
@@ -65,6 +72,7 @@ class AlphaZero_train():
         alpha_player_3 = AlphaZero_play(3, mcts_params, model)
 
         for round_num in range(num_rounds):
+            print(round_num)
             round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
 
             alpha_player_0.new_round(round)
@@ -76,7 +84,7 @@ class AlphaZero_train():
             for trick in range(8):
                 for j in range(4):
                     current_player = alpha_player_0.state.current_player
-
+                    now = time.time()
                     if current_player == 0:
                         played_card, score = alpha_player_0.get_move2()
                     elif current_player == 1:
@@ -87,11 +95,13 @@ class AlphaZero_train():
                     else:
                         played_card, score = alpha_player_3.get_move2()
                         score = -score
-
+                    tijden[1] += time.time() - now
+                    now = time.time()
                     X_train[round_num * 132 + trick * 16 + j * 4] = alpha_player_0.state.to_nparray()
                     X_train[round_num * 132 + trick * 16 + j * 4 + 1] = alpha_player_1.state.to_nparray()
                     X_train[round_num * 132 + trick * 16 + j * 4 + 2] = alpha_player_2.state.to_nparray()
                     X_train[round_num * 132 + trick * 16 + j * 4 + 3] = alpha_player_3.state.to_nparray()
+                    tijden[0] += time.time() - now
                     y_train[round_num * 132 + trick * 16 + j * 4] = score
                     y_train[round_num * 132 + trick * 16 + j * 4 + 1] = -score
                     y_train[round_num * 132 + trick * 16 + j * 4 + 2] = score
@@ -102,17 +112,25 @@ class AlphaZero_train():
                     alpha_player_2.update_state2(played_card)
                     alpha_player_3.update_state2(played_card)
 
+            now = time.time()
             # generate state and score for end state
             X_train[round_num * 132 + 128] = alpha_player_0.state.to_nparray()
             X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
             X_train[round_num * 132 + 128 + 2] = alpha_player_2.state.to_nparray()
             X_train[round_num * 132 + 128 + 3] = alpha_player_3.state.to_nparray()
+            tijden[1] += time.time() - now
+            
             y_train[round_num * 132 + 128] = alpha_player_0.state.get_score(0)
             y_train[round_num * 132 + 128 + 1] = alpha_player_1.state.get_score(1)
             y_train[round_num * 132 + 128 + 2] = alpha_player_2.state.get_score(2)
             y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
 
         train_data = np.concatenate((X_train, y_train), axis=1)
+        print("To array time: ", tijden)
+        print("Self play time: ", time.time() - start_time)
+        print("MCTS time: ", np.array(alpha_player_0.mcts.tijden)/sum(alpha_player_0.mcts.tijden)*100)
+        print("Eval time", np.array(alpha_player_0.mcts.tijden2)/sum(alpha_player_0.mcts.tijden2)*100)
+        print("to_array", np.array(alpha_player_0.tijden)/sum(alpha_player_0.tijden)*100)
         return train_data
     
     def train_nn(self, train_data, model, batch_size, epochs, callbacks):
@@ -159,18 +177,19 @@ class AlphaZero_train():
             step += 1
             # generate data
             tijd = time.time()
-            with get_context("spawn").Pool(processes=n_cores) as pool:
-                data = pool.starmap(
-                    self.selfplay,
-                    [
-                        (mcts_params, model, rounds_per_step // n_cores)
-                        for _ in range(n_cores)
-                    ],
-                )
+            # with get_context("spawn").Pool(processes=n_cores) as pool:
+            #     data = pool.starmap(
+            #         self.selfplay,
+            #         [
+            #             (mcts_params, model, rounds_per_step // n_cores)
+            #             for _ in range(n_cores)
+            #         ],
+            #     )
+            data = self.selfplay(mcts_params, model, rounds_per_step)
             self_play_time += time.time() - tijd
 
             # concatenate data and save it
-            data = np.concatenate(data, axis=0)
+            # data = np.concatenate(data, axis=0)
             np.save(f"Data/RL_data/{model_name}/{model_name}_{step}.npy", data)
             
             

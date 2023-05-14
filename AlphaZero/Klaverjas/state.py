@@ -2,6 +2,7 @@ from __future__ import annotations  # To use the class name in the type hinting
 
 import random
 import copy
+import time
 import numpy as np
 
 from Lennard.rounds import Round
@@ -29,20 +30,22 @@ class State:
         # self.other_players_cards = set([Card(id) for id in not_own_hand_as_id])
         # other_players_cards = set([Card(id) for id in not_own_hand_as_id])
 
-        self.hands = [set() for i in range(4)]
+        self.hands = [set() for _ in range(4)]
         self.hands[own_position] = set([Card(id) for id in own_hand_as_id])
 
         self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
         self.possible_cards[own_position] = set([Card(id) for id in own_hand_as_id])
+        self.removed_cards = [set() for _ in range(4)]
 
         self.tricks = [Trick(self.current_player)]
 
-        self.has_lost = [0, 0]
+        self.pit_check = 0
         self.cards_left = [8, 8, 8, 8]
         self.final_score = [0, 0]
         # The current score of the round
         self.points = [0, 0]
         self.meld = [0, 0]
+        self.tijden = [0,0,0,0,0]
 
     def __eq__(self, other: State) -> bool:
         raise NotImplementedError
@@ -142,10 +145,12 @@ class State:
 
             return False
 
-    def update_possible_cards(self, played_card: Card):
+    def update_possible_cards(self, played_card: Card, reversable: bool):
 
         # remove played card from all players possible_cards
         for player in range(4):
+            if reversable and played_card in self.possible_cards[player]:
+                self.removed_cards[player] |= {played_card}
             self.possible_cards[player].discard(played_card)
 
         if self.current_player == self.own_position:
@@ -158,28 +163,34 @@ class State:
         if played_card.suit == 0:
             if (highest_trump_order := self.tricks[-1].highest_trump().order()) > played_card.order():
                 # remove all trump cards higher then the highest trump card from the current player
-                self.possible_cards[self.current_player] -= {
+                cards_to_remove = {
                     card
                     for card in self.possible_cards[self.current_player]
                     if card.id in [0, 1, 5, 6, 3, 7, 2, 4][highest_trump_order - 8 :]
                 }
+                if reversable:
+                    if cards_to_remove != cards_to_remove & self.possible_cards[self.current_player]:
+                        raise Exception("Klopt nie heh")
+                    self.removed_cards[self.current_player] |= cards_to_remove
+                self.possible_cards[self.current_player] -= cards_to_remove
 
         if played_card.suit != leading_suit:
             # remove all cards of the leading suit from the current player
-            self.possible_cards[self.current_player] -= {Card(leading_suit * 10 + i) for i in range(8)}
+            cards_to_remove = {Card(leading_suit * 10 + i) for i in range(8)}
+            if reversable:
+                self.removed_cards[self.current_player] |= cards_to_remove  & self.possible_cards[self.current_player]
+            self.possible_cards[self.current_player] -= cards_to_remove
 
             if played_card.suit != 0:
                 # remove all trumps from the current player
-                self.possible_cards[self.current_player] -= {
+                cards_to_remove = {
                     card for card in self.possible_cards[self.current_player] if card.id in {0, 1, 2, 3, 4, 5, 6, 7}
                 }
-
-        # for i in range(4):
-        #     real_hand_id = [card_transform(card.id, ['k', 'h', 'r', 's'].index(self.round.trump_suit))
-        #                     for card in self.round.player_hands[i]]
-        #     real_hand = set([Card(id) for id in real_hand_id])
-        #     if real_hand - self.possible_cards[i] != set():
-        #         raise Exception("Not all cards added")
+                if reversable:
+                    if cards_to_remove != cards_to_remove & self.possible_cards[self.current_player]:
+                        raise Exception("Klopt nie heh")
+                    self.removed_cards[self.current_player] |= cards_to_remove
+                self.possible_cards[self.current_player] -= cards_to_remove
 
     def legal_moves(self) -> set[Card]:
         hand = self.hands[self.current_player]
@@ -211,14 +222,19 @@ class State:
 
         return trump_higher or trump or hand
 
-    def do_move(self, card: Card, simulation: bool = True):
+    def do_move(self, card: Card, mode: str = "normal"):
         """Play a card and update the game state"""
-        if simulation:
-            self.hands[self.current_player].remove(card)
-        else:
-            self.update_possible_cards(card)
+        if mode == "normal":
+            self.update_possible_cards(card, False)
             if self.current_player == self.own_position:
                 self.hands[self.current_player].remove(card)
+        elif mode == "mcts_move":
+            self.update_possible_cards(card, True)
+            self.hands[self.current_player].remove(card)
+        elif mode == "simulation":
+            self.hands[self.current_player].remove(card)
+        else:
+            raise Exception("Invalid mode")
 
         self.tricks[-1].add_card(card)
 
@@ -229,7 +245,7 @@ class State:
             winner = self.tricks[-1].winner()
             team_winner = team(winner)
 
-            self.has_lost[1 - team_winner] += 1
+            self.pit_check += team_winner
 
             points = self.tricks[-1].points()
             meld = self.tricks[-1].meld()
@@ -244,10 +260,8 @@ class State:
                 defending_team = 1 - self.declaring_team
 
                 # Check if the round has "pit"
-                if not self.has_lost[0]:
-                    self.meld[0] += 100
-                elif not self.has_lost[1]:
-                    self.meld[1] += 100
+                if self.pit_check == self.declaring_team * 8:
+                    self.meld[self.declaring_team] += 100
 
                 # Check if the round has "nat"
                 if (
@@ -266,8 +280,8 @@ class State:
         else:
             self.current_player = (self.current_player + 1) % 4
 
-    def undo_move(self, card: Card):
-        """Undo the last move made in the game. Can only be used for simulations"""
+    def undo_move(self, card: Card, reverse_possible_cards: bool = False):
+        """Undo the last move made in the game. Can only be used for moves within mcts"""
         if self.tricks[-1].cards == [] or self.round_complete():
 
             if self.round_complete():
@@ -277,10 +291,8 @@ class State:
                 self.final_score[1] = 0
 
                 # Reverse the: Check if the round has "pit"
-                if not self.has_lost[0]:
-                    self.meld[0] -= 100
-                elif not self.has_lost[1]:
-                    self.meld[1] -= 100
+                if self.pit_check == self.declaring_team * 8:
+                    self.meld[self.declaring_team] -= 100
 
                 # Reverse the: Winner of last trick gets 10 points
                 self.points[team(self.tricks[-1].winner())] -= 10
@@ -296,7 +308,7 @@ class State:
             self.points[team_winner] -= points
             self.meld[team_winner] -= meld
 
-            self.has_lost[1 - team_winner] -= 1
+            self.pit_check -= team_winner
         else:
             self.current_player = (self.current_player + 3) % 4
 
@@ -306,6 +318,9 @@ class State:
 
         self.hands[self.current_player].add(card)
 
+        if reverse_possible_cards:
+            for i in range(4):
+                self.possible_cards[i] |= self.removed_cards[i]
     def to_nparray(self):
         """
         Convert the game state to a numpy array own position will become index 0
@@ -314,19 +329,33 @@ class State:
         """
         card_location = np.zeros((32, 8), dtype=np.float16)  # 32 cards, 8 possible locations by one of the 4
         # players in one of the 3 centre positions or already played
-
+        now = time.time()
         # Set the locations of the cards in the hands
         for index, cards in enumerate(self.possible_cards):
             for card in cards:
                 card_location[8 * (card.id // 10) + card.id % 10][(index + self.own_position) % 4] = 1
+        self.tijden[0] += time.time() - now
+        now = time.time()
+        
+        # FASTER METHOD (to be tested)
+        # a = card_location[:, :-1]
+        # card_location[:, :-1] = np.where(np.logical_and(a, np.sum(a, axis=1, keepdims=True) > 1), a/np.sum(a, axis=1, keepdims=True), a)
+        # self.tijden[1] += time.time() - now
+        # OLD METHOD
         for i in range(32):
+            now2 = time.time()
             row_sum = np.sum(card_location[i][:4])
+            self.tijden[2] += time.time() - now2
+            now2 = time.time()
             for j in range(4):
                 if card_location[i][(j + self.own_position) % 4] == 1:
                     card_location[i][(j + self.own_position) % 4] = 1 / row_sum
-
+            self.tijden[3] += time.time() - now2
+        self.tijden[1] += time.time() - now
+        
         # Set the locations of the cards in the centre
         for card in self.tricks[-1].cards:
+            # print("tricks", self.tricks[-1].cards)
             card_location[8 * (card.id // 10) + card.id % 10][
                 4 + (self.tricks[-1].cards.index(card) + self.own_position) % 4
             ] = 1
@@ -336,9 +365,10 @@ class State:
             for card in trick.cards:
                 card_location[8 * (card.id // 10) + card.id % 10][(7 + self.own_position) % 4] = 1
 
-        # if not (np.sum(card_location, axis=1)==1).all():
-        #     print(card_location)
-        #     raise ValueError("Some cards are not in the array")
+        if not (np.sum(card_location, axis=1)==1).all():
+            print(card_location)
+            print(np.sum(card_location, axis=1))
+            raise ValueError("Some cards are not in the array")
 
         array = np.zeros(12, dtype=np.float16)
 
