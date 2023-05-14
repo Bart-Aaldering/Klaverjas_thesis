@@ -8,6 +8,7 @@ import time
 from AlphaZero.Klaverjas.card import Card
 from AlphaZero.Klaverjas.state import State
 
+
 class MCTS_Node:
     def __init__(self, parent: MCTS_Node = None, move: Card = None):
         self.children = set()
