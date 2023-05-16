@@ -4,6 +4,7 @@ import os
 
 from AlphaZero.test_alphazero import run_test_multiprocess
 
+
 def main():
     try:
         n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
@@ -11,20 +12,22 @@ def main():
     except:
         n_cores = 10
         cluster = "local"
-    
+
     opponent = "rule"
-    num_rounds = 50
     multiprocessing = True
-    
+
+    num_rounds = 1000
+    num_rounds = num_rounds // n_cores * n_cores  # make sure rounds is divisible by n_cores
+
     mcts_params = {
-        "mcts_steps": 10,
-        "n_of_sims": 1,
-        "nn_scaler": 0,
+        "mcts_steps": 200,
+        "n_of_sims": 0,
+        "nn_scaler": 1,
         "ucb_c": 300,
     }
-    
-    model_paths = [None, None]
-    
+
+    model_paths = ["RL_nn_normal_90.h5", None]
+
     print(
         "cluster:",
         cluster,
@@ -35,13 +38,15 @@ def main():
         "mcts_params:",
         mcts_params,
         "model_paths:",
-        model_paths
+        model_paths,
     )
-    
-    scores_round, alpha_eval_time, _ = run_test_multiprocess(n_cores, opponent, num_rounds, mcts_params, model_paths, multiprocessing)
-    
-    mean_score = sum(scores_round)/len(scores_round)
-    
+
+    scores_round, alpha_eval_time, _ = run_test_multiprocess(
+        n_cores, opponent, num_rounds, mcts_params, model_paths, multiprocessing
+    )
+
+    mean_score = sum(scores_round) / len(scores_round)
+
     print(
         "score:",
         round(mean_score, 1),
@@ -50,6 +55,7 @@ def main():
         "eval_time(ms):",
         alpha_eval_time,
     )
+
 
 if __name__ == "__main__":
     start_time = time.time()

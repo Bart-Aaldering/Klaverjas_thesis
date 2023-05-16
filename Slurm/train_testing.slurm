@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=test_testing
+#SBATCH --job-name=train_testing
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=500M
+#SBATCH --mem-per-cpu=5G
 #SBATCH --time=01:00:00
 #SBATCH --partition=testing
 #SBATCH --nodes=1
@@ -15,5 +15,5 @@ echo "[$SHELL] ## This is $SLURM_JOB_USER on $HOSTNAME and this job has the ID $
 
 
 echo "[$SHELL] ## Run script"
-python3 run_test.py
+python3 run_train.py
 echo "[$SHELL] ## Script finished"
