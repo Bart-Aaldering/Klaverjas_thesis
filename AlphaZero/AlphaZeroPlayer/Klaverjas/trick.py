@@ -1,10 +1,9 @@
-from AlphaZero.Klaverjas.card import Card
-from AlphaZero.Klaverjas.helper import card_to_suit, card_to_value
+from AlphaZero.AlphaZeroPlayer.Klaverjas.card import Card
+from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_to_suit, card_to_value
 
 
 class Trick:
     """AlphaZero trick class"""
-
     def __init__(self, starting_player: int):
         self.cards = []
         self.starting_player = starting_player

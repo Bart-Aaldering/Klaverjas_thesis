@@ -2,21 +2,23 @@ import numpy as np
 import tensorflow as tf
 import os
 
-from AlphaZero.Klaverjas.state import State
-
-# gpus = tf.config.list_physical_devices('GPU')
-# if gpus:
-#   # Restrict TensorFlow to only use the first GPU
-#   try:
-#     tf.config.set_visible_devices(gpus[0], 'GPU')
-#     logical_gpus = tf.config.list_logical_devices('GPU')
-#     print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-#   except RuntimeError as e:
-#     # Visible devices must be set before GPUs have been initialized
-#     print(e)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+def create_simple_nn():
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(256, activation="relu"),
+            tf.keras.layers.Dense(32, activation="relu"),
+            tf.keras.layers.Dense(1, activation="linear"),
+        ]
+    )
+    # define how to train the model
+    model.compile(optimizer="adam", loss="mse")
+    model.build(input_shape=(1, 268))
+
+    return model
 
 def create_normal_nn():
     model = tf.keras.models.Sequential(

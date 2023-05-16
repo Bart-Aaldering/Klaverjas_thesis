@@ -5,8 +5,8 @@ import random
 import numpy as np
 import time
 
-from AlphaZero.Klaverjas.card import Card
-from AlphaZero.Klaverjas.state import State
+from AlphaZero.AlphaZeroPlayer.Klaverjas.card import Card
+from AlphaZero.AlphaZeroPlayer.Klaverjas.state import State
 
 
 class MCTS_Node:
@@ -37,7 +37,7 @@ class MCTS_Node:
             self.children.add(MCTS_Node(self, move))
             self.children_moves.add(move)
 
-    def select_child_ucb(self, c: int = 1) -> MCTS_Node:
+    def select_child_ucb(self, c: int) -> MCTS_Node:
         ucbs = []
         legal_children = [child for child in self.children if child.move in self.legal_moves]
         for child in legal_children:

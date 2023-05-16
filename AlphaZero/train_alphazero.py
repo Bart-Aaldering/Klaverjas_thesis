@@ -1,0 +1,167 @@
+from __future__ import annotations  # To use the class name in the type hinting
+
+import os
+import numpy as np
+import random
+import time
+import tensorflow as tf
+import wandb
+
+from sklearn.model_selection import train_test_split
+from multiprocessing import get_context
+
+from AlphaZero.AlphaZeroPlayer.alphazero_player import AlphaZero_player
+from AlphaZero.test_alphazero import run_test_multiprocess
+from Lennard.rounds import Round
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
+
+
+def selfplay(mcts_params, model_path, num_rounds):
+    model = tf.keras.models.load_model(f"Data/Models/{model_path}")
+
+    X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
+    y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
+
+    alpha_player_0 = AlphaZero_player(0, mcts_params, model)
+    alpha_player_1 = AlphaZero_player(1, mcts_params, model)
+    alpha_player_2 = AlphaZero_player(2, mcts_params, model)
+    alpha_player_3 = AlphaZero_player(3, mcts_params, model)
+
+    for round_num in range(num_rounds):
+        round = Round(
+            random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3])
+        )
+        alpha_player_0.new_round(round)
+        alpha_player_1.new_round(round)
+        alpha_player_2.new_round(round)
+        alpha_player_3.new_round(round)
+
+        # generate a state and score and play a card
+        for trick in range(8):
+            for j in range(4):
+                current_player = alpha_player_0.state.current_player
+
+                if current_player == 0:
+                    played_card, score = alpha_player_0.get_move()
+                elif current_player == 1:
+                    played_card, score = alpha_player_1.get_move()
+                    score = -score
+                elif current_player == 2:
+                    played_card, score = alpha_player_2.get_move()
+                else:
+                    played_card, score = alpha_player_3.get_move()
+                    score = -score
+
+                X_train[round_num * 132 + trick * 16 + j * 4] = alpha_player_0.state.to_nparray()
+                X_train[round_num * 132 + trick * 16 + j * 4 + 1] = alpha_player_1.state.to_nparray()
+                X_train[round_num * 132 + trick * 16 + j * 4 + 2] = alpha_player_2.state.to_nparray()
+                X_train[round_num * 132 + trick * 16 + j * 4 + 3] = alpha_player_3.state.to_nparray()
+                y_train[round_num * 132 + trick * 16 + j * 4] = score
+                y_train[round_num * 132 + trick * 16 + j * 4 + 1] = -score
+                y_train[round_num * 132 + trick * 16 + j * 4 + 2] = score
+                y_train[round_num * 132 + trick * 16 + j * 4 + 3] = -score
+
+                alpha_player_0.update_state(played_card)
+                alpha_player_1.update_state(played_card)
+                alpha_player_2.update_state(played_card)
+                alpha_player_3.update_state(played_card)
+
+        now = time.time()
+        # generate state and score for end state
+        X_train[round_num * 132 + 128] = alpha_player_0.state.to_nparray()
+        X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
+        X_train[round_num * 132 + 128 + 2] = alpha_player_2.state.to_nparray()
+        X_train[round_num * 132 + 128 + 3] = alpha_player_3.state.to_nparray()
+        
+        y_train[round_num * 132 + 128] = alpha_player_0.state.get_score(0)
+        y_train[round_num * 132 + 128 + 1] = alpha_player_1.state.get_score(1)
+        y_train[round_num * 132 + 128 + 2] = alpha_player_2.state.get_score(2)
+        y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
+
+    train_data = np.concatenate((X_train, y_train), axis=1)
+    return train_data
+
+def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
+    epochs = fit_params["epochs"]
+    batch_size = fit_params["batch_size"]
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
+    )
+
+    model.fit(
+        X_train,
+        y_train,
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=0,
+        validation_data=(X_test, y_test),
+        callbacks=callbacks,
+    )
+
+def train(budget, step, model_name, max_memory, multiprocessing, n_cores, rounds_per_step, mcts_params, fit_params, test_params):
+    start_time = time.time()
+    total_selfplay_time = 0
+    total_training_time = 0
+
+    # budget in seconds
+    budget = budget * 3600
+    test_rounds = test_params["test_rounds"]
+    test_frequency = test_params["test_frequency"]
+    test_mcts_params = test_params["mcts_params"]
+    
+    if step == 0:
+        memory = None
+    else:
+        memory = np.load(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy")
+
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", verbose=0, restore_best_weights=True)
+    model_path = f"{model_name}/{model_name}_{step}.h5"
+    
+    while time.time() - start_time < budget:
+        step += 1
+        # generate data
+        tijd = time.time()
+        if multiprocessing:
+            with get_context("spawn").Pool(processes=n_cores) as pool:
+                data = pool.starmap(
+                    selfplay,
+                    [(mcts_params, model_path, rounds_per_step // n_cores) for _ in range(n_cores)],
+                )
+            data = np.concatenate(data, axis=0)
+        else:
+            data = selfplay(mcts_params, model_path, rounds_per_step)
+        selfplay_time = time.time() - tijd
+
+        np.save(f"Data/RL_data/{model_name}/{model_name}_{step}.npy", data)
+        
+        # add data to memory and remove old data if memory is full
+        if memory is None:
+            memory = data
+        else:
+            memory = np.concatenate((memory, data), axis=0)
+        if len(memory) > max_memory:
+            memory = np.delete(memory, np.s_[0 : len(memory) - max_memory], axis=0)
+            
+        # select train data and train model
+        train_data = memory[np.random.choice(len(memory), rounds_per_step * 132, replace=False), :]
+        
+        # load train and save model
+        model = tf.keras.models.load_model(f"Data/Models/{model_path}")
+        tijd = time.time()
+        train_nn(train_data, model, fit_params, [early_stopping])
+        training_time = time.time() - tijd
+        model_path = f"{model_name}/{model_name}_{step}.h5"
+        model.save(f"Data/Models/{model_path}")
+
+        total_selfplay_time += selfplay_time
+        total_training_time += training_time
+        step_time = selfplay_time + training_time
+        
+        if step % test_frequency == 0:
+            scores_round, _, _ = run_test_multiprocess(n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing)
+            wandb.log({"Average Score": sum(scores_round)/len(scores_round),"Train Time": step*step_time})
+    np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
+    return time.time() - start_time, total_selfplay_time, total_training_time

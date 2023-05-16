@@ -1,14 +1,11 @@
 def card_to_suit(card: int) -> int:
     return card // 10
 
-
 def card_to_value(card: int) -> int:
     return card % 10
 
-
 def team(player: int) -> int:
     return player % 2
-
 
 def card_transform(card: int, trump_suit: int) -> int:
     "Makes cards of the trump suit to have suit 0 and cards with suit 0 have suit trump_suit"
@@ -19,7 +16,6 @@ def card_transform(card: int, trump_suit: int) -> int:
         return trump_suit * 10 + card_to_value(card)
     else:
         return card
-
 
 def card_untransform(card: int, trump_suit: int) -> int:
     "Makes cards of the trump suit to have suit trump_suit and cards with suit trump_suit have suit 0"

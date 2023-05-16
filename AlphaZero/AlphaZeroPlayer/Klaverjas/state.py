@@ -1,14 +1,13 @@
 from __future__ import annotations  # To use the class name in the type hinting
 
 import random
-import copy
 import time
 import numpy as np
 
 from Lennard.rounds import Round
-from AlphaZero.Klaverjas.trick import Trick
-from AlphaZero.Klaverjas.card import Card
-from AlphaZero.Klaverjas.helper import *
+from AlphaZero.AlphaZeroPlayer.Klaverjas.trick import Trick
+from AlphaZero.AlphaZeroPlayer.Klaverjas.card import Card
+from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_transform, team
 
 
 class State:
