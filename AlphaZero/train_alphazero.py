@@ -30,9 +30,7 @@ def selfplay(mcts_params, model_path, num_rounds):
     alpha_player_3 = AlphaZero_player(3, mcts_params, model)
 
     for round_num in range(num_rounds):
-        round = Round(
-            random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3])
-        )
+        round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
         alpha_player_0.new_round(round)
         alpha_player_1.new_round(round)
         alpha_player_2.new_round(round)
@@ -74,7 +72,7 @@ def selfplay(mcts_params, model_path, num_rounds):
         X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
         X_train[round_num * 132 + 128 + 2] = alpha_player_2.state.to_nparray()
         X_train[round_num * 132 + 128 + 3] = alpha_player_3.state.to_nparray()
-        
+
         y_train[round_num * 132 + 128] = alpha_player_0.state.get_score(0)
         y_train[round_num * 132 + 128 + 1] = alpha_player_1.state.get_score(1)
         y_train[round_num * 132 + 128 + 2] = alpha_player_2.state.get_score(2)
@@ -83,10 +81,11 @@ def selfplay(mcts_params, model_path, num_rounds):
     train_data = np.concatenate((X_train, y_train), axis=1)
     return train_data
 
+
 def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
     epochs = fit_params["epochs"]
     batch_size = fit_params["batch_size"]
-    
+
     X_train, X_test, y_train, y_test = train_test_split(
         train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
     )
@@ -101,25 +100,39 @@ def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
         callbacks=callbacks,
     )
 
-def train(budget, step, model_name, max_memory, multiprocessing, n_cores, rounds_per_step, mcts_params, fit_params, test_params):
+
+def train(
+    budget,
+    step,
+    model_name,
+    max_memory,
+    multiprocessing,
+    n_cores,
+    rounds_per_step,
+    mcts_params,
+    fit_params,
+    test_params,
+):
     start_time = time.time()
     total_selfplay_time = 0
     total_training_time = 0
+    total_testing_time = 0
 
     # budget in seconds
     budget = budget * 3600
     test_rounds = test_params["test_rounds"]
     test_frequency = test_params["test_frequency"]
     test_mcts_params = test_params["mcts_params"]
-    
+
     if step == 0:
         memory = None
     else:
         memory = np.load(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy")
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", verbose=0, restore_best_weights=True)
+    wandb.log({"Average Score": -35, "Train Time": 0})
     model_path = f"{model_name}/{model_name}_{step}.h5"
-    
+
     while time.time() - start_time < budget:
         step += 1
         # generate data
@@ -136,7 +149,7 @@ def train(budget, step, model_name, max_memory, multiprocessing, n_cores, rounds
         selfplay_time = time.time() - tijd
 
         np.save(f"Data/RL_data/{model_name}/{model_name}_{step}.npy", data)
-        
+
         # add data to memory and remove old data if memory is full
         if memory is None:
             memory = data
@@ -144,10 +157,10 @@ def train(budget, step, model_name, max_memory, multiprocessing, n_cores, rounds
             memory = np.concatenate((memory, data), axis=0)
         if len(memory) > max_memory:
             memory = np.delete(memory, np.s_[0 : len(memory) - max_memory], axis=0)
-            
+
         # select train data and train model
         train_data = memory[np.random.choice(len(memory), rounds_per_step * 132, replace=False), :]
-        
+
         # load train and save model
         model = tf.keras.models.load_model(f"Data/Models/{model_path}")
         tijd = time.time()
@@ -159,9 +172,13 @@ def train(budget, step, model_name, max_memory, multiprocessing, n_cores, rounds
         total_selfplay_time += selfplay_time
         total_training_time += training_time
         step_time = selfplay_time + training_time
-        
+
+        tijd = time.time()
         if step % test_frequency == 0:
-            scores_round, _, _ = run_test_multiprocess(n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing)
-            wandb.log({"Average Score": sum(scores_round)/len(scores_round),"Train Time": step*step_time})
+            scores_round, _, _ = run_test_multiprocess(
+                n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
+            )
+            wandb.log({"Average Score": sum(scores_round) / len(scores_round), "Train Time": step * step_time})
+        total_testing_time += time.time() - tijd
     np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
-    return time.time() - start_time, total_selfplay_time, total_training_time
+    return time.time() - start_time, total_selfplay_time, total_training_time, total_testing_time

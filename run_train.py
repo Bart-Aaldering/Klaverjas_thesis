@@ -14,12 +14,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    budget = 3.5  # hours
+    budget = 0.5  # hours
     starting_step = 0
     model_name = "simple_test_5"
     multiprocessing = True
 
-    rounds_per_step = 600
+    rounds_per_step = 60
     rounds_per_step = rounds_per_step // n_cores * n_cores  # make sure rounds is divisible by n_cores
     max_memory = rounds_per_step * 132 * 20
 
@@ -34,8 +34,8 @@ def main():
         "batch_size": 256,
     }
     test_params = {
-        "test_rounds": 1000,
-        "test_frequency": 10,
+        "test_rounds": 500,
+        "test_frequency": 1,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,
@@ -68,7 +68,7 @@ def main():
         model = create_simple_nn()
         model.save(f"Data/Models/{model_name}/{model_name}_0.h5")
 
-    total_time, selfplay_time, training_time = train(
+    total_time, selfplay_time, training_time, testing_time = train(
         budget,
         starting_step,
         model_name,
@@ -83,6 +83,7 @@ def main():
     print("total time:", total_time)
     print("selfplay time:", selfplay_time)
     print("training time:", training_time)
+    print("testing time:", testing_time)
 
 
 if __name__ == "__main__":
