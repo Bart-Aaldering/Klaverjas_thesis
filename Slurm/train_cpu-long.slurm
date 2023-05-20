@@ -2,7 +2,7 @@
 #SBATCH --job-name=train_cpu-long
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=5G
+#SBATCH --mem-per-cpu=2G
 #SBATCH --time=7-00:00:00
 #SBATCH --partition=cpu-long
 #SBATCH --nodes=1
@@ -15,5 +15,5 @@ echo "[$SHELL] ## This is $SLURM_JOB_USER on $HOSTNAME and this job has the ID $
 
 
 echo "[$SHELL] ## Run script"
-python3 run_train_multiple.py
+python3 run_train.py
 echo "[$SHELL] ## Script finished"

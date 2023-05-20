@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import os
+import math
 
 from AlphaZero.test_alphazero import run_test_multiprocess
 
@@ -16,8 +17,10 @@ def main():
     opponent = "rule"
     multiprocessing = True
 
-    num_rounds = 1000
-    num_rounds = num_rounds // n_cores * n_cores  # make sure rounds is divisible by n_cores
+    num_rounds = 1
+    num_rounds = (
+        math.ceil(num_rounds / n_cores) * n_cores
+    )  # make sure rounds is divisible by n_cores and not devide to 0
 
     mcts_params = {
         "mcts_steps": 200,

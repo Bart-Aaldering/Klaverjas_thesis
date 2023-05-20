@@ -5,7 +5,8 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-def create_simple_nn():
+
+def create_simple_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Dense(268, activation="relu"),
@@ -15,12 +16,13 @@ def create_simple_nn():
         ]
     )
     # define how to train the model
-    model.compile(optimizer="adam", loss="mse")
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
     model.build(input_shape=(1, 268))
 
     return model
 
-def create_normal_nn():
+
+def create_normal_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Dense(268, activation="relu"),
@@ -33,13 +35,13 @@ def create_normal_nn():
         ]
     )
     # define how to train the model
-    model.compile(optimizer="adam", loss="mse")
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
     model.build(input_shape=(1, 268))
 
     return model
 
 
-def create_large_nn():
+def create_large_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Dense(268, activation="relu"),
@@ -53,7 +55,7 @@ def create_large_nn():
         ]
     )
     # define how to train the model
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss="mse")
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
     model.build(input_shape=(1, 268))
 
     return model

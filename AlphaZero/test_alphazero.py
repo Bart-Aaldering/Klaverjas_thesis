@@ -36,10 +36,10 @@ def test_vs_alphazero_player(
 
     model1, model2 = None, None
     if model_paths[0] is not None:
-        model1 = tf.keras.models.load_model("Data/Models/" + model_paths[0]) 
+        model1 = tf.keras.models.load_model("Data/Models/" + model_paths[0])
     if model_paths[1] is not None:
         model2 = tf.keras.models.load_model("Data/Models/" + model_paths[1])
-    
+
     alpha_player_0 = AlphaZero_player(0, mcts_params, model1)
     alpha_player_1 = AlphaZero_player(1, mcts_params, model2)
     alpha_player_2 = AlphaZero_player(2, mcts_params, model1)
@@ -64,7 +64,7 @@ def test_vs_alphazero_player(
             for j in range(4):
 
                 current_player = alpha_player_0.state.current_player
-                
+
                 tijd = time.time()
                 if current_player == 0:
                     played_card, score = alpha_player_0.get_move()
@@ -90,7 +90,8 @@ def test_vs_alphazero_player(
         point_cumulative[0] += round.points[0] + round.meld[0]
         point_cumulative[1] += round.points[1] + round.meld[1]
 
-    return scores_alpha, point_cumulative, mcts_times, alpha_eval_time/4
+    return scores_alpha, point_cumulative, mcts_times, alpha_eval_time / 4
+
 
 def test_vs_rule_player(
     num_rounds: int,
@@ -109,9 +110,9 @@ def test_vs_rule_player(
         raise "too many rounds"
 
     rounds = pd.read_csv("Data/SL_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
-    
+
     rule_player = Rule_player()
-    
+
     model = None
     if model_paths[0] is not None:
         try:
@@ -119,7 +120,7 @@ def test_vs_rule_player(
         except:
             print("model not found")
             raise Exception("model not found")
-        
+
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
     alpha_player_2 = AlphaZero_player(2, mcts_params, model)
 
@@ -181,11 +182,15 @@ def test_vs_rule_player(
         point_cumulative[0] += round.points[0] + round.meld[0]
         point_cumulative[1] += round.points[1] + round.meld[1]
 
-    return scores_round, point_cumulative, mcts_times, alpha_eval_time/2
+    return scores_round, point_cumulative, mcts_times, alpha_eval_time / 2
 
-def run_test_multiprocess(n_cores: int, opponent: str, total_rounds: int, mcts_params: dict, model_paths: List[str], multiprocessing: bool):
+
+def run_test_multiprocess(
+    n_cores: int, opponent: str, total_rounds: int, mcts_params: dict, model_paths: List[str], multiprocessing: bool
+):
     rounds_per_process = total_rounds // n_cores
-
+    if rounds_per_process == 0:
+        raise Exception("too few rounds to test")
     if opponent == "rule":
         test_function = test_vs_rule_player
     elif opponent == "alphazero":
@@ -198,13 +203,10 @@ def run_test_multiprocess(n_cores: int, opponent: str, total_rounds: int, mcts_p
     mcts_times = [0, 0, 0, 0, 0]
     alpha_eval_time = 0
     if multiprocessing:
-        with Pool(processes=n_cores) as pool:
+        with get_context("spawn").Pool(processes=n_cores) as pool:
             results = pool.starmap(
                 test_function,
-                [
-                    (rounds_per_process, i, mcts_params, model_paths)
-                    for i in range(n_cores)
-                ],
+                [(rounds_per_process, i, mcts_params, model_paths) for i in range(n_cores)],
             )
         for result in results:
             scores_round += result[0]
@@ -212,15 +214,17 @@ def run_test_multiprocess(n_cores: int, opponent: str, total_rounds: int, mcts_p
             points_cumulative[1] += result[1][1]
             mcts_times = [mcts_times[i] + result[2][i] for i in range(len(mcts_times))]
             alpha_eval_time += result[3]
-            
+
         if len(scores_round) != n_cores * rounds_per_process:
             print(len(scores_round))
             print(scores_round)
             raise Exception("wrong length")
     else:
-        scores_round, points_cumulative, mcts_times, alpha_eval_time = test_function(rounds_per_process, 0, mcts_params, model_paths)
+        scores_round, points_cumulative, mcts_times, alpha_eval_time = test_function(
+            rounds_per_process, 0, mcts_params, model_paths
+        )
 
     alpha_eval_time /= total_rounds * 8
-    alpha_eval_time = round(alpha_eval_time*1000, 1) # convert to ms and round to 1 decimal
+    alpha_eval_time = round(alpha_eval_time * 1000, 1)  # convert to ms and round to 1 decimal
     temp = None
     return scores_round, alpha_eval_time, temp

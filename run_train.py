@@ -1,71 +1,69 @@
 import os
 import wandb
+import math
+import time
+import copy
 
 from AlphaZero.train_alphazero import train
-from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn
+from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn, create_large_nn
 
 
-def main():
-    try:
-        n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
-        cluster = "cluster"
-    except:
-        n_cores = 10
-        cluster = "local"
-    print(f"Using {n_cores} cores on {cluster}")
+def run_train(
+    run_settings,
+    model_params,
+    selfplay_params,
+    fit_params,
+    test_params,
+):
+    budget = run_settings["budget"]
+    n_cores = run_settings["n_cores"]
+    starting_step = run_settings["starting_step"]
+    model_name = run_settings["model_name"]
+    multiprocessing = run_settings["multiprocessing"]
+    learning_rate = model_params["learning_rate"]
+    rounds_per_step = selfplay_params["rounds_per_step"]
+    mcts_params = selfplay_params["mcts_params"]
+    max_memory_multiplier = selfplay_params["max_memory_multiplier"]
 
-    budget = 0.5  # hours
-    starting_step = 0
-    model_name = "simple_test_5"
-    multiprocessing = True
+    test_params["test_rounds"] = (
+        math.ceil(test_params["test_rounds"] / n_cores) * n_cores
+    )  # make sure rounds is divisible by n_cores and not devide to 0
+    rounds_per_step = (
+        math.ceil(rounds_per_step / n_cores) * n_cores
+    )  # make sure rounds is divisible by n_cores and not devide to 0
+    max_memory = rounds_per_step * 132 * max_memory_multiplier
 
-    rounds_per_step = 60
-    rounds_per_step = rounds_per_step // n_cores * n_cores  # make sure rounds is divisible by n_cores
-    max_memory = rounds_per_step * 132 * 20
-
-    mcts_params = {
-        "mcts_steps": 10,
-        "n_of_sims": 1,
-        "nn_scaler": 0.1,
-        "ucb_c": 50,
-    }
-    fit_params = {
-        "epochs": 5,
-        "batch_size": 256,
-    }
-    test_params = {
-        "test_rounds": 500,
-        "test_frequency": 1,
-        "mcts_params": {
-            "mcts_steps": 10,
-            "n_of_sims": 0,
-            "nn_scaler": 1,
-            "ucb_c": 50,
-        },
-    }
     wandb.init(
         # set the wandb project where this run will be logged
-        project="Thesis_test6",
+        project=run_settings["project_name"],
         # track hyperparameters and run metadata
         config={
-            "budget": budget,
-            "starting_step": starting_step,
-            "model_name": model_name,
-            "multiprocessing": multiprocessing,
-            "n_cores": n_cores,
-            "max_memory": max_memory,
-            "mcts_params": mcts_params,
+            "run_settings": run_settings,
+            "selfplay_params": selfplay_params,
             "fit_params": fit_params,
             "test_params": test_params,
         },
     )
+    print("starting training")
+    print("run settings:", run_settings)
+    print("selfplay params:", selfplay_params)
+    print("fit params:", fit_params)
+    print("test params:", test_params)
 
     if starting_step == 0:
         try:
             os.mkdir(f"Data/RL_data/{model_name}/")
         except:
             print("\n\n\n============model already exists============\n\n\n")
-        model = create_simple_nn()
+        if model_params["model_type"] == "simple":
+            model = create_simple_nn(learning_rate)
+        elif model_params["model_type"] == "normal":
+            model = create_normal_nn(learning_rate)
+        elif model_params["model_type"] == "large":
+            model = create_large_nn(learning_rate)
+        else:
+            raise Exception("model type not recognized")
+
         model.save(f"Data/Models/{model_name}/{model_name}_0.h5")
 
     total_time, selfplay_time, training_time, testing_time = train(
@@ -84,7 +82,129 @@ def main():
     print("selfplay time:", selfplay_time)
     print("training time:", training_time)
     print("testing time:", testing_time)
+    wandb.finish()
+
+
+def main():
+    try:
+        n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
+        cluster = "cluster"
+    except:
+        n_cores = 10
+        cluster = "local"
+    print(f"Using {n_cores} cores on {cluster}")
+
+    model_name = "test_multiple"
+    run_settings = {
+        "project_name": "Thesis_test8",
+        "model_name": model_name,
+        "starting_step": 0,
+        "budget": 2,  # hours
+        "multiprocessing": True,
+        "n_cores": n_cores,
+    }
+    model_params = {
+        "model_type": "simple",
+        "learning_rate": 0.001,
+    }
+    selfplay_params = {
+        "rounds_per_step": 300,  # amount of selfplay rounds per step
+        "max_memory_multiplier": 10,  # how many times rounds_per_step * 132 can fit in memory
+        "mcts_params": {
+            "mcts_steps": 10,
+            "n_of_sims": 1,
+            "nn_scaler": 0.1,
+            "ucb_c": 50,
+        },
+    }
+    fit_params = {
+        "epochs": 5,
+        "batch_size": 256,
+    }
+    test_params = {
+        "test_rounds": 1000,
+        "test_frequency": 5,
+        "mcts_params": {
+            "mcts_steps": 10,
+            "n_of_sims": 0,
+            "nn_scaler": 1,
+            "ucb_c": 50,
+        },
+    }
+
+    for rounds_per_step in [60, 600, 1500]:
+        selfplay_params2 = copy.deepcopy(selfplay_params)
+        selfplay_params2["rounds_per_step"] = rounds_per_step
+        run_settings["model_name"] = model_name + "1" + str(rounds_per_step)
+        run_train(
+            run_settings,
+            model_params,
+            selfplay_params2,
+            fit_params,
+            test_params,
+        )
+
+    for batch_size in [32, 2048]:
+        fit_params2 = copy.deepcopy(fit_params)
+        fit_params2["batch_size"] = batch_size
+        run_settings["model_name"] = model_name + "2" + str(batch_size)
+        run_train(
+            run_settings,
+            model_params,
+            selfplay_params,
+            fit_params2,
+            test_params,
+        )
+
+    for epochs in [1, 10]:
+        fit_params2 = copy.deepcopy(fit_params)
+        fit_params2["epochs"] = epochs
+        run_settings["model_name"] = model_name + "3" + str(epochs)
+        run_train(
+            run_settings,
+            model_params,
+            selfplay_params,
+            fit_params2,
+            test_params,
+        )
+
+    for max_memory_multiplier in [5, 20]:
+        selfplay_params2 = copy.deepcopy(selfplay_params)
+        selfplay_params2["max_memory_multiplier"] = max_memory_multiplier
+        run_settings["model_name"] = model_name + "4" + str(max_memory_multiplier)
+        run_train(
+            run_settings,
+            model_params,
+            selfplay_params2,
+            fit_params,
+            test_params,
+        )
+
+    for learning_rate in [0.0001, 0.01]:
+        model_params2 = copy.deepcopy(model_params)
+        model_params2["learning_rate"] = learning_rate
+        run_settings["model_name"] = model_name + "5" + str(learning_rate)
+        run_train(
+            run_settings,
+            model_params2,
+            selfplay_params,
+            fit_params,
+            test_params,
+        )
+    for model_type in ["normal", "large"]:
+        model_params2 = copy.deepcopy(model_params)
+        model_params2["model_type"] = model_type
+        run_settings["model_name"] = model_name + "6" + str(model_type)
+        run_train(
+            run_settings,
+            model_params2,
+            selfplay_params,
+            fit_params,
+            test_params,
+        )
 
 
 if __name__ == "__main__":
+    starting_time = time.time()
     main()
+    print("total run time:", time.time() - starting_time)

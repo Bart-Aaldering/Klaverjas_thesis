@@ -66,7 +66,6 @@ def selfplay(mcts_params, model_path, num_rounds):
                 alpha_player_2.update_state(played_card)
                 alpha_player_3.update_state(played_card)
 
-        now = time.time()
         # generate state and score for end state
         X_train[round_num * 132 + 128] = alpha_player_0.state.to_nparray()
         X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
@@ -178,7 +177,11 @@ def train(
             scores_round, _, _ = run_test_multiprocess(
                 n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
             )
-            wandb.log({"Average Score": sum(scores_round) / len(scores_round), "Train Time": step * step_time})
+            try:
+                wandb.log({"Average Score": sum(scores_round) / len(scores_round), "Train Time": step * step_time})
+            except:
+                print("WTF")
+                raise Exception("WTF")
         total_testing_time += time.time() - tijd
     np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
     return time.time() - start_time, total_selfplay_time, total_training_time, total_testing_time

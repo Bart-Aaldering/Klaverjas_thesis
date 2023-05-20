@@ -2,7 +2,7 @@
 #SBATCH --job-name=train_cpu-short
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
-#SBATCH --mem-per-cpu=5G
+#SBATCH --mem-per-cpu=2G
 #SBATCH --time=04:00:00
 #SBATCH --partition=cpu-short
 #SBATCH --nodes=1
