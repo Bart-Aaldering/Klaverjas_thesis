@@ -36,6 +36,8 @@ def run_train(
     wandb.init(
         # set the wandb project where this run will be logged
         project=run_settings["project_name"],
+        # name of the run
+        name=model_name,
         # track hyperparameters and run metadata
         config={
             "run_settings": run_settings,
@@ -94,9 +96,9 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "test_multiple"
+    model_name = "test_multiple_fixed"
     run_settings = {
-        "project_name": "Thesis_test8",
+        "project_name": "Thesis_test9",
         "model_name": model_name,
         "starting_step": 0,
         "budget": 2,  # hours
@@ -104,11 +106,11 @@ def main():
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "simple",
+        "model_type": "large",
         "learning_rate": 0.001,
     }
     selfplay_params = {
-        "rounds_per_step": 300,  # amount of selfplay rounds per step
+        "rounds_per_step": 100,  # amount of selfplay rounds per step
         "max_memory_multiplier": 10,  # how many times rounds_per_step * 132 can fit in memory
         "mcts_params": {
             "mcts_steps": 10,
@@ -122,7 +124,7 @@ def main():
         "batch_size": 256,
     }
     test_params = {
-        "test_rounds": 1000,
+        "test_rounds": 500,
         "test_frequency": 5,
         "mcts_params": {
             "mcts_steps": 10,
@@ -131,77 +133,84 @@ def main():
             "ucb_c": 50,
         },
     }
+    run_train(
+        run_settings,
+        model_params,
+        selfplay_params,
+        fit_params,
+        test_params,
+    )
+    
+    # for rounds_per_step in [60, 600, 1500]:
+    #     selfplay_params2 = copy.deepcopy(selfplay_params)
+    #     selfplay_params2["rounds_per_step"] = rounds_per_step
+    #     run_settings["model_name"] = model_name + "1" + str(rounds_per_step)
+    #     run_train(
+    #         run_settings,
+    #         model_params,
+    #         selfplay_params2,
+    #         fit_params,
+    #         test_params,
+    #     )
 
-    for rounds_per_step in [60, 600, 1500]:
-        selfplay_params2 = copy.deepcopy(selfplay_params)
-        selfplay_params2["rounds_per_step"] = rounds_per_step
-        run_settings["model_name"] = model_name + "1" + str(rounds_per_step)
-        run_train(
-            run_settings,
-            model_params,
-            selfplay_params2,
-            fit_params,
-            test_params,
-        )
+    # for batch_size in [32, 2048]:
+    #     fit_params2 = copy.deepcopy(fit_params)
+    #     fit_params2["batch_size"] = batch_size
+    #     run_settings["model_name"] = model_name + "2" + str(batch_size)
+    #     run_train(
+    #         run_settings,
+    #         model_params,
+    #         selfplay_params,
+    #         fit_params2,
+    #         test_params,
+    #     )
 
-    for batch_size in [32, 2048]:
-        fit_params2 = copy.deepcopy(fit_params)
-        fit_params2["batch_size"] = batch_size
-        run_settings["model_name"] = model_name + "2" + str(batch_size)
-        run_train(
-            run_settings,
-            model_params,
-            selfplay_params,
-            fit_params2,
-            test_params,
-        )
+    # for epochs in [1, 10]:
+    #     fit_params2 = copy.deepcopy(fit_params)
+    #     fit_params2["epochs"] = epochs
+    #     run_settings["model_name"] = model_name + "3" + str(epochs)
+    #     run_train(
+    #         run_settings,
+    #         model_params,
+    #         selfplay_params,
+    #         fit_params2,
+    #         test_params,
+    #     )
 
-    for epochs in [1, 10]:
-        fit_params2 = copy.deepcopy(fit_params)
-        fit_params2["epochs"] = epochs
-        run_settings["model_name"] = model_name + "3" + str(epochs)
-        run_train(
-            run_settings,
-            model_params,
-            selfplay_params,
-            fit_params2,
-            test_params,
-        )
+    # for max_memory_multiplier in [5, 20]:
+    #     selfplay_params2 = copy.deepcopy(selfplay_params)
+    #     selfplay_params2["max_memory_multiplier"] = max_memory_multiplier
+    #     run_settings["model_name"] = model_name + "4" + str(max_memory_multiplier)
+    #     run_train(
+    #         run_settings,
+    #         model_params,
+    #         selfplay_params2,
+    #         fit_params,
+    #         test_params,
+    #     )
 
-    for max_memory_multiplier in [5, 20]:
-        selfplay_params2 = copy.deepcopy(selfplay_params)
-        selfplay_params2["max_memory_multiplier"] = max_memory_multiplier
-        run_settings["model_name"] = model_name + "4" + str(max_memory_multiplier)
-        run_train(
-            run_settings,
-            model_params,
-            selfplay_params2,
-            fit_params,
-            test_params,
-        )
-
-    for learning_rate in [0.0001, 0.01]:
-        model_params2 = copy.deepcopy(model_params)
-        model_params2["learning_rate"] = learning_rate
-        run_settings["model_name"] = model_name + "5" + str(learning_rate)
-        run_train(
-            run_settings,
-            model_params2,
-            selfplay_params,
-            fit_params,
-            test_params,
-        )
-    for model_type in ["normal", "large"]:
-        model_params2 = copy.deepcopy(model_params)
-        model_params2["model_type"] = model_type
-        run_settings["model_name"] = model_name + "6" + str(model_type)
-        run_train(
-            run_settings,
-            model_params2,
-            selfplay_params,
-            fit_params,
-            test_params,
-        )
+    # for learning_rate in [0.0001, 0.01]:
+    #     model_params2 = copy.deepcopy(model_params)
+    #     model_params2["learning_rate"] = learning_rate
+    #     run_settings["model_name"] = model_name + "5" + str(learning_rate)
+    #     run_train(
+    #         run_settings,
+    #         model_params2,
+    #         selfplay_params,
+    #         fit_params,
+    #         test_params,
+    #     )
+    # for model_type in ["normal", "large"]:
+    #     model_params2 = copy.deepcopy(model_params)
+    #     model_params2["model_type"] = model_type
+    #     run_settings["model_name"] = model_name + "6" + str(model_type)
+    #     run_train(
+    #         run_settings,
+    #         model_params2,
+    #         selfplay_params,
+    #         fit_params,
+    #         test_params,
+    #     )
 
 
 if __name__ == "__main__":

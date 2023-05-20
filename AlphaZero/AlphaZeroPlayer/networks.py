@@ -9,7 +9,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 def create_simple_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(299, activation="relu"),
             tf.keras.layers.Dense(256, activation="relu"),
             tf.keras.layers.Dense(32, activation="relu"),
             tf.keras.layers.Dense(1, activation="linear"),
@@ -17,7 +17,7 @@ def create_simple_nn(learning_rate):
     )
     # define how to train the model
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
-    model.build(input_shape=(1, 268))
+    model.build(input_shape=(1, 299))
 
     return model
 
@@ -25,7 +25,7 @@ def create_simple_nn(learning_rate):
 def create_normal_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(299, activation="relu"),
             tf.keras.layers.Dense(512, activation="relu"),
             tf.keras.layers.Dense(512, activation="relu"),
             tf.keras.layers.Dense(512, activation="relu"),
@@ -36,7 +36,7 @@ def create_normal_nn(learning_rate):
     )
     # define how to train the model
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
-    model.build(input_shape=(1, 268))
+    model.build(input_shape=(1, 299))
 
     return model
 
@@ -44,7 +44,7 @@ def create_normal_nn(learning_rate):
 def create_large_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Dense(268, activation="relu"),
+            tf.keras.layers.Dense(299, activation="relu"),
             tf.keras.layers.Dense(512, activation="relu"),
             tf.keras.layers.Dense(1024, activation="relu"),
             tf.keras.layers.Dense(2048, activation="relu"),
@@ -56,7 +56,7 @@ def create_large_nn(learning_rate):
     )
     # define how to train the model
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
-    model.build(input_shape=(1, 268))
+    model.build(input_shape=(1, 299))
 
     return model
 
@@ -70,7 +70,7 @@ class Value_network:
             print("Creating model")
             self.model = tf.keras.models.Sequential(
                 [
-                    tf.keras.layers.Dense(268, activation="relu"),
+                    tf.keras.layers.Dense(299, activation="relu"),
                     tf.keras.layers.Dense(256, activation="relu"),
                     tf.keras.layers.Dense(256, activation="relu"),
                     tf.keras.layers.Dense(1, activation="linear"),
@@ -79,7 +79,7 @@ class Value_network:
 
             # define how to train the model
             self.model.compile(optimizer="adam", loss="mse")
-            self.model.build(input_shape=(1, 268))
+            self.model.build(input_shape=(1, 299))
 
     def __call__(self, game_state):
         return self.model(game_state)
@@ -103,7 +103,7 @@ class Value_resnet50v2:
             self.model = tf.keras.models.load_model("Data/value_resnet50v2.h5")
         except:
             print("Creating model")
-            self.model = tf.keras.applications.ResNet50V2(weights=None, input_shape=268)
+            self.model = tf.keras.applications.ResNet50V2(weights=None, input_shape=299)
 
 
 class Value_random_forest:
@@ -116,8 +116,8 @@ class Value_random_forest:
         from sklearn.metrics import accuracy_score
 
         data = np.load("Data/train_data.npy")
-        X = data[:, :268]
-        y = data[:, 268]
+        X = data[:, :299]
+        y = data[:, 299]
 
         # Split the dataset into training and testing sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

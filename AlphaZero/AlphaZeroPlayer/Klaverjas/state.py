@@ -320,78 +320,72 @@ class State:
         if reverse_possible_cards:
             for i in range(4):
                 self.possible_cards[i] |= self.removed_cards[i]
+                
     def to_nparray(self):
         """
         Convert the game state to a numpy array own position will become index 0
-        first 32x8 array: 32 cards, 8 possible locations by one of the 4 players in one of the 3 centre positions or already played
-        second 12 array: starting player 4, amount of centre cards 1 , current player 4, declaring 1, points 2
+        first 32x9 array: 32 cards, 9 possible locations by one of the 4 players in one of the 4 centre positions or already played
+        second 11 array: starting player 4, current player 4, declaring 1, points 2
         """
-        card_location = np.zeros((32, 8), dtype=np.float16)  # 32 cards, 8 possible locations by one of the 4
+        card_location = np.zeros((32, 9), dtype=np.float16)  # 32 cards, 8 possible locations by one of the 4
         # players in one of the 3 centre positions or already played
         now = time.time()
         # Set the locations of the cards in the hands
         for index, cards in enumerate(self.possible_cards):
             for card in cards:
-                card_location[8 * (card.id // 10) + card.id % 10][(index + self.own_position) % 4] = 1
+                card_location[8 * (card.id // 10) + card.id % 10][(index - self.own_position) % 4] = 1
         self.tijden[0] += time.time() - now
+
         now = time.time()
-        
-        # FASTER METHOD (to be tested)
-        # a = card_location[:, :-1]
-        # card_location[:, :-1] = np.where(np.logical_and(a, np.sum(a, axis=1, keepdims=True) > 1), a/np.sum(a, axis=1, keepdims=True), a)
-        # self.tijden[1] += time.time() - now
-        # OLD METHOD
-        for i in range(32):
-            now2 = time.time()
-            row_sum = np.sum(card_location[i][:4])
-            self.tijden[2] += time.time() - now2
-            now2 = time.time()
-            for j in range(4):
-                if card_location[i][(j + self.own_position) % 4] == 1:
-                    card_location[i][(j + self.own_position) % 4] = 1 / row_sum
-            self.tijden[3] += time.time() - now2
-        self.tijden[1] += time.time() - now
-        
         # Set the locations of the cards in the centre
-        for card in self.tricks[-1].cards:
+        for index, card in enumerate(self.tricks[-1].cards):
             # print("tricks", self.tricks[-1].cards)
             card_location[8 * (card.id // 10) + card.id % 10][
-                4 + (self.tricks[-1].cards.index(card) + self.own_position) % 4
+                4 + (self.tricks[-1].starting_player + index - self.own_position) % 4
             ] = 1
 
         # Set the locations of the cards already played
         for trick in self.tricks[:-1]:
             for card in trick.cards:
-                card_location[8 * (card.id // 10) + card.id % 10][(7 + self.own_position) % 4] = 1
-
+                card_location[8 * (card.id // 10) + card.id % 10][8] = 1
+        
+        self.tijden[1] += time.time() - now
+        now = time.time()
+        
+        card_location = np.where(np.logical_and(card_location, np.sum(card_location, axis=1, keepdims=True) > 1), card_location/np.sum(card_location, axis=1, keepdims=True), card_location)
+        # for card in range(32):
+        #     row_sum = np.sum(card_location[card][:4])
+        #     for player in range(4):
+        #         if card_location[card][player] == 1:
+        #             card_location[card][player] = 1 / row_sum
+        self.tijden[2] += time.time() - now
+        now = time.time()
         if not (np.sum(card_location, axis=1)==1).all():
-            print(card_location)
+            print(card_location, flush=True)
             print(np.sum(card_location, axis=1))
             raise ValueError("Some cards are not in the array")
 
-        array = np.zeros(12, dtype=np.float16)
+        array = np.zeros(11, dtype=np.float16)
 
-        array[(self.tricks[-1].starting_player + self.own_position) % 4] = 1
+        array[(self.tricks[-1].starting_player - self.own_position) % 4] = 1
 
-        array[4] = len(self.tricks[-1].cards)
-
-        array[4 + (self.current_player + self.own_position) % 4] = 1
+        array[4 + (self.current_player - self.own_position) % 4] = 1
 
         own_team = self.own_position % 2
 
         if self.declaring_team == own_team:
-            array[9] = 1
+            array[8] = 1
         else:
-            array[9] = 0
+            array[8] = 0
 
         # Set the points
         if self.round_complete():
-            array[10] = self.final_score[own_team]
-            array[11] = self.final_score[1 - own_team]
+            array[9] = self.final_score[own_team]
+            array[10] = self.final_score[1 - own_team]
         else:
-            array[10] = self.points[own_team] + self.meld[own_team]
-            array[11] = self.points[1 - own_team] + self.meld[1 - own_team]
-
+            array[9] = self.points[own_team] + self.meld[own_team]
+            array[10] = self.points[1 - own_team] + self.meld[1 - own_team]
+        self.tijden[3] += time.time() - now
         return np.concatenate((card_location.flatten(), array))
 
     def round_complete(self) -> bool:

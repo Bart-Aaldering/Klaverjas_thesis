@@ -19,9 +19,12 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 
 
 def selfplay(mcts_params, model_path, num_rounds):
-    model = tf.keras.models.load_model(f"Data/Models/{model_path}")
+    if model_path is not None:
+        model = tf.keras.models.load_model(f"Data/Models/{model_path}")
+    else:
+        model = None
 
-    X_train = np.zeros((num_rounds * 132, 268), dtype=np.float16)
+    X_train = np.zeros((num_rounds * 132, 299), dtype=np.float16)
     y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
 
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
@@ -78,7 +81,7 @@ def selfplay(mcts_params, model_path, num_rounds):
         y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
 
     train_data = np.concatenate((X_train, y_train), axis=1)
-    return train_data
+    return train_data, alpha_player_0.tijden
 
 
 def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
@@ -86,7 +89,7 @@ def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
     batch_size = fit_params["batch_size"]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        train_data[:, :268], train_data[:, 268], train_size=0.8, shuffle=True
+        train_data[:, :299], train_data[:, 299], train_size=0.8, shuffle=True
     )
 
     model.fit(
