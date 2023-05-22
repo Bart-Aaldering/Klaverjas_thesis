@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=train_cpu-long
+#SBATCH --job-name=train_cpu-medium
 #SBATCH --output=Data/Outputs/%x_%j.out
 #SBATCH --error=Data/Outputs/%x_%j.err
 #SBATCH --mem-per-cpu=1G
-#SBATCH --time=7-00:00:00
-#SBATCH --partition=cpu-long
+#SBATCH --time=24:00:00
+#SBATCH --partition=cpu-medium
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=20
