@@ -4,6 +4,7 @@ from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_to_suit, card_to_val
 
 class Trick:
     """AlphaZero trick class"""
+
     def __init__(self, starting_player: int):
         self.cards = []
         self.starting_player = starting_player

@@ -25,4 +25,3 @@ class AlphaZero_player:
 
     def get_move(self):
         return self.mcts(self.state)
-

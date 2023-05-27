@@ -81,7 +81,7 @@ def selfplay(mcts_params, model_path, num_rounds):
         y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
 
     train_data = np.concatenate((X_train, y_train), axis=1)
-    return train_data, alpha_player_0.tijden
+    return train_data
 
 
 def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):

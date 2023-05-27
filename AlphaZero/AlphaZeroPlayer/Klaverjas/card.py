@@ -3,6 +3,7 @@ from __future__ import annotations  # To use the class name in the type hinting
 
 class Card:
     """AlphaZero card class"""
+
     def __init__(self, id: int):
         self.id = id
         self.suit = id // 10

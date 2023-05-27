@@ -44,7 +44,7 @@ class State:
         # The current score of the round
         self.points = [0, 0]
         self.meld = [0, 0]
-        self.tijden = [0,0,0,0,0]
+        self.tijden = [0, 0, 0, 0, 0]
 
     def __eq__(self, other: State) -> bool:
         raise NotImplementedError
@@ -177,7 +177,7 @@ class State:
             # remove all cards of the leading suit from the current player
             cards_to_remove = {Card(leading_suit * 10 + i) for i in range(8)}
             if reversable:
-                self.removed_cards[self.current_player] |= cards_to_remove  & self.possible_cards[self.current_player]
+                self.removed_cards[self.current_player] |= cards_to_remove & self.possible_cards[self.current_player]
             self.possible_cards[self.current_player] -= cards_to_remove
 
             if played_card.suit != 0:
@@ -320,15 +320,15 @@ class State:
         if reverse_possible_cards:
             for i in range(4):
                 self.possible_cards[i] |= self.removed_cards[i]
-                
+
     def to_nparray(self):
         """
         Convert the game state to a numpy array own position will become index 0
         first 32x9 array: 32 cards, 9 possible locations by one of the 4 players in one of the 4 centre positions or already played
         second 11 array: starting player 4, current player 4, declaring 1, points 2
         """
-        card_location = np.zeros((32, 9), dtype=np.float16)  # 32 cards, 8 possible locations by one of the 4
-        # players in one of the 3 centre positions or already played
+        card_location = np.zeros((32, 9), dtype=np.float16)  # 32 cards, 9 possible locations by one of the 4
+        # players in one of the 4 centre positions or already played
         now = time.time()
         # Set the locations of the cards in the hands
         for index, cards in enumerate(self.possible_cards):
@@ -348,11 +348,15 @@ class State:
         for trick in self.tricks[:-1]:
             for card in trick.cards:
                 card_location[8 * (card.id // 10) + card.id % 10][8] = 1
-        
+
         self.tijden[1] += time.time() - now
         now = time.time()
-        
-        card_location = np.where(np.logical_and(card_location, np.sum(card_location, axis=1, keepdims=True) > 1), card_location/np.sum(card_location, axis=1, keepdims=True), card_location)
+
+        card_location = np.where(
+            np.logical_and(card_location, np.sum(card_location, axis=1, keepdims=True) > 1),
+            card_location / np.sum(card_location, axis=1, keepdims=True),
+            card_location,
+        )
         # for card in range(32):
         #     row_sum = np.sum(card_location[card][:4])
         #     for player in range(4):
@@ -360,7 +364,7 @@ class State:
         #             card_location[card][player] = 1 / row_sum
         self.tijden[2] += time.time() - now
         now = time.time()
-        if not (np.sum(card_location, axis=1)==1).all():
+        if not (np.sum(card_location, axis=1) == 1).all():
             print(card_location, flush=True)
             print(np.sum(card_location, axis=1))
             raise ValueError("Some cards are not in the array")

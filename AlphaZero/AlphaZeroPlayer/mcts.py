@@ -46,8 +46,9 @@ class MCTS_Node:
             ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
-    
-class MCTS():
+
+
+class MCTS:
     def __init__(self, params: dict, model, player_position: int):
         self.mcts_steps = params["mcts_steps"]
         self.n_of_sims = params["n_of_sims"]
@@ -56,15 +57,15 @@ class MCTS():
         self.player_position = player_position
         self.model = model
         self.tijden = [0, 0, 0, 0, 0]
-        self.tijden2 = [0,0,0]
-        
+        self.tijden2 = [0, 0, 0]
+
     def __call__(self, state: State):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
         check = copy.deepcopy(current_state.possible_cards)
         # current_state.set_determinization2()
         for _ in range(self.mcts_steps):
-            
+
             now = time.time()
             # Determination
             current_state.set_determinization()
@@ -105,7 +106,7 @@ class MCTS():
                 moves.reverse()
                 for move in moves:
                     current_state.undo_move(move, False)
-                    
+
             # Average the score
             if self.n_of_sims > 0:
                 sim_score /= self.n_of_sims
@@ -133,7 +134,7 @@ class MCTS():
             if check != current_state.possible_cards:
                 print(check, current_state.possible_cards)
                 raise Exception("Niet gelijk")
-            
+
             current_node.visits += 1
             current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
             self.tijden[4] += time.time() - now
