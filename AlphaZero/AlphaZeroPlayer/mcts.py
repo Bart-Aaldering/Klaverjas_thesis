@@ -62,8 +62,7 @@ class MCTS:
     def __call__(self, state: State):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
-        check = copy.deepcopy(current_state.possible_cards)
-        # current_state.set_determinization2()
+        # current_state.set_determinization()
         for _ in range(self.mcts_steps):
 
             now = time.time()
@@ -131,9 +130,6 @@ class MCTS:
                 current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
                 current_state.undo_move(current_node.move, True)
                 current_node = current_node.parent
-            if check != current_state.possible_cards:
-                print(check, current_state.possible_cards)
-                raise Exception("Niet gelijk")
 
             current_node.visits += 1
             current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score

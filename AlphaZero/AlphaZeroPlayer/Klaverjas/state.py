@@ -61,7 +61,7 @@ class State:
         all_cards = list(possible_cards[0] | possible_cards[1] | possible_cards[2])
         random.shuffle(all_cards)
 
-        for index, player in enumerate(other_players):
+        for player in other_players:
             self.hands[player] = set()
             for i in range(self.cards_left[player]):
                 self.hands[player].add(all_cards.pop())

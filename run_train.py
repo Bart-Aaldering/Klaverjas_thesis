@@ -97,12 +97,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "test_multiple_fixed_7simple"
+    model_name = "optimised_50_steps"
     run_settings = {
         "project_name": "Thesis_test13",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 7,  # hours
+        "budget": 3.5,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -114,10 +114,10 @@ def main():
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 132 can fit in memory
         "mcts_params": {
-            "mcts_steps": 10,
+            "mcts_steps": 50,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 50,
+            "ucb_c": 200,
         },
     }
     fit_params = {
@@ -201,17 +201,17 @@ def main():
     #         fit_params,
     #         test_params,
     #     )
-    for model_type in ["normal", "large"]:
-        model_params2 = copy.deepcopy(model_params)
-        model_params2["model_type"] = model_type
-        run_settings["model_name"] = model_name + "6" + str(model_type)
-        run_train(
-            run_settings,
-            model_params2,
-            selfplay_params,
-            fit_params,
-            test_params,
-        )
+    # for model_type in ["normal", "large"]:
+    #     model_params2 = copy.deepcopy(model_params)
+    #     model_params2["model_type"] = model_type
+    #     run_settings["model_name"] = model_name + "6" + str(model_type)
+    #     run_train(
+    #         run_settings,
+    #         model_params2,
+    #         selfplay_params,
+    #         fit_params,
+    #         test_params,
+    #     )
 
 
 if __name__ == "__main__":
