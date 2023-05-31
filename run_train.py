@@ -32,7 +32,7 @@ def run_train(
         math.ceil(rounds_per_step / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0
     selfplay_params["rounds_per_step"] = rounds_per_step
-    max_memory = rounds_per_step * 132 * max_memory_multiplier
+    max_memory = rounds_per_step * 36 * max_memory_multiplier
 
     wandb.init(
         # set the wandb project where this run will be logged
@@ -97,12 +97,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "test_multiple_fixed_7simple"
+    model_name = "optimised_det2"
     run_settings = {
         "project_name": "Thesis_test13",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 7,  # hours
+        "budget": 0.85,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -112,7 +112,7 @@ def main():
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
-        "max_memory_multiplier": 5,  # how many times rounds_per_step * 132 can fit in memory
+        "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,

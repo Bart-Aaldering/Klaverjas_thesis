@@ -24,8 +24,8 @@ def selfplay(mcts_params, model_path, num_rounds):
     else:
         model = None
 
-    X_train = np.zeros((num_rounds * 132, 299), dtype=np.float16)
-    y_train = np.zeros((num_rounds * 132, 1), dtype=np.float16)
+    X_train = np.zeros((num_rounds * 36, 299), dtype=np.float16)
+    y_train = np.zeros((num_rounds * 36, 1), dtype=np.float16)
 
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
     alpha_player_1 = AlphaZero_player(1, mcts_params, model)
@@ -46,23 +46,20 @@ def selfplay(mcts_params, model_path, num_rounds):
 
                 if current_player == 0:
                     played_card, score = alpha_player_0.get_move()
+                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_0.state.to_nparray()
+                    y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 1:
                     played_card, score = alpha_player_1.get_move()
-                    score = -score
+                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_1.state.to_nparray()
+                    y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 2:
                     played_card, score = alpha_player_2.get_move()
+                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_2.state.to_nparray()
+                    y_train[round_num * 36 + trick * 4 + j] = score
                 else:
                     played_card, score = alpha_player_3.get_move()
-                    score = -score
-
-                X_train[round_num * 132 + trick * 16 + j * 4] = alpha_player_0.state.to_nparray()
-                X_train[round_num * 132 + trick * 16 + j * 4 + 1] = alpha_player_1.state.to_nparray()
-                X_train[round_num * 132 + trick * 16 + j * 4 + 2] = alpha_player_2.state.to_nparray()
-                X_train[round_num * 132 + trick * 16 + j * 4 + 3] = alpha_player_3.state.to_nparray()
-                y_train[round_num * 132 + trick * 16 + j * 4] = score
-                y_train[round_num * 132 + trick * 16 + j * 4 + 1] = -score
-                y_train[round_num * 132 + trick * 16 + j * 4 + 2] = score
-                y_train[round_num * 132 + trick * 16 + j * 4 + 3] = -score
+                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
+                    y_train[round_num * 36 + trick * 4 + j] = score
 
                 alpha_player_0.update_state(played_card)
                 alpha_player_1.update_state(played_card)
@@ -70,15 +67,15 @@ def selfplay(mcts_params, model_path, num_rounds):
                 alpha_player_3.update_state(played_card)
 
         # generate state and score for end state
-        X_train[round_num * 132 + 128] = alpha_player_0.state.to_nparray()
-        X_train[round_num * 132 + 128 + 1] = alpha_player_1.state.to_nparray()
-        X_train[round_num * 132 + 128 + 2] = alpha_player_2.state.to_nparray()
-        X_train[round_num * 132 + 128 + 3] = alpha_player_3.state.to_nparray()
+        X_train[round_num * 36 + 32] = alpha_player_0.state.to_nparray()
+        X_train[round_num * 36 + 32 + 1] = alpha_player_1.state.to_nparray()
+        X_train[round_num * 36 + 32 + 2] = alpha_player_2.state.to_nparray()
+        X_train[round_num * 36 + 32 + 3] = alpha_player_3.state.to_nparray()
 
-        y_train[round_num * 132 + 128] = alpha_player_0.state.get_score(0)
-        y_train[round_num * 132 + 128 + 1] = alpha_player_1.state.get_score(1)
-        y_train[round_num * 132 + 128 + 2] = alpha_player_2.state.get_score(2)
-        y_train[round_num * 132 + 128 + 3] = alpha_player_3.state.get_score(3)
+        y_train[round_num * 36 + 32] = alpha_player_0.state.get_score(0)
+        y_train[round_num * 36 + 32 + 1] = alpha_player_1.state.get_score(1)
+        y_train[round_num * 36 + 32 + 2] = alpha_player_2.state.get_score(2)
+        y_train[round_num * 36 + 32 + 3] = alpha_player_3.state.get_score(3)
 
     train_data = np.concatenate((X_train, y_train), axis=1)
     return train_data
@@ -161,7 +158,7 @@ def train(
             memory = np.delete(memory, np.s_[0 : len(memory) - max_memory], axis=0)
 
         # select train data and train model
-        train_data = memory[np.random.choice(len(memory), rounds_per_step * 132, replace=False), :]
+        train_data = memory[np.random.choice(len(memory), rounds_per_step * 36, replace=False), :]
 
         # load train and save model
         model = tf.keras.models.load_model(f"Data/Models/{model_path}")

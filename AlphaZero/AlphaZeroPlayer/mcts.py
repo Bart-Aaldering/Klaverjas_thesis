@@ -63,7 +63,7 @@ class MCTS:
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
         check = copy.deepcopy(current_state.possible_cards)
-        # current_state.set_determinization2()
+        # current_state.set_determinization()
         for _ in range(self.mcts_steps):
 
             now = time.time()

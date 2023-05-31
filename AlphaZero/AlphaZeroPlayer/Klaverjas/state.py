@@ -54,18 +54,6 @@ class State:
         raise NotImplementedError
         return hash(tuple(sorted(self.__dict__.items())))
 
-    def set_determinization2(self):
-        other_players = [0, 1, 2, 3]
-        other_players.pop(self.own_position)
-        possible_cards = [self.possible_cards[i].copy() for i in other_players]
-        all_cards = list(possible_cards[0] | possible_cards[1] | possible_cards[2])
-        random.shuffle(all_cards)
-
-        for index, player in enumerate(other_players):
-            self.hands[player] = set()
-            for i in range(self.cards_left[player]):
-                self.hands[player].add(all_cards.pop())
-
     def set_determinization(self):
         other_players = [0, 1, 2, 3]
         other_players.pop(self.own_position)
@@ -367,6 +355,9 @@ class State:
         if not (np.sum(card_location, axis=1) == 1).all():
             print(card_location, flush=True)
             print(np.sum(card_location, axis=1))
+            print(self.possible_cards, flush=True)
+            for trick in self.tricks:
+                print(trick.cards)
             raise ValueError("Some cards are not in the array")
 
         array = np.zeros(11, dtype=np.float16)
