@@ -67,14 +67,13 @@ def test_vs_alphazero_player(
 
                 tijd = time.time()
                 if current_player == 0:
-                    played_card, score = alpha_player_0.get_move()
+                    played_card, _ = alpha_player_0.get_move()
                 elif current_player == 1:
-                    played_card, score = alpha_player_1.get_move()
-                    score = -score
+                    played_card, _ = alpha_player_1.get_move()
                 elif current_player == 2:
-                    played_card, score = alpha_player_2.get_move()
+                    played_card, _ = alpha_player_2.get_move()
                 else:
-                    played_card, score = alpha_player_3.get_move()
+                    played_card, _ = alpha_player_3.get_move()
                 alpha_eval_time += time.time() - tijd
 
                 alpha_player_0.update_state(played_card)
@@ -106,7 +105,7 @@ def test_vs_rule_player(
     scores_alpha = []
     scores_round = []
 
-    if num_rounds * (process_id + 1) > 50000:
+    if num_rounds * (process_id + 1) > 50010:
         raise "too many rounds"
 
     rounds = pd.read_csv("Data/SL_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})

@@ -54,7 +54,7 @@ class MCTS_Node:
         for child in legal_children:
             if child.visits == 0:
                 return child
-            pp = self.pp[child.move.suit*7 + child.move.value]
+            pp = self.pp[child.move.suit * 7 + child.move.value]
             ucbs.append(child.score / child.visits + c * pp * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
@@ -99,7 +99,7 @@ class MCTS:
                 current_state.do_move(current_node.move, "mcts_move")
             # self.tijden[2] += time.time() - now
             # now = time.time()
-            
+
             if not current_state.round_complete():
                 # Simulation
                 sim_score = 0
@@ -120,6 +120,9 @@ class MCTS:
                     for move in moves:
                         current_state.undo_move(move, False)
 
+                # Average the score
+                if self.n_of_sims > 0:
+                    sim_score /= self.n_of_sims
                 # Average the score
                 if self.n_of_sims > 0:
                     sim_score /= self.n_of_sims

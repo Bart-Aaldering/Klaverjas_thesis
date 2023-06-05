@@ -92,7 +92,7 @@ def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
         y_train,
         batch_size=batch_size,
         epochs=epochs,
-        verbose=0,
+        verbose=1,
         validation_data=(X_test, y_test),
         callbacks=callbacks,
     )
@@ -132,6 +132,7 @@ def train(
 
     while time.time() - start_time < budget:
         step += 1
+
         # generate data
         tijd = time.time()
         if multiprocessing:
@@ -164,22 +165,35 @@ def train(
         train_nn(train_data, model, fit_params, [early_stopping])
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
+        # tf.keras.backend.set_value(model.optimizer.learning_rate, tf.keras.backend.get_value(model.optimizer.learning_rate) * 0.99)
         model.save(f"Data/Models/{model_path}")
 
         total_selfplay_time += selfplay_time
         total_training_time += training_time
-        step_time = selfplay_time + training_time
 
         tijd = time.time()
         if step % test_frequency == 0:
             scores_round, _, _ = run_test_multiprocess(
                 n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
             )
-            try:
-                wandb.log({"Average Score": sum(scores_round) / len(scores_round), "Train Time": step * step_time})
-            except:
-                print("WTF")
-                raise Exception("WTF")
+            wandb.log(
+                {
+                    "Average Score": sum(scores_round) / len(scores_round),
+                    "Train Time": total_selfplay_time + total_training_time,
+                }
+            )
         total_testing_time += time.time() - tijd
+
+    # always test at the end
+    if step % test_frequency != 0:
+        scores_round, _, _ = run_test_multiprocess(
+            n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
+        )
+        wandb.log(
+            {
+                "Average Score": sum(scores_round) / len(scores_round),
+                "Train Time": total_selfplay_time + total_training_time,
+            }
+        )
     np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
     return time.time() - start_time, total_selfplay_time, total_training_time, total_testing_time
