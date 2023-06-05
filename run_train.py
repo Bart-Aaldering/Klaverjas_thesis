@@ -5,7 +5,7 @@ import time
 import copy
 
 from AlphaZero.train_alphazero import train
-from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn, create_large_nn, create_two_headed_nn
+from AlphaZero.AlphaZeroPlayer.networks import create_small_two_headed_nn
 
 
 def run_train(
@@ -59,14 +59,8 @@ def run_train(
             os.mkdir(f"Data/RL_data/{model_name}/")
         except:
             print("\n\n\n============model already exists============\n\n\n")
-        if model_params["model_type"] == "simple":
-            model = create_simple_nn(learning_rate)
-        elif model_params["model_type"] == "normal":
-            model = create_normal_nn(learning_rate)
-        elif model_params["model_type"] == "large":
-            model = create_large_nn(learning_rate)
-        elif model_params["model_type"] == "two_head":
-            model = create_two_headed_nn(learning_rate)
+        if model_params["model_type"] == "small":
+            model = create_small_two_headed_nn(learning_rate)
         else:
             raise Exception("model type not recognized")
 
@@ -111,7 +105,7 @@ def main():
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "two_head",
+        "model_type": "small",
         "learning_rate": 0.0001,
     }
     selfplay_params = {
@@ -146,51 +140,51 @@ def main():
         test_params,
     )
 
-    # RUN 2
-    model_name = "optimised_test2"
-    run_settings = {
-        "project_name": "Thesis_test14",
-        "model_name": model_name,
-        "starting_step": 0,
-        "budget": 11.5,  # hours
-        "multiprocessing": True,
-        "n_cores": n_cores,
-    }
-    model_params = {
-        "model_type": "simple",
-        "learning_rate": 0.00001,
-    }
-    selfplay_params = {
-        "rounds_per_step": 60,  # amount of selfplay rounds per step
-        "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
-        "mcts_params": {
-            "mcts_steps": 10,
-            "n_of_sims": 0,
-            "nn_scaler": 1,
-            "ucb_c": 50,
-        },
-    }
-    fit_params = {
-        "epochs": 1,
-        "batch_size": 2048,
-    }
-    test_params = {
-        "test_rounds": 5000,
-        "test_frequency": 10,
-        "mcts_params": {
-            "mcts_steps": 10,
-            "n_of_sims": 0,
-            "nn_scaler": 1,
-            "ucb_c": 50,
-        },
-    }
-    run_train(
-        run_settings,
-        model_params,
-        selfplay_params,
-        fit_params,
-        test_params,
-    )
+    # # RUN 2
+    # model_name = "optimised_test2"
+    # run_settings = {
+    #     "project_name": "Thesis_test14",
+    #     "model_name": model_name,
+    #     "starting_step": 0,
+    #     "budget": 11.5,  # hours
+    #     "multiprocessing": True,
+    #     "n_cores": n_cores,
+    # }
+    # model_params = {
+    #     "model_type": "simple",
+    #     "learning_rate": 0.00001,
+    # }
+    # selfplay_params = {
+    #     "rounds_per_step": 60,  # amount of selfplay rounds per step
+    #     "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
+    #     "mcts_params": {
+    #         "mcts_steps": 10,
+    #         "n_of_sims": 0,
+    #         "nn_scaler": 1,
+    #         "ucb_c": 50,
+    #     },
+    # }
+    # fit_params = {
+    #     "epochs": 1,
+    #     "batch_size": 2048,
+    # }
+    # test_params = {
+    #     "test_rounds": 5000,
+    #     "test_frequency": 10,
+    #     "mcts_params": {
+    #         "mcts_steps": 10,
+    #         "n_of_sims": 0,
+    #         "nn_scaler": 1,
+    #         "ucb_c": 50,
+    #     },
+    # }
+    # run_train(
+    #     run_settings,
+    #     model_params,
+    #     selfplay_params,
+    #     fit_params,
+    #     test_params,
+    # )
     # for rounds_per_step in [30, 120]:
     #     selfplay_params2 = copy.deepcopy(selfplay_params)
     #     selfplay_params2["rounds_per_step"] = rounds_per_step

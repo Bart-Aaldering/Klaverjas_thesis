@@ -133,7 +133,7 @@ class MCTS:
             else:
                 sim_score = current_state.get_score(self.player_position)
                 nn_score = sim_score
-                
+
             # Backpropagation
             while current_node.parent is not None:
                 current_node.visits += 1
@@ -154,5 +154,5 @@ class MCTS:
                 best_score = score
                 best_child = child
         propabilities /= np.sum(propabilities)
-        
+
         return best_child.move, np.concatenate(([best_score / current_node.visits], propabilities))
