@@ -42,6 +42,7 @@ def run_train(
         # track hyperparameters and run metadata
         config={
             "run_settings": run_settings,
+            "model_params": model_params,
             "selfplay_params": selfplay_params,
             "fit_params": fit_params,
             "test_params": test_params,
@@ -99,64 +100,18 @@ def main():
     print(f"Using {n_cores} cores on {cluster}")
 
     # RUN 1
-    model_name = "optimised_test1"
+    model_name = "optimised_testing_0"
     run_settings = {
-        "project_name": "Thesis_test14",
+        "project_name": "Thesis_test15",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 11.5,  # hours
+        "budget": 3.8,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
         "model_type": "simple",
-        "learning_rate": 0.0001,
-    }
-    selfplay_params = {
-        "rounds_per_step": 120,  # amount of selfplay rounds per step
-        "max_memory_multiplier": 10,  # how many times rounds_per_step * 36 can fit in memory
-        "mcts_params": {
-            "mcts_steps": 10,
-            "n_of_sims": 0,
-            "nn_scaler": 1,
-            "ucb_c": 200,
-        },
-    }
-    fit_params = {
-        "epochs": 1,
-        "batch_size": 2048,
-    }
-    test_params = {
-        "test_rounds": 5000,
-        "test_frequency": 10,
-        "mcts_params": {
-            "mcts_steps": 10,
-            "n_of_sims": 0,
-            "nn_scaler": 1,
-            "ucb_c": 50,
-        },
-    }
-    run_train(
-        run_settings,
-        model_params,
-        selfplay_params,
-        fit_params,
-        test_params,
-    )
-
-    # RUN 2
-    model_name = "optimised_test2"
-    run_settings = {
-        "project_name": "Thesis_test14",
-        "model_name": model_name,
-        "starting_step": 0,
-        "budget": 11.5,  # hours
-        "multiprocessing": True,
-        "n_cores": n_cores,
-    }
-    model_params = {
-        "model_type": "simple",
-        "learning_rate": 0.00001,
+        "learning_rate": 0.001,
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
@@ -174,7 +129,7 @@ def main():
     }
     test_params = {
         "test_rounds": 5000,
-        "test_frequency": 10,
+        "test_frequency": 20,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,

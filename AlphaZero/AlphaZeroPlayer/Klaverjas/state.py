@@ -352,13 +352,13 @@ class State:
         #             card_location[card][player] = 1 / row_sum
         self.tijden[2] += time.time() - now
         now = time.time()
-        if not (np.sum(card_location, axis=1) == 1).all():
-            print(card_location, flush=True)
-            print(np.sum(card_location, axis=1))
-            print(self.possible_cards, flush=True)
-            for trick in self.tricks:
-                print(trick.cards)
-            raise ValueError("Some cards are not in the array")
+        # if not (np.sum(card_location, axis=1) == 1).all():
+        #     print(card_location, flush=True)
+        #     print(np.sum(card_location, axis=1))
+        #     print(self.possible_cards, flush=True)
+        #     for trick in self.tricks:
+        #         print(trick.cards)
+        #     raise ValueError("Some cards are not in the array")
 
         array = np.zeros(11, dtype=np.float16)
 
@@ -373,13 +373,13 @@ class State:
         else:
             array[8] = 0
 
-        # Set the points
+        # normalize and Set the points
         if self.round_complete():
-            array[9] = self.final_score[own_team]
-            array[10] = self.final_score[1 - own_team]
+            array[9] = self.final_score[own_team] / 200
+            array[10] = self.final_score[1 - own_team] / 200
         else:
-            array[9] = self.points[own_team] + self.meld[own_team]
-            array[10] = self.points[1 - own_team] + self.meld[1 - own_team]
+            array[9] = self.points[own_team] + self.meld[own_team] / 200
+            array[10] = self.points[1 - own_team] + self.meld[1 - own_team] / 200
         self.tijden[3] += time.time() - now
         return np.concatenate((card_location.flatten(), array))
 
