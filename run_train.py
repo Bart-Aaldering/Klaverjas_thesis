@@ -5,7 +5,7 @@ import time
 import copy
 
 from AlphaZero.train_alphazero import train
-from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn, create_large_nn
+from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn, create_large_nn, create_two_headed_nn
 
 
 def run_train(
@@ -64,6 +64,8 @@ def run_train(
             model = create_normal_nn(learning_rate)
         elif model_params["model_type"] == "large":
             model = create_large_nn(learning_rate)
+        elif model_params["model_type"] == "two_head":
+            model = create_two_headed_nn(learning_rate)
         else:
             raise Exception("model type not recognized")
 
@@ -99,25 +101,25 @@ def main():
 
     model_name = "optimised_50_steps"
     run_settings = {
-        "project_name": "Thesis_test13",
+        "project_name": "Thesis_test16",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 0.85,  # hours
+        "budget": 0.01,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "simple",
+        "model_type": "two_head",
         "learning_rate": 0.0001,
     }
     selfplay_params = {
-        "rounds_per_step": 60,  # amount of selfplay rounds per step
+        "rounds_per_step": 1,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
-            "mcts_steps": 50,
+            "mcts_steps": 10,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 200,
+            "ucb_c": 50,
         },
     }
     fit_params = {
@@ -125,8 +127,8 @@ def main():
         "batch_size": 2048,
     }
     test_params = {
-        "test_rounds": 5000,
-        "test_frequency": 5,
+        "test_rounds": 10,
+        "test_frequency": 1,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,

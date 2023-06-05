@@ -25,7 +25,7 @@ def selfplay(mcts_params, model_path, num_rounds):
         model = None
 
     X_train = np.zeros((num_rounds * 36, 299), dtype=np.float16)
-    y_train = np.zeros((num_rounds * 36, 1), dtype=np.float16)
+    y_train = np.zeros((num_rounds * 36, 33), dtype=np.float16)
 
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
     alpha_player_1 = AlphaZero_player(1, mcts_params, model)
@@ -45,21 +45,19 @@ def selfplay(mcts_params, model_path, num_rounds):
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card, score = alpha_player_0.get_move()
+                    played_card, score_and_probabilities = alpha_player_0.get_move()
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_0.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 1:
-                    played_card, score = alpha_player_1.get_move()
+                    played_card, score_and_probabilities = alpha_player_1.get_move()
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_1.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 2:
-                    played_card, score = alpha_player_2.get_move()
+                    played_card, score_and_probabilities = alpha_player_2.get_move()
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_2.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
                 else:
-                    played_card, score = alpha_player_3.get_move()
+                    played_card, score_and_probabilities = alpha_player_3.get_move()
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
+                
+                y_train[round_num * 36 + trick * 4 + j] = score_and_probabilities
 
                 alpha_player_0.update_state(played_card)
                 alpha_player_1.update_state(played_card)
