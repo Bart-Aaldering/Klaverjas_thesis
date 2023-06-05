@@ -5,25 +5,26 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+
 def create_small_two_headed_nn(learning_rate):
     # Define the input shape
 
     # Create the first branch of the network
 
     input = tf.keras.layers.Input(shape=(299,))
-    
-    base_layers = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(256, activation="relu")
-    ], name = "base_layers")(input)
 
-    value_head = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(256, activation="relu"),
-        tf.keras.layers.Dense(1, activation="linear")
-    ], name = "value_head")(base_layers)
-    
-    policy_head = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(32, activation="softmax")
-    ], name = "policy_head")(base_layers)
+    base_layers = tf.keras.models.Sequential([tf.keras.layers.Dense(256, activation="relu")], name="base_layers")(
+        input
+    )
+
+    value_head = tf.keras.models.Sequential(
+        [tf.keras.layers.Dense(256, activation="relu"), tf.keras.layers.Dense(1, activation="linear")],
+        name="value_head",
+    )(base_layers)
+
+    policy_head = tf.keras.models.Sequential([tf.keras.layers.Dense(32, activation="softmax")], name="policy_head")(
+        base_layers
+    )
 
     # Create the two-headed model
     model = tf.keras.models.Model(inputs=input, outputs=[value_head, policy_head])
@@ -32,7 +33,7 @@ def create_small_two_headed_nn(learning_rate):
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
     return model
 
-    
+
 def create_simple_nn(learning_rate):
     model = tf.keras.models.Sequential(
         [

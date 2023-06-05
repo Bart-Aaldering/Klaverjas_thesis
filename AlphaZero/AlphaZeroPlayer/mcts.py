@@ -59,6 +59,7 @@ class MCTS_Node:
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
 
+
 class MCTS:
     def __init__(self, params: dict, model, player_position: int):
         self.mcts_steps = params["mcts_steps"]
@@ -148,7 +149,7 @@ class MCTS:
         best_score = -500
         propabilities = np.zeros(32)
         for child in current_node.children:
-            propabilities[child.move.suit*7 + child.move.value] = child.visits
+            propabilities[child.move.suit * 7 + child.move.value] = child.visits
             score = child.visits
             if score > best_score:
                 best_score = score
