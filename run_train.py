@@ -5,7 +5,11 @@ import time
 import copy
 
 from AlphaZero.train_alphazero import train
-from AlphaZero.AlphaZeroPlayer.networks import create_small_two_headed_nn
+from AlphaZero.AlphaZeroPlayer.networks import (
+    create_small_two_headed_nn,
+    create_normal_two_headed_nn,
+    create_normal_nn,
+)
 
 
 def run_train(
@@ -61,6 +65,10 @@ def run_train(
             print("\n\n\n============model already exists============\n\n\n")
         if model_params["model_type"] == "small":
             model = create_small_two_headed_nn(learning_rate)
+        elif model_params["model_type"] == "normal":
+            model = create_normal_two_headed_nn(learning_rate)
+        elif model_params["model_type"] == "normal1h":
+            model = create_normal_nn(learning_rate)
         else:
             raise Exception("model type not recognized")
 
@@ -95,21 +103,21 @@ def main():
     print(f"Using {n_cores} cores on {cluster}")
 
     # RUN 1
-    model_name = "optimised_test1"
+    model_name = "1H_normal"
     run_settings = {
         "project_name": "Thesis_test16",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 0.01,  # hours
+        "budget": 3.8,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "small",
+        "model_type": "normal1h",
         "learning_rate": 0.0001,
     }
     selfplay_params = {
-        "rounds_per_step": 1,  # amount of selfplay rounds per step
+        "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
             "mcts_steps": 10,
@@ -123,8 +131,8 @@ def main():
         "batch_size": 2048,
     }
     test_params = {
-        "test_rounds": 10,
-        "test_frequency": 1,
+        "test_rounds": 5000,
+        "test_frequency": 20,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,

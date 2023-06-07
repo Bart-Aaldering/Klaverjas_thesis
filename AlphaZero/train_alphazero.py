@@ -57,7 +57,7 @@ def selfplay(mcts_params, model_path, num_rounds):
                     played_card, score_and_probabilities = alpha_player_3.get_move()
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
 
-                y_train[round_num * 36 + trick * 4 + j] = score_and_probabilities
+                y_train[round_num * 36 + trick * 4 + j] = score_and_probabilities[0]
 
                 alpha_player_0.update_state(played_card)
                 alpha_player_1.update_state(played_card)
@@ -70,10 +70,10 @@ def selfplay(mcts_params, model_path, num_rounds):
         X_train[round_num * 36 + 32 + 2] = alpha_player_2.state.to_nparray()
         X_train[round_num * 36 + 32 + 3] = alpha_player_3.state.to_nparray()
 
-        y_train[round_num * 36 + 32] = [alpha_player_0.state.get_score(0)] + [0] * 32
-        y_train[round_num * 36 + 32 + 1] = [alpha_player_1.state.get_score(1)] + [0] * 32
-        y_train[round_num * 36 + 32 + 2] = [alpha_player_2.state.get_score(2)] + [0] * 32
-        y_train[round_num * 36 + 32 + 3] = [alpha_player_3.state.get_score(3)] + [0] * 32
+        y_train[round_num * 36 + 32] = [alpha_player_0.state.get_score(0)][0]  # + [0] * 32
+        y_train[round_num * 36 + 32 + 1] = [alpha_player_1.state.get_score(1)][0]  # + [0] * 32
+        y_train[round_num * 36 + 32 + 2] = [alpha_player_2.state.get_score(2)][0]  # + [0] * 32
+        y_train[round_num * 36 + 32 + 3] = [alpha_player_3.state.get_score(3)][0]  # + [0] * 32
 
     train_data = np.concatenate((X_train, y_train), axis=1)
     return train_data
@@ -92,7 +92,7 @@ def train_nn(train_data, model: tf.keras.Sequential, fit_params, callbacks):
         [y_train[:, 0], y_train[:, 1:]],
         batch_size=batch_size,
         epochs=epochs,
-        verbose=1,
+        verbose=0,
         validation_data=(X_test, [y_test[:, 0], y_test[:, 1:]]),
         callbacks=callbacks,
     )

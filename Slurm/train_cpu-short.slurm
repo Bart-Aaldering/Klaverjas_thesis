@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu-short
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=20
+#SBATCH --cpus-per-task=24
 
 
 echo "[$SHELL] #### Starting Python test"
@@ -15,5 +15,5 @@ echo "[$SHELL] ## This is $SLURM_JOB_USER on $HOSTNAME and this job has the ID $
 
 
 echo "[$SHELL] ## Run script"
-python3 run_train2.py
+python3 run_train.py
 echo "[$SHELL] ## Script finished"

@@ -18,7 +18,7 @@ def main():
     # opponent = "alphazero"
     multiprocessing = True
 
-    num_rounds = 50000
+    num_rounds = 10000
     num_rounds = (
         math.ceil(num_rounds / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0

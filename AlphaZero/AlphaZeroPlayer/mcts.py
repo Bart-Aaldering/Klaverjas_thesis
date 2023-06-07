@@ -19,9 +19,9 @@ class MCTS_Node:
         self.visits = 0
         if model is not None:
             array = current_state.to_nparray()
-            nn_score, policy = model(np.array([array]))
-            self.nn_score = int(nn_score)
-            self.pp = np.array(policy[0])
+            output = model(np.array([array]))
+            self.nn_score = int(output[0])
+            # self.pp = np.array(output[1][0])
         else:
             self.nn_score = 0
             self.pp = np.ones(32)
@@ -54,7 +54,8 @@ class MCTS_Node:
         for child in legal_children:
             if child.visits == 0:
                 return child
-            pp = self.pp[child.move.suit * 7 + child.move.value]
+            # pp = self.pp[child.move.suit * 7 + child.move.value]
+            pp = 1
             ucbs.append(child.score / child.visits + c * pp * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
@@ -155,5 +156,5 @@ class MCTS:
                 best_score = score
                 best_child = child
         propabilities /= np.sum(propabilities)
-
+        propabilities = np.zeros(32)
         return best_child.move, np.concatenate(([best_score / current_node.visits], propabilities))
