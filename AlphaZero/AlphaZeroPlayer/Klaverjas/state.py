@@ -22,7 +22,7 @@ class State:
         self.meld = [0, 0]
         self.tijden = [0, 0, 0, 0, 0]
 
-    def set_state_from_Round(self, round: Round):
+    def init_from_Round(self, round: Round):
         self.round = round
         self.current_player = round.current_player
         self.declaring_team = round.declaring_team
@@ -44,21 +44,12 @@ class State:
 
         self.tricks = [Trick(self.current_player)]
 
-    def set_state_from_klaverlive(self, hand_current_player, current_player, trump_suit, declaring_team):
-        self.current_player
-        self.declaring_team
+    def init_from_klaverlive(self, own_hand, starting_player, declaring_team):
+        self.current_player = starting_player
+        self.declaring_team = declaring_team
 
         # The hand of the transformed to the game state representation
-        own_hand_as_id = [
-            card_transform(
-                ["k", "h", "r", "s"].index(card[:1]) * 10 + card[1:] - 7, ["k", "h", "r", "s"].index(trump_suit[0])
-            )
-            for card in hand_current_player
-        ]
-        # own_hand_as_id = [
-        #     card_transform(card.id, ["k", "h", "r", "s"].index(round.trump_suit))
-        #     for card in round.player_hands[self.own_position]
-        # ]
+        own_hand_as_id = own_hand
 
         not_own_hand_as_id = set([suit * 10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
 

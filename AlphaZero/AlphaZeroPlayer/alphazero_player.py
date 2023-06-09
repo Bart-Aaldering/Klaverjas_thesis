@@ -19,14 +19,17 @@ class AlphaZero_player:
             for i in range(len(self.tijden)):
                 self.tijden[i] += self.state.tijden[i]
         self.state = State(self.player_position)
-        self.state.set_state_from_Round(round)
+        self.state.init_from_Round(round)
 
-    def new_round_klaverlive(self, player_information):
+    def new_round_klaverlive(self, hand, starting_player, declaring_team):
         self.state = State(self.player_position)
-        self.state.set_state_from_klaverlive(player_information)
+        self.state.init_from_klaverlive(hand, starting_player, declaring_team)
 
     def update_state(self, move: Card):
         self.state.do_move(move)
 
     def get_move(self):
+        if self.player_position != self.state.current_player:
+            print(self.state.current_player, self.player_position)
+            raise Exception("Not this player's turn")
         return self.mcts(self.state)
