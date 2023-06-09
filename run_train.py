@@ -2,7 +2,6 @@ import os
 import wandb
 import math
 import time
-import copy
 
 from AlphaZero.train_alphazero import train
 from AlphaZero.AlphaZeroPlayer.networks import (

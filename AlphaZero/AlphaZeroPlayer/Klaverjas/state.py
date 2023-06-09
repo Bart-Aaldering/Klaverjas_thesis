@@ -11,8 +11,18 @@ from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_transform, team
 
 
 class State:
-    def __init__(self, round: Round, own_position: int) -> None:
+    def __init__(self, own_position: int) -> None:
         self.own_position = own_position
+        self.pit_check = 0
+        self.cards_left = [8, 8, 8, 8]
+        self.final_score = [0, 0]
+
+        # The current score of the round
+        self.points = [0, 0]
+        self.meld = [0, 0]
+        self.tijden = [0, 0, 0, 0, 0]
+
+    def set_state_from_Round(self, round: Round):
         self.round = round
         self.current_player = round.current_player
         self.declaring_team = round.declaring_team
@@ -25,34 +35,41 @@ class State:
 
         not_own_hand_as_id = set([suit * 10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
 
-        # Cards that other players can have
-        # self.other_players_cards = set([Card(id) for id in not_own_hand_as_id])
-        # other_players_cards = set([Card(id) for id in not_own_hand_as_id])
-
         self.hands = [set() for _ in range(4)]
-        self.hands[own_position] = set([Card(id) for id in own_hand_as_id])
+        self.hands[self.own_position] = set([Card(id) for id in own_hand_as_id])
 
         self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
-        self.possible_cards[own_position] = set([Card(id) for id in own_hand_as_id])
+        self.possible_cards[self.own_position] = set([Card(id) for id in own_hand_as_id])
         self.removed_cards = [set() for _ in range(4)]
 
         self.tricks = [Trick(self.current_player)]
 
-        self.pit_check = 0
-        self.cards_left = [8, 8, 8, 8]
-        self.final_score = [0, 0]
-        # The current score of the round
-        self.points = [0, 0]
-        self.meld = [0, 0]
-        self.tijden = [0, 0, 0, 0, 0]
+    def set_state_from_klaverlive(self, hand_current_player, current_player, trump_suit, declaring_team):
+        self.current_player
+        self.declaring_team
 
-    def __eq__(self, other: State) -> bool:
-        raise NotImplementedError
-        return self.__dict__ == other.__dict__
+        # The hand of the transformed to the game state representation
+        own_hand_as_id = [
+            card_transform(
+                ["k", "h", "r", "s"].index(card[:1]) * 10 + card[1:] - 7, ["k", "h", "r", "s"].index(trump_suit[0])
+            )
+            for card in hand_current_player
+        ]
+        # own_hand_as_id = [
+        #     card_transform(card.id, ["k", "h", "r", "s"].index(round.trump_suit))
+        #     for card in round.player_hands[self.own_position]
+        # ]
 
-    def __hash__(self) -> int:
-        raise NotImplementedError
-        return hash(tuple(sorted(self.__dict__.items())))
+        not_own_hand_as_id = set([suit * 10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
+
+        self.hands = [set() for _ in range(4)]
+        self.hands[self.own_position] = set([Card(id) for id in own_hand_as_id])
+
+        self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
+        self.possible_cards[self.own_position] = set([Card(id) for id in own_hand_as_id])
+        self.removed_cards = [set() for _ in range(4)]
+
+        self.tricks = [Trick(self.current_player)]
 
     def set_determinization(self):
         other_players = [0, 1, 2, 3]
@@ -156,8 +173,6 @@ class State:
                     if card.id in [0, 1, 5, 6, 3, 7, 2, 4][highest_trump_order - 8 :]
                 }
                 if reversable:
-                    if cards_to_remove != cards_to_remove & self.possible_cards[self.current_player]:
-                        raise Exception("Klopt nie heh")
                     self.removed_cards[self.current_player] |= cards_to_remove
                 self.possible_cards[self.current_player] -= cards_to_remove
 
@@ -174,8 +189,6 @@ class State:
                     card for card in self.possible_cards[self.current_player] if card.id in {0, 1, 2, 3, 4, 5, 6, 7}
                 }
                 if reversable:
-                    if cards_to_remove != cards_to_remove & self.possible_cards[self.current_player]:
-                        raise Exception("Klopt nie heh")
                     self.removed_cards[self.current_player] |= cards_to_remove
                 self.possible_cards[self.current_player] -= cards_to_remove
 
@@ -345,20 +358,9 @@ class State:
             card_location / np.sum(card_location, axis=1, keepdims=True),
             card_location,
         )
-        # for card in range(32):
-        #     row_sum = np.sum(card_location[card][:4])
-        #     for player in range(4):
-        #         if card_location[card][player] == 1:
-        #             card_location[card][player] = 1 / row_sum
+
         self.tijden[2] += time.time() - now
         now = time.time()
-        # if not (np.sum(card_location, axis=1) == 1).all():
-        #     print(card_location, flush=True)
-        #     print(np.sum(card_location, axis=1))
-        #     print(self.possible_cards, flush=True)
-        #     for trick in self.tricks:
-        #         print(trick.cards)
-        #     raise ValueError("Some cards are not in the array")
 
         array = np.zeros(11, dtype=np.float16)
 

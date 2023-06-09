@@ -14,11 +14,16 @@ class AlphaZero_player:
         self.tijden = [0, 0, 0, 0, 0]
         self.state = None
 
-    def new_round(self, round: Round):
+    def new_round_Round(self, round: Round):
         if self.state is not None:
             for i in range(len(self.tijden)):
                 self.tijden[i] += self.state.tijden[i]
-        self.state = State(round, self.player_position)
+        self.state = State(self.player_position)
+        self.state.set_state_from_Round(round)
+
+    def new_round_klaverlive(self, player_information):
+        self.state = State(self.player_position)
+        self.state.set_state_from_klaverlive(player_information)
 
     def update_state(self, move: Card):
         self.state.do_move(move)

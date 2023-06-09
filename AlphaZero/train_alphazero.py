@@ -34,10 +34,10 @@ def selfplay(mcts_params, model_path, num_rounds):
 
     for round_num in range(num_rounds):
         round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
-        alpha_player_0.new_round(round)
-        alpha_player_1.new_round(round)
-        alpha_player_2.new_round(round)
-        alpha_player_3.new_round(round)
+        alpha_player_0.new_round_Round(round)
+        alpha_player_1.new_round_Round(round)
+        alpha_player_2.new_round_Round(round)
+        alpha_player_3.new_round_Round(round)
 
         # generate a state and score and play a card
         for trick in range(8):

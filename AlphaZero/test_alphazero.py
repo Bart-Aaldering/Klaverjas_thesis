@@ -55,10 +55,10 @@ def test_vs_alphazero_player(
         )
         round.set_cards(rounds.loc[round_num]["Cards"])
 
-        alpha_player_0.new_round(round)
-        alpha_player_1.new_round(round)
-        alpha_player_2.new_round(round)
-        alpha_player_3.new_round(round)
+        alpha_player_0.new_round_Round(round)
+        alpha_player_1.new_round_Round(round)
+        alpha_player_2.new_round_Round(round)
+        alpha_player_3.new_round_Round(round)
 
         for trick in range(8):
             for j in range(4):
@@ -131,8 +131,8 @@ def test_vs_rule_player(
         )
         round.set_cards(rounds.loc[round_num]["Cards"])
 
-        alpha_player_0.new_round(round)
-        alpha_player_2.new_round(round)
+        alpha_player_0.new_round_Round(round)
+        alpha_player_2.new_round_Round(round)
         for trick in range(8):
             for j in range(4):
 
