@@ -103,6 +103,10 @@ def main():
     json_state = json.loads(sys.argv[1])
     alpha_player_settings = json.loads(sys.argv[2])
 
+    ### Can be used for testing:
+    # json_state = json.loads(test)
+    # alpha_player_settings = json.loads(settings)
+
     mcts_params = alpha_player_settings["mcts_params"]
 
     ### Only needed if a model will be used:
@@ -112,7 +116,6 @@ def main():
 
     alphazero_player = AlphaZero_player(0, mcts_params, model)
     hand, starting_player, declaring_team, played_cards = process_klaverlive_json(json_state)
-    print(hand, starting_player, declaring_team)
     alphazero_player.new_round_klaverlive(hand, starting_player, declaring_team)
 
     for card in played_cards:
