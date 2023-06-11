@@ -375,11 +375,11 @@ class State:
 
         # Set the points
         if self.round_complete():
-            array[9] = self.final_score[own_team]
-            array[10] = self.final_score[1 - own_team]
+            array[9] = self.final_score[own_team] / 100
+            array[10] = self.final_score[1 - own_team] / 100
         else:
-            array[9] = self.points[own_team] + self.meld[own_team]
-            array[10] = self.points[1 - own_team] + self.meld[1 - own_team]
+            array[9] = (self.points[own_team] + self.meld[own_team]) / 100
+            array[10] = (self.points[1 - own_team] + self.meld[1 - own_team]) / 100
         self.tijden[3] += time.time() - now
         return np.concatenate((card_location.flatten(), array))
 
