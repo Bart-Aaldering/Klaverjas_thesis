@@ -45,19 +45,19 @@ def selfplay(mcts_params, model_path, num_rounds):
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card, score = alpha_player_0.get_move()
+                    played_card, score = alpha_player_0.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_0.state.to_nparray()
                     y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 1:
-                    played_card, score = alpha_player_1.get_move()
+                    played_card, score = alpha_player_1.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_1.state.to_nparray()
                     y_train[round_num * 36 + trick * 4 + j] = score
                 elif current_player == 2:
-                    played_card, score = alpha_player_2.get_move()
+                    played_card, score = alpha_player_2.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_2.state.to_nparray()
                     y_train[round_num * 36 + trick * 4 + j] = score
                 else:
-                    played_card, score = alpha_player_3.get_move()
+                    played_card, score = alpha_player_3.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
                     y_train[round_num * 36 + trick * 4 + j] = score
 
@@ -134,6 +134,7 @@ def train(
 
     while time.time() - start_time < budget:
         step += 1
+
         # generate data
         tijd = time.time()
         if multiprocessing:
@@ -166,22 +167,35 @@ def train(
         train_nn(train_data, model, fit_params, [early_stopping])
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
+        # tf.keras.backend.set_value(model.optimizer.learning_rate, tf.keras.backend.get_value(model.optimizer.learning_rate) * 0.99)
         model.save(f"Data/Models/{model_path}")
 
         total_selfplay_time += selfplay_time
         total_training_time += training_time
-        step_time = selfplay_time + training_time
 
         tijd = time.time()
         if step % test_frequency == 0:
             scores_round, _, _ = run_test_multiprocess(
                 n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
             )
-            try:
-                wandb.log({"Average Score": sum(scores_round) / len(scores_round), "Train Time": step * step_time})
-            except:
-                print("WTF")
-                raise Exception("WTF")
+            wandb.log(
+                {
+                    "Average Score": sum(scores_round) / len(scores_round),
+                    "Train Time": total_selfplay_time + total_training_time,
+                }
+            )
         total_testing_time += time.time() - tijd
+
+    # always test at the end
+    if step % test_frequency != 0:
+        scores_round, _, _ = run_test_multiprocess(
+            n_cores, "rule", test_rounds, test_mcts_params, [model_path, None], multiprocessing
+        )
+        wandb.log(
+            {
+                "Average Score": sum(scores_round) / len(scores_round),
+                "Train Time": total_selfplay_time + total_training_time,
+            }
+        )
     np.save(f"Data/RL_data/{model_name}/{model_name}_{step}_memory.npy", memory)
     return time.time() - start_time, total_selfplay_time, total_training_time, total_testing_time

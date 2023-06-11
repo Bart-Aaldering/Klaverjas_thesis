@@ -23,5 +23,5 @@ class AlphaZero_player:
     def update_state(self, move: Card):
         self.state.do_move(move)
 
-    def get_move(self):
-        return self.mcts(self.state)
+    def get_move(self, training: bool = False):
+        return self.mcts(self.state, training)
