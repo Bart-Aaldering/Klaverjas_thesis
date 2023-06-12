@@ -99,18 +99,18 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "one_expansion"
+    model_name = "decreasing_lr"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 2.8,  # hours
+        "budget": 3.8,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
         "model_type": "simple",
-        "learning_rate": 0.005,
+        "learning_rate": 0.01,
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
