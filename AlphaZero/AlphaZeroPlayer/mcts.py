@@ -72,7 +72,7 @@ class MCTS:
         self.tijden = [0, 0, 0, 0, 0]
         self.tijden2 = [0, 0, 0]
 
-    def __call__(self, state: State):
+    def __call__(self, state: State, training: bool):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node(self.model, current_state)
 
@@ -147,14 +147,18 @@ class MCTS:
             current_node.score += (1 - self.nn_scaler) * sim_score + self.nn_scaler * nn_score
             # self.tijden[4] += time.time() - now
             # now = time.time()
-        best_score = -500
-        propabilities = np.zeros(32)
+
+        visits = []
+        moves = []
         for child in current_node.children:
-            propabilities[child.move.suit * 7 + child.move.value] = child.visits
-            score = child.visits
-            if score > best_score:
-                best_score = score
-                best_child = child
-        propabilities /= np.sum(propabilities)
-        propabilities = np.zeros(32)
-        return best_child.move, np.concatenate(([best_score / current_node.visits], propabilities))
+            visits.append(child.visits)
+            moves.append(child.move)
+
+        if training == True:
+            probabilities = np.array(visits) / np.sum(visits)
+            move = np.random.choice(moves, p=probabilities)
+        else:
+            move = moves[np.argmax(visits)]
+
+        return move, current_node.score / current_node.visits
+        # return best_child.move, np.concatenate(([best_score / current_node.visits], propabilities))

@@ -45,16 +45,16 @@ def selfplay(mcts_params, model_path, num_rounds):
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card, score_and_probabilities = alpha_player_0.get_move()
+                    played_card, score_and_probabilities = alpha_player_0.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_0.state.to_nparray()
                 elif current_player == 1:
-                    played_card, score_and_probabilities = alpha_player_1.get_move()
+                    played_card, score_and_probabilities = alpha_player_1.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_1.state.to_nparray()
                 elif current_player == 2:
-                    played_card, score_and_probabilities = alpha_player_2.get_move()
+                    played_card, score_and_probabilities = alpha_player_2.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_2.state.to_nparray()
                 else:
-                    played_card, score_and_probabilities = alpha_player_3.get_move()
+                    played_card, score_and_probabilities = alpha_player_3.get_move(training=True)
                     X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
 
                 y_train[round_num * 36 + trick * 4 + j] = score_and_probabilities[0]
@@ -120,6 +120,7 @@ def train(
     test_rounds = test_params["test_rounds"]
     test_frequency = test_params["test_frequency"]
     test_mcts_params = test_params["mcts_params"]
+    learning_rate_decrease = fit_params["learning_rate_decrease"]
 
     if step == 0:
         memory = None
@@ -165,7 +166,10 @@ def train(
         train_nn(train_data, model, fit_params, [early_stopping])
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
-        # tf.keras.backend.set_value(model.optimizer.learning_rate, tf.keras.backend.get_value(model.optimizer.learning_rate) * 0.99)
+        tf.keras.backend.set_value(
+            model.optimizer.learning_rate,
+            tf.keras.backend.get_value(model.optimizer.learning_rate) * learning_rate_decrease,
+        )
         model.save(f"Data/Models/{model_path}")
 
         total_selfplay_time += selfplay_time

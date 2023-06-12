@@ -28,7 +28,7 @@ class AlphaZero_player:
     def update_state(self, move: Card):
         self.state.do_move(move)
 
-    def get_move(self):
+    def get_move(self, training: bool = False):
         if self.player_position != self.state.current_player:
             print(self.state.current_player, self.player_position)
             raise Exception("Not this player's turn")

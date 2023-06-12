@@ -45,6 +45,7 @@ def run_train(
         # track hyperparameters and run metadata
         config={
             "run_settings": run_settings,
+            "model_params": model_params,
             "selfplay_params": selfplay_params,
             "fit_params": fit_params,
             "test_params": test_params,
@@ -101,19 +102,18 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    # RUN 1
-    model_name = "1H_normal"
+    model_name = "50_step_decrease_lr"
     run_settings = {
-        "project_name": "Thesis_test16",
+        "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.8,  # hours
+        "budget": 3.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
         "model_type": "normal1h",
-        "learning_rate": 0.0001,
+        "learning_rate": 0.01,
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
@@ -128,10 +128,11 @@ def main():
     fit_params = {
         "epochs": 1,
         "batch_size": 2048,
+        "learning_rate_decrease": 0.95,
     }
     test_params = {
         "test_rounds": 5000,
-        "test_frequency": 20,
+        "test_frequency": 30,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,
@@ -146,122 +147,6 @@ def main():
         fit_params,
         test_params,
     )
-
-    # # RUN 2
-    # model_name = "optimised_test2"
-    # run_settings = {
-    #     "project_name": "Thesis_test14",
-    #     "model_name": model_name,
-    #     "starting_step": 0,
-    #     "budget": 11.5,  # hours
-    #     "multiprocessing": True,
-    #     "n_cores": n_cores,
-    # }
-    # model_params = {
-    #     "model_type": "simple",
-    #     "learning_rate": 0.00001,
-    # }
-    # selfplay_params = {
-    #     "rounds_per_step": 60,  # amount of selfplay rounds per step
-    #     "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
-    #     "mcts_params": {
-    #         "mcts_steps": 10,
-    #         "n_of_sims": 0,
-    #         "nn_scaler": 1,
-    #         "ucb_c": 50,
-    #     },
-    # }
-    # fit_params = {
-    #     "epochs": 1,
-    #     "batch_size": 2048,
-    # }
-    # test_params = {
-    #     "test_rounds": 5000,
-    #     "test_frequency": 10,
-    #     "mcts_params": {
-    #         "mcts_steps": 10,
-    #         "n_of_sims": 0,
-    #         "nn_scaler": 1,
-    #         "ucb_c": 50,
-    #     },
-    # }
-    # run_train(
-    #     run_settings,
-    #     model_params,
-    #     selfplay_params,
-    #     fit_params,
-    #     test_params,
-    # )
-    # for rounds_per_step in [30, 120]:
-    #     selfplay_params2 = copy.deepcopy(selfplay_params)
-    #     selfplay_params2["rounds_per_step"] = rounds_per_step
-    #     run_settings["model_name"] = model_name + "1" + str(rounds_per_step)
-    #     run_train(
-    #         run_settings,
-    #         model_params,
-    #         selfplay_params2,
-    #         fit_params,
-    #         test_params,
-    #     )
-
-    # for batch_size in [512, 8192]:
-    #     fit_params2 = copy.deepcopy(fit_params)
-    #     fit_params2["batch_size"] = batch_size
-    #     run_settings["model_name"] = model_name + "2" + str(batch_size)
-    #     run_train(
-    #         run_settings,
-    #         model_params,
-    #         selfplay_params,
-    #         fit_params2,
-    #         test_params,
-    #     )
-
-    # for epochs in [1, 10]:
-    #     fit_params2 = copy.deepcopy(fit_params)
-    #     fit_params2["epochs"] = epochs
-    #     run_settings["model_name"] = model_name + "3" + str(epochs)
-    #     run_train(
-    #         run_settings,
-    #         model_params,
-    #         selfplay_params,
-    #         fit_params2,
-    #         test_params,
-    #     )
-
-    # for max_memory_multiplier in [10, 40]:
-    #     selfplay_params2 = copy.deepcopy(selfplay_params)
-    #     selfplay_params2["max_memory_multiplier"] = max_memory_multiplier
-    #     run_settings["model_name"] = model_name + "4" + str(max_memory_multiplier)
-    #     run_train(
-    #         run_settings,
-    #         model_params,
-    #         selfplay_params2,
-    #         fit_params,
-    #         test_params,
-    #     )
-
-    # for learning_rate in [0.0001, 0.01]:
-    #     model_params2 = copy.deepcopy(model_params)
-    #     model_params2["learning_rate"] = learning_rate
-    #     run_settings["model_name"] = model_name + "5" + str(learning_rate)
-    #     run_train(
-    #         run_settings,
-    #         model_params2,
-    #         selfplay_params,
-    #         fit_params,
-    #         test_params,
-    #     )
-    # for model_type in ["normal"]:
-    #     model_params2 = copy.deepcopy(model_params)
-    #     model_params2["model_type"] = model_type
-    #     run_settings["model_name"] = model_name + "6" + str(model_type)
-    #     run_train(
-    #         run_settings,
-    #         model_params2,
-    #         selfplay_params,
-    #         fit_params,
-    #         test_params,
-    #     )
 
 
 if __name__ == "__main__":
