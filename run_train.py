@@ -99,12 +99,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "decreasing_lr"
+    model_name = "50_step_decrease_lr"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.8,  # hours
+        "budget": 3.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -116,15 +116,16 @@ def main():
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
-            "mcts_steps": 20,
+            "mcts_steps": 50,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 50,
+            "ucb_c": 200,
         },
     }
     fit_params = {
         "epochs": 1,
         "batch_size": 2048,
+        "learning_rate_decrease": 0.95,
     }
     test_params = {
         "test_rounds": 5000,

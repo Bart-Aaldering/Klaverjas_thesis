@@ -122,6 +122,7 @@ def train(
     test_rounds = test_params["test_rounds"]
     test_frequency = test_params["test_frequency"]
     test_mcts_params = test_params["mcts_params"]
+    learning_rate_decrease = fit_params["learning_rate_decrease"]
 
     if step == 0:
         memory = None
@@ -168,7 +169,7 @@ def train(
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
         tf.keras.backend.set_value(
-            model.optimizer.learning_rate, tf.keras.backend.get_value(model.optimizer.learning_rate) * 0.99
+            model.optimizer.learning_rate, tf.keras.backend.get_value(model.optimizer.learning_rate) * learning_rate_decrease
         )
         model.save(f"Data/Models/{model_path}")
 
