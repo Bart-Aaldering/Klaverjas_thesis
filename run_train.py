@@ -7,6 +7,7 @@ from AlphaZero.train_alphazero import train
 from AlphaZero.AlphaZeroPlayer.networks import (
     create_small_two_headed_nn,
     create_normal_two_headed_nn,
+    create_simple_nn,
     create_normal_nn,
 )
 
@@ -67,6 +68,8 @@ def run_train(
             model = create_small_two_headed_nn(learning_rate)
         elif model_params["model_type"] == "normal":
             model = create_normal_two_headed_nn(learning_rate)
+        elif model_params["model_type"] == "simple1h":
+            model = create_simple_nn(learning_rate)
         elif model_params["model_type"] == "normal1h":
             model = create_normal_nn(learning_rate)
         else:
@@ -102,12 +105,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "50_step_decrease_lr"
+    model_name = "main"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.9,  # hours
+        "budget": 0.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -119,7 +122,7 @@ def main():
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
-            "mcts_steps": 10,
+            "mcts_steps": 20,
             "n_of_sims": 0,
             "nn_scaler": 1,
             "ucb_c": 50,

@@ -41,7 +41,7 @@ class MCTS_Node:
         self.legal_moves = state.legal_moves()
 
     def expand(self, model, current_state):
-        move = random.choice(list(self.legal_moves))
+        move = random.choice(list(self.legal_moves - self.children_moves))
         self.children.add(MCTS_Node(model, current_state, self, move))
         self.children_moves.add(move)
         # for move in self.legal_moves - self.children_moves:
@@ -160,5 +160,5 @@ class MCTS:
         else:
             move = moves[np.argmax(visits)]
 
-        return move, current_node.score / current_node.visits
-        # return best_child.move, np.concatenate(([best_score / current_node.visits], propabilities))
+        # return move, current_node.score / current_node.visits
+        return move, np.concatenate(([current_node.score / current_node.visits], probabilities))
