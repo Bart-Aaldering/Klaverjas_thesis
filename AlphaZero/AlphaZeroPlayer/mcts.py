@@ -34,8 +34,10 @@ class MCTS_Node:
 
     def expand(self):
         move = random.choice(list(self.legal_moves - self.children_moves))
-        self.children.add(MCTS_Node(self, move))
+        new_node = MCTS_Node(self, move)
+        self.children.add(new_node)
         self.children_moves.add(move)
+        return new_node
 
     def select_child_ucb(self, c: int) -> MCTS_Node:
         ucbs = []
@@ -82,46 +84,54 @@ class MCTS:
             now = time.time()
             # Expansion
             if not current_state.round_complete():
-                current_node.expand()
-                current_node = current_node.select_child_ucb(self.ucb_c)
+                new_node = current_node.expand()
+                current_node = new_node
+                # current_node.expand()
+                # current_node = current_node.select_child_ucb(self.ucb_c)
                 current_state.do_move(current_node.move, "mcts_move")
+
             self.tijden[2] += time.time() - now
             now = time.time()
             # Simulation
-            sim_score = 0
-            for _ in range(self.n_of_sims):
-                moves = []
+            if not current_state.round_complete():
+                sim_score = 0
+                for _ in range(self.n_of_sims):
+                    moves = []
 
-                # Do random moves until round is complete
-                while not current_state.round_complete():
-                    move = random.choice(list(current_state.legal_moves()))
-                    moves.append(move)
-                    current_state.do_move(move, "simulation")
+                    # Do random moves until round is complete
+                    while not current_state.round_complete():
+                        move = random.choice(list(current_state.legal_moves()))
+                        moves.append(move)
+                        current_state.do_move(move, "simulation")
 
-                # Add score to points
-                sim_score += current_state.get_score(self.player_position)
+                    # Add score to points
+                    sim_score += current_state.get_score(self.player_position)
 
-                # Undo moves
-                moves.reverse()
-                for move in moves:
-                    current_state.undo_move(move, False)
+                    # Undo moves
+                    moves.reverse()
+                    for move in moves:
+                        current_state.undo_move(move, False)
 
-            # Average the score
-            if self.n_of_sims > 0:
-                sim_score /= self.n_of_sims
+                # Average the score
+                if self.n_of_sims > 0:
+                    sim_score /= self.n_of_sims
 
-            if self.model is not None:
-                now2 = time.time()
-                stat = current_state.to_nparray()
-                self.tijden2[0] += time.time() - now2
-                now2 = time.time()
-                arr = np.array([stat])
-                self.tijden2[1] += time.time() - now2
-                now2 = time.time()
-                nn_score = int(self.model(arr))
-                self.tijden2[2] += time.time() - now2
+                if self.model is not None:
+                    now2 = time.time()
+                    stat = current_state.to_nparray()
+                    self.tijden2[0] += time.time() - now2
+                    now2 = time.time()
+                    arr = np.array([stat])
+                    self.tijden2[1] += time.time() - now2
+                    now2 = time.time()
+                    nn_score = int(self.model(arr))
+                    self.tijden2[2] += time.time() - now2
+                else:
+                    nn_score = 0
             else:
-                nn_score = 0
+                sim_score = current_state.get_score(self.player_position)
+                nn_score = sim_score
+
             self.tijden[3] += time.time() - now
             now = time.time()
             # Backpropagation

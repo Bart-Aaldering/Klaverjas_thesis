@@ -11,7 +11,7 @@ from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_transform, team
 
 
 class State:
-    def __init__(self, round: Round, own_position: int) -> None:
+    def __init__(self, own_position: int) -> None:
         self.own_position = own_position
         self.pit_check = 0
         self.cards_left = [8, 8, 8, 8]
