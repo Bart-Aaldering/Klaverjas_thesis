@@ -99,12 +99,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "50_step_decrease_lr"
+    model_name = "main_test"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.9,  # hours
+        "budget": 0.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }

@@ -13,6 +13,14 @@ from AlphaZero.AlphaZeroPlayer.Klaverjas.helper import card_transform, team
 class State:
     def __init__(self, round: Round, own_position: int) -> None:
         self.own_position = own_position
+        self.pit_check = 0
+        self.cards_left = [8, 8, 8, 8]
+        self.final_score = [0, 0]
+        self.points = [0, 0]
+        self.meld = [0, 0]
+        self.tijden = [0, 0, 0, 0, 0]
+
+    def init_from_Round(self, round: Round):
         self.round = round
         self.current_player = round.current_player
         self.declaring_team = round.declaring_team
@@ -25,26 +33,32 @@ class State:
 
         not_own_hand_as_id = set([suit * 10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
 
-        # Cards that other players can have
-        # self.other_players_cards = set([Card(id) for id in not_own_hand_as_id])
-        # other_players_cards = set([Card(id) for id in not_own_hand_as_id])
-
         self.hands = [set() for _ in range(4)]
-        self.hands[own_position] = set([Card(id) for id in own_hand_as_id])
+        self.hands[self.own_position] = set([Card(id) for id in own_hand_as_id])
 
         self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
-        self.possible_cards[own_position] = set([Card(id) for id in own_hand_as_id])
+        self.possible_cards[self.own_position] = set([Card(id) for id in own_hand_as_id])
         self.removed_cards = [set() for _ in range(4)]
 
         self.tricks = [Trick(self.current_player)]
 
-        self.pit_check = 0
-        self.cards_left = [8, 8, 8, 8]
-        self.final_score = [0, 0]
-        # The current score of the round
-        self.points = [0, 0]
-        self.meld = [0, 0]
-        self.tijden = [0, 0, 0, 0, 0]
+    def init_from_klaverlive(self, own_hand, starting_player, declaring_team):
+        self.current_player = starting_player
+        self.declaring_team = declaring_team
+
+        # The hand of the transformed to the game state representation
+        own_hand_as_id = own_hand
+
+        not_own_hand_as_id = set([suit * 10 + value for suit in range(4) for value in range(8)]) - set(own_hand_as_id)
+
+        self.hands = [set() for _ in range(4)]
+        self.hands[self.own_position] = set([Card(id) for id in own_hand_as_id])
+
+        self.possible_cards = [set([Card(id) for id in not_own_hand_as_id]) for _ in range(4)]
+        self.possible_cards[self.own_position] = set([Card(id) for id in own_hand_as_id])
+        self.removed_cards = [set() for _ in range(4)]
+
+        self.tricks = [Trick(self.current_player)]
 
     def __eq__(self, other: State) -> bool:
         raise NotImplementedError
@@ -345,11 +359,7 @@ class State:
             card_location / np.sum(card_location, axis=1, keepdims=True),
             card_location,
         )
-        # for card in range(32):
-        #     row_sum = np.sum(card_location[card][:4])
-        #     for player in range(4):
-        #         if card_location[card][player] == 1:
-        #             card_location[card][player] = 1 / row_sum
+
         self.tijden[2] += time.time() - now
         now = time.time()
         if not (np.sum(card_location, axis=1) == 1).all():
