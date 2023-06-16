@@ -110,7 +110,7 @@ def main():
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 0.9,  # hours
+        "budget": 0.93,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }

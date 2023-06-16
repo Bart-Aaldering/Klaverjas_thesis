@@ -32,4 +32,4 @@ class AlphaZero_player:
         if self.player_position != self.state.current_player:
             print(self.state.current_player, self.player_position)
             raise Exception("Not this player's turn")
-        return self.mcts(self.state)
+        return self.mcts(self.state, training)

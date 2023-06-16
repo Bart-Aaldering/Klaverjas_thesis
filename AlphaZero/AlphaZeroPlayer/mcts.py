@@ -154,8 +154,8 @@ class MCTS:
             visits.append(child.visits)
             moves.append(child.move)
 
+        probabilities = np.array(visits) / np.sum(visits)
         if training == True:
-            probabilities = np.array(visits) / np.sum(visits)
             move = np.random.choice(moves, p=probabilities)
         else:
             move = moves[np.argmax(visits)]
