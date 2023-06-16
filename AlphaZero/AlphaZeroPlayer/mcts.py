@@ -33,9 +33,9 @@ class MCTS_Node:
         self.legal_moves = state.legal_moves()
 
     def expand(self):
-        for move in self.legal_moves - self.children_moves:
-            self.children.add(MCTS_Node(self, move))
-            self.children_moves.add(move)
+        move = random.choice(list(self.legal_moves - self.children_moves))
+        self.children.add(MCTS_Node(self, move))
+        self.children_moves.add(move)
 
     def select_child_ucb(self, c: int) -> MCTS_Node:
         ucbs = []
