@@ -168,10 +168,11 @@ def train(
         train_nn(train_data, model, fit_params, [early_stopping])
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
-        tf.keras.backend.set_value(
-            model.optimizer.learning_rate,
-            tf.keras.backend.get_value(model.optimizer.learning_rate) * learning_rate_decrease,
-        )
+        if step == 50 or step == 100:
+            tf.keras.backend.set_value(
+                model.optimizer.learning_rate,
+                tf.keras.backend.get_value(model.optimizer.learning_rate) / 10,
+            )
         model.save(f"Data/Models/{model_path}")
 
         total_selfplay_time += selfplay_time

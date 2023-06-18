@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu-long
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=20
 
 
 echo "[$SHELL] #### Starting Python test"
