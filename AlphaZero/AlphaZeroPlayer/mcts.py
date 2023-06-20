@@ -100,17 +100,17 @@ class MCTS:
 
                     # Do random moves until round is complete
                     while not current_state.round_complete():
-                        child2 = random.choice(list(current_state.legal_moves()))
-                        children.append(child2)
-                        current_state.do_move(child2, "simulation")
+                        move = random.choice(list(current_state.legal_moves()))
+                        children.append(move)
+                        current_state.do_move(move, "simulation")
 
                     # Add score to points
                     sim_score += current_state.get_score(self.player_position)
 
                     # Undo moves
                     children.reverse()
-                    for child2 in children:
-                        current_state.undo_move(child2, False)
+                    for move in children:
+                        current_state.undo_move(move, False)
 
                 # Average the score
                 if self.n_of_sims > 0:
@@ -157,8 +157,8 @@ class MCTS:
         if training == True:
             # visits = np.array(visits) + self.mcts_steps / 10
             probabilities = np.array(visits) / np.sum(visits)
-            child2 = np.random.choice(children, p=probabilities)
+            move = np.random.choice(children, p=probabilities).move
         else:
-            child2 = child
+            move = child.move
 
-        return child2, child.score / child.visits
+        return move, child.score / child.visits
