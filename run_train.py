@@ -99,12 +99,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "main_test"
+    model_name = "no_avr_value"
     run_settings = {
-        "project_name": "Thesis_test17",
+        "project_name": "Thesis_test18",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 0.9,  # hours
+        "budget": 3.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -125,16 +125,15 @@ def main():
     fit_params = {
         "epochs": 1,
         "batch_size": 2048,
-        "learning_rate_decrease": 0.95,
     }
     test_params = {
         "test_rounds": 5000,
-        "test_frequency": 30,
+        "test_frequency": 50,
         "mcts_params": {
-            "mcts_steps": 10,
+            "mcts_steps": 200,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 50,
+            "ucb_c": 300,
         },
     }
     run_train(

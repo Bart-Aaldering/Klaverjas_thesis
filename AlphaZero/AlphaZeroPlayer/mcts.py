@@ -96,21 +96,21 @@ class MCTS:
             if not current_state.round_complete():
                 sim_score = 0
                 for _ in range(self.n_of_sims):
-                    moves = []
+                    children = []
 
                     # Do random moves until round is complete
                     while not current_state.round_complete():
-                        move = random.choice(list(current_state.legal_moves()))
-                        moves.append(move)
-                        current_state.do_move(move, "simulation")
+                        child2 = random.choice(list(current_state.legal_moves()))
+                        children.append(child2)
+                        current_state.do_move(child2, "simulation")
 
                     # Add score to points
                     sim_score += current_state.get_score(self.player_position)
 
                     # Undo moves
-                    moves.reverse()
-                    for move in moves:
-                        current_state.undo_move(move, False)
+                    children.reverse()
+                    for child2 in children:
+                        current_state.undo_move(child2, False)
 
                 # Average the score
                 if self.n_of_sims > 0:
@@ -147,15 +147,18 @@ class MCTS:
             now = time.time()
 
         visits = []
-        moves = []
+        children = []
         for child in current_node.children:
             visits.append(child.visits)
-            moves.append(child.move)
+            children.append(child)
+
+        child = children[np.argmax(visits)]
 
         if training == True:
+            # visits = np.array(visits) + self.mcts_steps / 10
             probabilities = np.array(visits) / np.sum(visits)
-            move = np.random.choice(moves, p=probabilities)
+            child2 = np.random.choice(children, p=probabilities)
         else:
-            move = moves[np.argmax(visits)]
+            child2 = child
 
-        return move, current_node.score / current_node.visits
+        return child2, child.score / child.visits

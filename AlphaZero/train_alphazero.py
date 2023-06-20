@@ -122,7 +122,6 @@ def train(
     test_rounds = test_params["test_rounds"]
     test_frequency = test_params["test_frequency"]
     test_mcts_params = test_params["mcts_params"]
-    learning_rate_decrease = fit_params["learning_rate_decrease"]
 
     if step == 0:
         memory = None
