@@ -10,13 +10,14 @@ from AlphaZero.AlphaZeroPlayer.Klaverjas.state import State
 
 
 class MCTS_Node:
-    def __init__(self, parent: MCTS_Node = None, move: Card = None):
+    def __init__(self, own_team: bool = True, parent: MCTS_Node = None, move: Card = None):
         self.children = set()
         self.children_moves = set()
         self.parent = parent
         self.move = move
         self.score = 0
         self.visits = 0
+        self.own_team = own_team
 
     def __repr__(self) -> str:
         return f"Node({self.move}, {self.parent.move}, {self.score}, {self.visits})"
@@ -34,7 +35,7 @@ class MCTS_Node:
 
     def expand(self):
         move = random.choice(list(self.legal_moves - self.children_moves))
-        new_node = MCTS_Node(self, move)
+        new_node = MCTS_Node(not self.own_team, self, move)
         self.children.add(new_node)
         self.children_moves.add(move)
         return new_node
@@ -45,7 +46,10 @@ class MCTS_Node:
         for child in legal_children:
             if child.visits == 0:
                 return child
-            ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
+            if self.own_team:
+                ucbs.append(child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
+            else:
+                ucbs.append(-child.score / child.visits + c * np.sqrt(np.log(self.visits) / child.visits))
         index_max = np.argmax(np.array([ucbs]))
         return legal_children[index_max]
 

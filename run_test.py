@@ -17,19 +17,19 @@ def main():
     opponent = "rule"
     multiprocessing = True
 
-    num_rounds = 10000
+    num_rounds = 5000
     num_rounds = (
         math.ceil(num_rounds / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0
 
     mcts_params = {
         "mcts_steps": 200,
-        "n_of_sims": 0,
-        "nn_scaler": 1,
+        "n_of_sims": 1,
+        "nn_scaler": 0,
         "ucb_c": 300,
     }
 
-    model_paths = ["50_step_decrease_lr/50_step_decrease_lr_40.h5", None]
+    model_paths = [None, None]
 
     print(
         "cluster:",
