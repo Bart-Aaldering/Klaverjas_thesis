@@ -99,12 +99,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "no_avr_value"
+    model_name = "no_avr_extra_explo_rev_ucb"
     run_settings = {
         "project_name": "Thesis_test18",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.9,  # hours
+        "budget": 3.5,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
