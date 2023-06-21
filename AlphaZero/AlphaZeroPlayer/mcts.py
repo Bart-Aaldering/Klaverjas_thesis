@@ -159,7 +159,7 @@ class MCTS:
         child = children[np.argmax(visits)]
 
         if training == True:
-            visits = np.array(visits) + self.mcts_steps / 20
+            visits = np.array(visits) + self.mcts_steps / 10
             probabilities = visits / np.sum(visits)
             move = np.random.choice(children, p=probabilities).move
         else:

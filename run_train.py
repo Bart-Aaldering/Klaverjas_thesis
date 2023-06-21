@@ -99,7 +99,7 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "no_avr_extra_explo_rev_ucb"
+    model_name = "no_avr_extra_explo_rev_ucb_10"
     run_settings = {
         "project_name": "Thesis_test18",
         "model_name": model_name,
@@ -109,7 +109,7 @@ def main():
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "simple",
+        "model_type": "normal",
         "learning_rate": 0.01,
     }
     selfplay_params = {
@@ -127,7 +127,7 @@ def main():
         "batch_size": 2048,
     }
     test_params = {
-        "test_rounds": 5000,
+        "test_rounds": 1000,
         "test_frequency": 50,
         "mcts_params": {
             "mcts_steps": 200,
