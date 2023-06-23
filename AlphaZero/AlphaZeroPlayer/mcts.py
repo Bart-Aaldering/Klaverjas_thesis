@@ -60,13 +60,12 @@ class MCTS:
         self.n_of_sims = params["n_of_sims"]
         self.ucb_c = params["ucb_c"]
         self.nn_scaler = params["nn_scaler"]
-        self.extra_noise_ratio = params["extra_noise_ratio"]
         self.player_position = player_position
         self.model = model
         self.tijden = [0, 0, 0, 0, 0]
         self.tijden2 = [0, 0, 0]
 
-    def __call__(self, state: State, training: bool):
+    def __call__(self, state: State, training: bool, extra_noise_ratio):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
         if training:
@@ -165,7 +164,7 @@ class MCTS:
         child = children[np.argmax(visits)]
 
         if training == True:
-            visits = np.array(visits) + int(self.mcts_steps * self.extra_noise_ratio)
+            visits = np.array(visits) + int(self.mcts_steps * extra_noise_ratio)
             probabilities = visits / np.sum(visits)
             move = np.random.choice(children, p=probabilities).move
         else:

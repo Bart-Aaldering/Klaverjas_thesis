@@ -29,8 +29,8 @@ class AlphaZero_player:
     def update_state(self, move: Card):
         self.state.do_move(move)
 
-    def get_move(self, training: bool = False):
+    def get_move(self, training: bool = False, extra_noise_ratio=0):
         if self.player_position != self.state.current_player:
             print(self.state.current_player, self.player_position)
             raise Exception("Not this player's turn")
-        return self.mcts(self.state, training)
+        return self.mcts(self.state, training, extra_noise_ratio)
