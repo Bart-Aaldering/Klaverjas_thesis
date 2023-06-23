@@ -18,7 +18,7 @@ from Lennard.rounds import Round
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
 
 
-def selfplay(mcts_params, model_path, num_rounds):
+def selfplay(mcts_params, model_path, num_rounds, extra_noise_ratio):
     if model_path is not None:
         model = tf.keras.models.load_model(f"Data/Models/{model_path}")
     else:
@@ -50,16 +50,16 @@ def selfplay(mcts_params, model_path, num_rounds):
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card = alpha_player_0.get_move(training=True)
+                    played_card = alpha_player_0.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4] = alpha_player_0.state.to_nparray()
                 elif current_player == 1:
-                    played_card = alpha_player_1.get_move(training=True)
+                    played_card = alpha_player_1.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 1] = alpha_player_1.state.to_nparray()
                 elif current_player == 2:
-                    played_card = alpha_player_2.get_move(training=True)
+                    played_card = alpha_player_2.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 2] = alpha_player_2.state.to_nparray()
                 else:
-                    played_card = alpha_player_3.get_move(training=True)
+                    played_card = alpha_player_3.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 3] = alpha_player_3.state.to_nparray()
 
                 alpha_player_0.update_state(played_card)
@@ -124,6 +124,7 @@ def train(
     mcts_params,
     fit_params,
     test_params,
+    extra_noise_ratio,
 ):
     start_time = time.time()
     total_selfplay_time = 0
@@ -154,7 +155,7 @@ def train(
             with get_context("spawn").Pool(processes=n_cores) as pool:
                 data = pool.starmap(
                     selfplay,
-                    [(mcts_params, model_path, rounds_per_step // n_cores) for _ in range(n_cores)],
+                    [(mcts_params, model_path, rounds_per_step // n_cores, extra_noise_ratio) for _ in range(n_cores)],
                 )
             data = np.concatenate(data, axis=0)
         else:

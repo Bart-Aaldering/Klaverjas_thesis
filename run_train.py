@@ -25,6 +25,7 @@ def run_train(
     l2 = model_params["l2"]
     rounds_per_step = selfplay_params["rounds_per_step"]
     training_size_multiplier = fit_params["training_size_multiplier"]
+    extra_noise_ratio = selfplay_params["extra_noise_ratio"]
     mcts_params = selfplay_params["mcts_params"]
     max_memory_multiplier = selfplay_params["max_memory_multiplier"]
 
@@ -86,6 +87,7 @@ def run_train(
         mcts_params,
         fit_params,
         test_params,
+        extra_noise_ratio,
     )
     print("total time:", total_time)
     print("selfplay time:", selfplay_time)
@@ -121,12 +123,12 @@ def main():
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # memory size = rounds_per_step * 36 * max_memory_multiplier
+        "extra_noise_ratio": 0,  # extra noise ratio for training
         "mcts_params": {
             "mcts_steps": 50,
             "n_of_sims": 0,
             "nn_scaler": 1,
             "ucb_c": 200,
-            "extra_noise_ratio": 0.1,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
         },
     }
     fit_params = {
