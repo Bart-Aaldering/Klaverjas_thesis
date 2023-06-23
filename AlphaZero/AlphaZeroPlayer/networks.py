@@ -89,7 +89,7 @@ def create_simple_nn(learning_rate, l1, l2):
     return model
 
 
-def create_normal_nn(learning_rate, l1 = 0.01, l2 = 0.01):
+def create_normal_nn(learning_rate, l1, l2):
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Dense(256, activation="relu", kernel_regularizer=tf.keras.regularizers.l1_l2(l1, l2)),
