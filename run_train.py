@@ -129,7 +129,6 @@ def main():
             "n_of_sims": 0,
             "nn_scaler": 1,
             "ucb_c": 200,
-            "extra_noise_ratio": 0.1,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
         },
     }
     fit_params = {
