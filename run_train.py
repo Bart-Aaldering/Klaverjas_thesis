@@ -21,6 +21,8 @@ def run_train(
     model_name = run_settings["model_name"]
     multiprocessing = run_settings["multiprocessing"]
     learning_rate = model_params["learning_rate"]
+    l1 = model_params["l1"]
+    l2 = model_params["l2"]
     rounds_per_step = selfplay_params["rounds_per_step"]
     mcts_params = selfplay_params["mcts_params"]
     max_memory_multiplier = selfplay_params["max_memory_multiplier"]
@@ -61,7 +63,7 @@ def run_train(
         except:
             print("\n\n\n============model already exists============\n\n\n")
         if model_params["model_type"] == "simple":
-            model = create_simple_nn(learning_rate)
+            model = create_simple_nn(learning_rate, l1, l2)
         elif model_params["model_type"] == "normal":
             model = create_normal_nn(learning_rate)
         elif model_params["model_type"] == "large":
@@ -111,15 +113,17 @@ def main():
     model_params = {
         "model_type": "simple",
         "learning_rate": 0.01,
+        "l1": 0.01,
+        "l2": 0.01,
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
         "mcts_params": {
-            "mcts_steps": 50,
+            "mcts_steps": 25,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 200,
+            "ucb_c": 100,
         },
     }
     fit_params = {

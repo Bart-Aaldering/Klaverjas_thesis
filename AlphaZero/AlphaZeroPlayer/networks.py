@@ -73,11 +73,11 @@ def create_normal_two_headed_nn(learning_rate):
     return model
 
 
-def create_simple_nn(learning_rate):
+def create_simple_nn(learning_rate, l1, l2):
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Dense(299, activation="relu"),
-            tf.keras.layers.Dense(256, activation="relu"),
+            tf.keras.layers.Dense(299, activation="relu", kernel_regularizer=tf.keras.regularizers.l1_l2(l1, l2)),
+            tf.keras.layers.Dense(256, activation="relu", kernel_regularizer=tf.keras.regularizers.l1_l2(l1, l2)),
             tf.keras.layers.Dense(32, activation="relu"),
             tf.keras.layers.Dense(1, activation="linear"),
         ]
@@ -89,15 +89,13 @@ def create_simple_nn(learning_rate):
     return model
 
 
-def create_normal_nn(learning_rate):
+def create_normal_nn(learning_rate, l1 = 0.01, l2 = 0.01):
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Dense(299, activation="relu"),
-            tf.keras.layers.Dense(512, activation="relu"),
-            tf.keras.layers.Dense(512, activation="relu"),
-            tf.keras.layers.Dense(512, activation="relu"),
+            tf.keras.layers.Dense(256, activation="relu", kernel_regularizer=tf.keras.regularizers.l1_l2(l1, l2)),
+            tf.keras.layers.Dense(512, activation="relu", kernel_regularizer=tf.keras.regularizers.l1_l2(l1, l2)),
             tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.Dense(32, activation="relu"),
+            tf.keras.layers.Dense(16, activation="relu"),
             tf.keras.layers.Dense(1, activation="linear"),
         ]
     )
