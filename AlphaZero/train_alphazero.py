@@ -120,6 +120,7 @@ def train(
     multiprocessing,
     n_cores,
     rounds_per_step,
+    training_size_multiplier,
     mcts_params,
     fit_params,
     test_params,
@@ -171,7 +172,9 @@ def train(
             memory = np.delete(memory, np.s_[0 : len(memory) - max_memory], axis=0)
 
         # select train data and train model
-        train_data = memory[np.random.choice(len(memory), rounds_per_step * 36, replace=False), :]
+        train_data = memory[
+            np.random.choice(len(memory), rounds_per_step * 36 * training_size_multiplier, replace=False), :
+        ]
 
         # load train and save model
         model = tf.keras.models.load_model(f"Data/Models/{model_path}")

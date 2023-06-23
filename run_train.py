@@ -24,6 +24,7 @@ def run_train(
     l1 = model_params["l1"]
     l2 = model_params["l2"]
     rounds_per_step = selfplay_params["rounds_per_step"]
+    training_size_multiplier = fit_params["training_size_multiplier"]
     mcts_params = selfplay_params["mcts_params"]
     max_memory_multiplier = selfplay_params["max_memory_multiplier"]
 
@@ -81,6 +82,7 @@ def run_train(
         multiprocessing,
         n_cores,
         rounds_per_step,
+        training_size_multiplier,
         mcts_params,
         fit_params,
         test_params,
@@ -101,7 +103,7 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "real_rl"
+    model_name = "normal_50lr_rule"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
@@ -111,22 +113,24 @@ def main():
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "simple",
+        "model_type": "normal",
         "learning_rate": 0.01,
-        "l1": 0.01,
-        "l2": 0.01,
+        "l1": 0.0,
+        "l2": 0.0,
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
-        "max_memory_multiplier": 5,  # how many times rounds_per_step * 36 can fit in memory
+        "max_memory_multiplier": 5,  # memory size = rounds_per_step * 36 * max_memory_multiplier
         "mcts_params": {
-            "mcts_steps": 25,
+            "mcts_steps": 50,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 100,
+            "ucb_c": 200,
+            "extra_noise_ratio": 0.1,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
         },
     }
     fit_params = {
+        "training_size_multiplier": 1,  # training size = training_size_multiplier * rounds_per_step * 36
         "epochs": 1,
         "batch_size": 2048,
     }
