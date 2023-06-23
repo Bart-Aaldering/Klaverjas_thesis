@@ -67,7 +67,7 @@ def run_train(
         if model_params["model_type"] == "simple":
             model = create_simple_nn(learning_rate, l1, l2)
         elif model_params["model_type"] == "normal":
-            model = create_normal_nn(learning_rate)
+            model = create_normal_nn(learning_rate, l1, l2)
         elif model_params["model_type"] == "large":
             model = create_large_nn(learning_rate)
         else:
