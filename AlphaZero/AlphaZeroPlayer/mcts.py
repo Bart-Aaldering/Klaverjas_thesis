@@ -68,6 +68,11 @@ class MCTS:
     def __call__(self, state: State, training: bool):
         current_state = copy.deepcopy(state)
         current_node = MCTS_Node()
+        if training:
+            # ucb_c = self.ucb_c * 4
+            ucb_c = self.ucb_c
+        else:
+            ucb_c = self.ucb_c
         # current_state.set_determinization()
         for _ in range(self.mcts_steps):
 
@@ -81,7 +86,7 @@ class MCTS:
             while (
                 not current_state.round_complete() and current_node.legal_moves - current_node.children_moves == set()
             ):
-                current_node = current_node.select_child_ucb(self.ucb_c)
+                current_node = current_node.select_child_ucb(ucb_c)
                 current_state.do_move(current_node.move, "mcts_move")
                 current_node.set_legal_moves(current_state)
             self.tijden[1] += time.time() - now
@@ -91,7 +96,7 @@ class MCTS:
                 new_node = current_node.expand()
                 current_node = new_node
                 # current_node.expand()
-                # current_node = current_node.select_child_ucb(self.ucb_c)
+                # current_node = current_node.select_child_ucb(ucb_c)
                 current_state.do_move(current_node.move, "mcts_move")
 
             self.tijden[2] += time.time() - now
@@ -165,4 +170,4 @@ class MCTS:
         else:
             move = child.move
 
-        return move, child.score / child.visits
+        return move

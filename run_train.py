@@ -99,17 +99,17 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "no_avr_extra_explo_rev_ucb_10"
+    model_name = "real_rl"
     run_settings = {
-        "project_name": "Thesis_test18",
+        "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.5,  # hours
+        "budget": 3.9,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
     model_params = {
-        "model_type": "normal",
+        "model_type": "simple",
         "learning_rate": 0.01,
     }
     selfplay_params = {
@@ -127,13 +127,13 @@ def main():
         "batch_size": 2048,
     }
     test_params = {
-        "test_rounds": 1000,
-        "test_frequency": 50,
+        "test_rounds": 5000,
+        "test_frequency": 30,
         "mcts_params": {
-            "mcts_steps": 200,
+            "mcts_steps": 10,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 300,
+            "ucb_c": 50,
         },
     }
     run_train(

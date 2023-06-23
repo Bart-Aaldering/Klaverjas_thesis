@@ -26,11 +26,16 @@ def selfplay(mcts_params, model_path, num_rounds):
 
     X_train = np.zeros((num_rounds * 36, 299), dtype=np.float16)
     y_train = np.zeros((num_rounds * 36, 1), dtype=np.float16)
-
+    other_mcts_params = {
+        "mcts_steps": 200,
+        "n_of_sims": 1,
+        "nn_scaler": 0,
+        "ucb_c": 300,
+    }
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
-    alpha_player_1 = AlphaZero_player(1, mcts_params, model)
+    alpha_player_1 = AlphaZero_player(1, other_mcts_params, None)
     alpha_player_2 = AlphaZero_player(2, mcts_params, model)
-    alpha_player_3 = AlphaZero_player(3, mcts_params, model)
+    alpha_player_3 = AlphaZero_player(3, other_mcts_params, None)
 
     for round_num in range(num_rounds):
         round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))
@@ -41,25 +46,21 @@ def selfplay(mcts_params, model_path, num_rounds):
 
         # generate a state and score and play a card
         for trick in range(8):
-            for j in range(4):
+            for _ in range(4):
                 current_player = alpha_player_0.state.current_player
 
                 if current_player == 0:
-                    played_card, score = alpha_player_0.get_move(training=True)
-                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_0.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
+                    played_card = alpha_player_0.get_move(training=True)
+                    X_train[round_num * 36 + trick * 4] = alpha_player_0.state.to_nparray()
                 elif current_player == 1:
-                    played_card, score = alpha_player_1.get_move(training=True)
-                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_1.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
+                    played_card = alpha_player_1.get_move(training=True)
+                    X_train[round_num * 36 + trick * 4 + 1] = alpha_player_1.state.to_nparray()
                 elif current_player == 2:
-                    played_card, score = alpha_player_2.get_move(training=True)
-                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_2.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
+                    played_card = alpha_player_2.get_move(training=True)
+                    X_train[round_num * 36 + trick * 4 + 2] = alpha_player_2.state.to_nparray()
                 else:
-                    played_card, score = alpha_player_3.get_move(training=True)
-                    X_train[round_num * 36 + trick * 4 + j] = alpha_player_3.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + j] = score
+                    played_card = alpha_player_3.get_move(training=True)
+                    X_train[round_num * 36 + trick * 4 + 3] = alpha_player_3.state.to_nparray()
 
                 alpha_player_0.update_state(played_card)
                 alpha_player_1.update_state(played_card)
@@ -72,10 +73,21 @@ def selfplay(mcts_params, model_path, num_rounds):
         X_train[round_num * 36 + 32 + 2] = alpha_player_2.state.to_nparray()
         X_train[round_num * 36 + 32 + 3] = alpha_player_3.state.to_nparray()
 
-        y_train[round_num * 36 + 32] = alpha_player_0.state.get_score(0)
-        y_train[round_num * 36 + 32 + 1] = alpha_player_1.state.get_score(1)
-        y_train[round_num * 36 + 32 + 2] = alpha_player_2.state.get_score(2)
-        y_train[round_num * 36 + 32 + 3] = alpha_player_3.state.get_score(3)
+        score_player_0 = alpha_player_0.state.get_score(0)
+        score_player_1 = alpha_player_1.state.get_score(1)
+        score_player_2 = alpha_player_2.state.get_score(2)
+        score_player_3 = alpha_player_3.state.get_score(3)
+
+        if score_player_0 != score_player_2 or score_player_1 != score_player_3:
+            raise Exception("Scores are not equal")
+        if score_player_0 + score_player_1 + score_player_2 + score_player_3 != 0:
+            raise Exception("Scores do not add up to 0")
+
+        for trick in range(9):
+            y_train[round_num * 36 + trick * 4] = score_player_0
+            y_train[round_num * 36 + trick * 4 + 1] = score_player_1
+            y_train[round_num * 36 + trick * 4 + 2] = score_player_2
+            y_train[round_num * 36 + trick * 4 + 3] = score_player_3
 
     train_data = np.concatenate((X_train, y_train), axis=1)
     return train_data
@@ -167,7 +179,7 @@ def train(
         train_nn(train_data, model, fit_params, [early_stopping])
         training_time = time.time() - tijd
         model_path = f"{model_name}/{model_name}_{step}.h5"
-        if step == 100:
+        if step == 50:
             tf.keras.backend.set_value(
                 model.optimizer.learning_rate,
                 tf.keras.backend.get_value(model.optimizer.learning_rate) / 10,

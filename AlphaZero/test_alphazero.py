@@ -67,13 +67,13 @@ def test_vs_alphazero_player(
 
                 tijd = time.time()
                 if current_player == 0:
-                    played_card, _ = alpha_player_0.get_move()
+                    played_card = alpha_player_0.get_move()
                 elif current_player == 1:
-                    played_card, _ = alpha_player_1.get_move()
+                    played_card = alpha_player_1.get_move()
                 elif current_player == 2:
-                    played_card, _ = alpha_player_2.get_move()
+                    played_card = alpha_player_2.get_move()
                 else:
-                    played_card, _ = alpha_player_3.get_move()
+                    played_card = alpha_player_3.get_move()
                 alpha_eval_time += time.time() - tijd
 
                 alpha_player_0.update_state(played_card)
@@ -145,10 +145,10 @@ def test_vs_rule_player(
                 else:
                     tijd = time.time()
                     if current_player == 0:
-                        played_card, _ = alpha_player_0.get_move()
+                        played_card = alpha_player_0.get_move()
                         played_card = card_untransform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit))
                     else:
-                        played_card, _ = alpha_player_2.get_move()
+                        played_card = alpha_player_2.get_move()
                         played_card = card_untransform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit))
                     alpha_eval_time += time.time() - tijd
                     moves = round.legal_moves()
