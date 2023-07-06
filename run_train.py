@@ -105,12 +105,12 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "normal_50lr_rule"
+    model_name = "normal_10_rulevsrule"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
         "starting_step": 0,
-        "budget": 3.9,  # hours
+        "budget": 3.85,  # hours
         "multiprocessing": True,
         "n_cores": n_cores,
     }
@@ -123,7 +123,7 @@ def main():
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
         "max_memory_multiplier": 5,  # memory size = rounds_per_step * 36 * max_memory_multiplier
-        "extra_noise_ratio": 0.1,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
+        "extra_noise_ratio": 0,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
         "mcts_params": {
             "mcts_steps": 50,
             "n_of_sims": 0,
@@ -133,12 +133,12 @@ def main():
     }
     fit_params = {
         "training_size_multiplier": 1,  # training size = training_size_multiplier * rounds_per_step * 36
-        "epochs": 1,
+        "epochs": 5,
         "batch_size": 2048,
     }
     test_params = {
-        "test_rounds": 5000,
-        "test_frequency": 30,
+        "test_rounds": 10000,
+        "test_frequency": 60,
         "mcts_params": {
             "mcts_steps": 10,
             "n_of_sims": 0,

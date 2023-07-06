@@ -26,16 +26,11 @@ def selfplay(mcts_params, model_path, num_rounds, extra_noise_ratio):
 
     X_train = np.zeros((num_rounds * 36, 299), dtype=np.float16)
     y_train = np.zeros((num_rounds * 36, 1), dtype=np.float16)
-    other_mcts_params = {
-        "mcts_steps": 200,
-        "n_of_sims": 1,
-        "nn_scaler": 0,
-        "ucb_c": 300,
-    }
+
     alpha_player_0 = AlphaZero_player(0, mcts_params, model)
-    alpha_player_1 = AlphaZero_player(1, other_mcts_params, None)
+    alpha_player_1 = AlphaZero_player(1, mcts_params, model)
     alpha_player_2 = AlphaZero_player(2, mcts_params, model)
-    alpha_player_3 = AlphaZero_player(3, other_mcts_params, None)
+    alpha_player_3 = AlphaZero_player(3, mcts_params, model)
 
     for round_num in range(num_rounds):
         round = Round(random.choice([0, 1, 2, 3]), random.choice(["k", "h", "r", "s"]), random.choice([0, 1, 2, 3]))

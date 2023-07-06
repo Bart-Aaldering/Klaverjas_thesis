@@ -29,7 +29,7 @@ def test_vs_alphazero_player(
     point_cumulative = [0, 0]
     scores_alpha = []
 
-    if num_rounds * (process_id + 1) > 50000:
+    if num_rounds * (process_id + 1) > 50010:
         raise "too many rounds"
 
     rounds = pd.read_csv("Data/SL_data/originalDB.csv", low_memory=False, converters={"Cards": pd.eval})
@@ -46,8 +46,8 @@ def test_vs_alphazero_player(
     alpha_player_3 = AlphaZero_player(3, mcts_params, model2)
 
     for round_num in range(num_rounds * process_id, num_rounds * (process_id + 1)):
-        if not process_id and round_num % 50 == 0:
-            print(round_num)
+        # if not process_id and round_num % 50 == 0:
+        #     print(round_num)
         # round = Round((starting_player + 1) % 4, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
 
         round = Round(
@@ -126,10 +126,19 @@ def test_vs_rule_player(
     for round_num in range(num_rounds * process_id, num_rounds * (process_id + 1)):
         # round = Round((starting_player + 1) % 4, random.choice(['k', 'h', 'r', 's']), random.choice([0,1,2,3]))
 
-        round = Round(
-            rounds.loc[round_num]["FirstPlayer"], rounds.loc[round_num]["Troef"][0], rounds.loc[round_num]["Gaat"]
-        )
-        round.set_cards(rounds.loc[round_num]["Cards"])
+        if round_num % 2 == 0:
+            round = Round(
+                rounds.loc[round_num]["FirstPlayer"], rounds.loc[round_num]["Troef"][0], rounds.loc[round_num]["Gaat"]
+            )
+            round.set_cards(rounds.loc[round_num]["Cards"])
+        else:
+            round = Round(
+                (rounds.loc[round_num]["FirstPlayer"] + 1) % 4,
+                rounds.loc[round_num]["Troef"][0],
+                (rounds.loc[round_num]["Gaat"] + 1) % 4,
+            )
+            cards = rounds.loc[round_num]["Cards"]
+            round.set_cards(cards[3:] + cards[:3])
 
         alpha_player_0.new_round_Round(round)
         alpha_player_2.new_round_Round(round)

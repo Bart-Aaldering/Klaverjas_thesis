@@ -17,16 +17,16 @@ def main():
     opponent = "rule"
     multiprocessing = True
 
-    num_rounds = 5000
+    num_rounds = 500
     num_rounds = (
         math.ceil(num_rounds / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0
 
     mcts_params = {
-        "mcts_steps": 200,
+        "mcts_steps": 10,
         "n_of_sims": 1,
         "nn_scaler": 0,
-        "ucb_c": 300,
+        "ucb_c": 50,
     }
 
     model_paths = [None, None]
