@@ -105,7 +105,7 @@ def main():
         cluster = "local"
     print(f"Using {n_cores} cores on {cluster}")
 
-    model_name = "normal_10_rulevsrule"
+    model_name = "real_lr_2"
     run_settings = {
         "project_name": "Thesis_test17",
         "model_name": model_name,
@@ -122,18 +122,18 @@ def main():
     }
     selfplay_params = {
         "rounds_per_step": 60,  # amount of selfplay rounds per step
-        "max_memory_multiplier": 5,  # memory size = rounds_per_step * 36 * max_memory_multiplier
-        "extra_noise_ratio": 0,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
+        "max_memory_multiplier": 10,  # memory size = rounds_per_step * 36 * max_memory_multiplier
+        "extra_noise_ratio": 0.05,  # when training extra_noise_ratio * mcts_steps is added to all visit counts
         "mcts_params": {
             "mcts_steps": 50,
             "n_of_sims": 0,
             "nn_scaler": 1,
-            "ucb_c": 200,
+            "ucb_c": 600,
         },
     }
     fit_params = {
         "training_size_multiplier": 1,  # training size = training_size_multiplier * rounds_per_step * 36
-        "epochs": 5,
+        "epochs": 1,
         "batch_size": 2048,
     }
     test_params = {
