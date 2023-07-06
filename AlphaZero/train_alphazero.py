@@ -47,19 +47,15 @@ def selfplay(mcts_params, model_path, num_rounds, extra_noise_ratio):
                 if current_player == 0:
                     played_card = alpha_player_0.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4] = alpha_player_0.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4] = alpha_player_0.state.get_score(0)
                 elif current_player == 1:
                     played_card = alpha_player_1.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 1] = alpha_player_1.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + 1] = alpha_player_1.state.get_score(1)
                 elif current_player == 2:
                     played_card = alpha_player_2.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 2] = alpha_player_2.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + 2] = alpha_player_2.state.get_score(2)
                 else:
                     played_card = alpha_player_3.get_move(True, extra_noise_ratio)
                     X_train[round_num * 36 + trick * 4 + 3] = alpha_player_3.state.to_nparray()
-                    y_train[round_num * 36 + trick * 4 + 3] = alpha_player_3.state.get_score(3)
 
                 alpha_player_0.update_state(played_card)
                 alpha_player_1.update_state(played_card)
@@ -82,7 +78,7 @@ def selfplay(mcts_params, model_path, num_rounds, extra_noise_ratio):
         if score_player_0 + score_player_1 + score_player_2 + score_player_3 != 0:
             raise Exception("Scores do not add up to 0")
 
-        for trick in range(8, 9):
+        for trick in range(9):
             y_train[round_num * 36 + trick * 4] = score_player_0
             y_train[round_num * 36 + trick * 4 + 1] = score_player_1
             y_train[round_num * 36 + trick * 4 + 2] = score_player_2
