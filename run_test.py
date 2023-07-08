@@ -17,7 +17,7 @@ def run_test(mcts_steps, ucb):
     opponent = "rule"
     multiprocessing = True
 
-    num_rounds = 5000
+    num_rounds = 3000
     num_rounds = (
         math.ceil(num_rounds / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0
@@ -29,6 +29,7 @@ def run_test(mcts_steps, ucb):
         "ucb_c": ucb,
     }
 
+    # model_paths = ["SL_models/SL_model_0.h5", None]
     model_paths = [None, None]
 
     print(
@@ -59,9 +60,16 @@ def run_test(mcts_steps, ucb):
         "eval_time(ms):",
         alpha_eval_time,
     )
+
+
 def main():
-    run_test(200, 12800)
-    
+
+    # run_test(10, 50)
+    # run_test(50, 200)
+    # run_test(200, 800)
+    run_test(800, 50)
+
+
 if __name__ == "__main__":
     start_time = time.time()
     main()

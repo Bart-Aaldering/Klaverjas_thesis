@@ -176,10 +176,10 @@ def train_nn_on_data(model_name, step):
         X_train,
         y_train,
         batch_size=2048,
-        epochs=10,
-        verbose=0,
+        epochs=5,
+        verbose=1,
         validation_data=(X_test, y_test),
-        # callbacks=early_stopping,
+        callbacks=early_stopping,
     )
 
     y_pred_test = model(X_test)
@@ -189,7 +189,6 @@ def train_nn_on_data(model_name, step):
     print(y_pred_test[:10])
     print(y_test[:10])
 
-    model.evaluate(X_test, y_test, verbose=2)
     model.save(f"Data/Models/SL_models/{model_name}_{step}.h5")
 
 
@@ -212,18 +211,19 @@ def test(test_rounds, mcts_params, model_name, step):
 
 def main():
     model_name = "SL_model"
-    step = 0
+    step = 1
     mcts_params = {
         "mcts_steps": 10,
         "n_of_sims": 0,
         "nn_scaler": 1,
         "ucb_c": 50,
     }
-    test_rounds = 1000
+    test_rounds = 5000
 
-    run_create_data()
-    merge_npy(10)
-    train_nn_on_data(model_name, step)
+    # run_create_data()
+    # merge_npy(10)
+    # train_nn_on_data(model_name, step)
+    step = 0
     test(test_rounds, mcts_params, model_name, step)
 
 
