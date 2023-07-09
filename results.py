@@ -32,23 +32,23 @@ y_3200_1 = [50.4, 61.5, 60.7, 59, 58.6, 57.7, 53.6]
 std_3200_1 = 2.3
 
 marker = ".-"
-alpha1 = 0.1
+alpha1 = 0.08
 fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(28, 7))
 ax1.plot(X_10_1, y_10_1, marker, label="10 simulations")
-ax1.fill_between(X_10_1, np.array(y_10_1) - std_10_1 * 1.98, np.array(y_10_1) + std_10_1 * 1.98, alpha=alpha1)
+ax1.fill_between(X_10_1, np.array(y_10_1) - std_10_1 * 1.96, np.array(y_10_1) + std_10_1 * 1.96, alpha=alpha1)
 
 ax1.plot(X_50_1, y_50_1, marker, label="50 simulations")
-ax1.fill_between(X_50_1, np.array(y_50_1) - std_50_1 * 1.98, np.array(y_50_1) + std_50_1 * 1.98, alpha=alpha1)
+ax1.fill_between(X_50_1, np.array(y_50_1) - std_50_1 * 1.96, np.array(y_50_1) + std_50_1 * 1.96, alpha=alpha1)
 
 ax1.plot(X_200_1, y_200_1, marker, label="200 simulations")
-ax1.fill_between(X_200_1, np.array(y_200_1) - std_200_1 * 1.98, np.array(y_200_1) + std_200_1 * 1.98, alpha=alpha1)
+ax1.fill_between(X_200_1, np.array(y_200_1) - std_200_1 * 1.96, np.array(y_200_1) + std_200_1 * 1.96, alpha=alpha1)
 
 ax1.plot(X_800_1, y_800_1, marker, label="800 simulations")
-ax1.fill_between(X_800_1, np.array(y_800_1) - std_800_1 * 1.98, np.array(y_800_1) + std_800_1 * 1.98, alpha=alpha1)
+ax1.fill_between(X_800_1, np.array(y_800_1) - std_800_1 * 1.96, np.array(y_800_1) + std_800_1 * 1.96, alpha=alpha1)
 
 ax1.plot(X_3200_1, y_3200_1, marker, label="3200 simulations")
 ax1.fill_between(
-    X_3200_1, np.array(y_3200_1) - std_3200_1 * 1.98, np.array(y_3200_1) + std_3200_1 * 1.98, alpha=alpha1
+    X_3200_1, np.array(y_3200_1) - std_3200_1 * 1.96, np.array(y_3200_1) + std_3200_1 * 1.96, alpha=alpha1
 )
 
 ax1.vlines(
@@ -65,7 +65,7 @@ ax1.set_ylim(bottom=-10)
 ax1.set_xscale("log")
 ax1.set_xlabel("Exploration Rate (C value)")
 ax1.set_ylabel("Score Difference")
-ax1.set_title("Effect of different C values on \nthe average score (rollouts=1).")
+# ax1.set_title("Effect of different C values on \nthe average score (rollouts=1).")
 ax1.legend()
 
 
@@ -83,37 +83,35 @@ time_rollout = [2.9, 12.6, 54.1, 310, 885.2]
 score_rollout = [4, 28.8, 43.9, 55, 58.6]
 std_rollout = np.array([1.3, 1.3, 1.3, 1.8, 2.3])
 
-marker2 = "-"
-alpha2 = 0.1
-ax2.plot(steps, score_hp, marker2, label="Human Data")
+ax2.plot(steps, score_hp, marker, label="Human Data")
 ax2.fill_between(
     steps,
-    np.array(score_hp) - std_hp * 1.98,
-    np.array(score_hp) + std_hp * 1.98,
-    alpha=alpha2,
+    np.array(score_hp) - std_hp * 1.96,
+    np.array(score_hp) + std_hp * 1.96,
+    alpha=alpha1,
     edgecolor="blue",
 )
-ax2.plot(steps, score_sp, marker2, label="Self-Play")
+ax2.plot(steps, score_sp, marker, label="Self-Play")
 ax2.fill_between(
     steps,
-    np.array(score_sp) - std_sp * 1.98,
-    np.array(score_sp) + std_sp * 1.98,
-    alpha=alpha2,
+    np.array(score_sp) - std_sp * 1.96,
+    np.array(score_sp) + std_sp * 1.96,
+    alpha=alpha1,
     edgecolor="orange",
 )
-ax2.plot(steps, score_rollout, marker2, label="Random Rollouts")
+ax2.plot(steps, score_rollout, marker, label="Random Rollouts")
 ax2.fill_between(
     steps,
-    np.array(score_rollout) - std_rollout * 1.98,
-    np.array(score_rollout) + std_rollout * 1.98,
-    alpha=alpha2,
+    np.array(score_rollout) - std_rollout * 1.96,
+    np.array(score_rollout) + std_rollout * 1.96,
+    alpha=alpha1,
     edgecolor="green",
 )
 all_y = score_hp + score_sp + score_rollout
 ax2.vlines(steps, 0, [14.3, 30.6, 43.9, 55, 58.6], linestyles="dashed", color="black", alpha=0.2, linewidth=1)
 ax2.set_ylim(bottom=0)
 ax2.set_xscale("log")
-ax2.set_title("Effect of different number of simulations \non the average score (rollouts=1).")
+# ax2.set_title("Effect of different number of simulations \non the average score (rollouts=1).")
 ax2.set_xlabel("Tree Depth per move (simulations)")
 ax2.set_ylabel("Score Difference")
 ax2.legend()
@@ -121,12 +119,12 @@ ax2.legend()
 number_base = 130
 number_scale = 10
 
-ax3.plot(time_hp, score_hp, marker2, label="Simulations (Human Data)")
+ax3.plot(time_hp, score_hp, marker, label="Simulations (Human Data)")
 ax3.fill_between(
     time_hp,
-    np.array(score_hp) - std_hp * 1.98,
-    np.array(score_hp) + std_hp * 1.98,
-    alpha=alpha2,
+    np.array(score_hp) - std_hp * 1.96,
+    np.array(score_hp) + std_hp * 1.96,
+    alpha=alpha1,
     edgecolor="blue",
 )
 for xp, yp, m in zip(time_hp, score_hp, steps):
@@ -138,12 +136,12 @@ for xp, yp, m in zip(time_hp, score_hp, steps):
         color="black",
         zorder=10,
     )
-ax3.plot(time_sp, score_sp, marker2, label="Simulations (Self-Play)")
+ax3.plot(time_sp, score_sp, marker, label="Simulations (Self-Play)")
 ax3.fill_between(
     time_sp,
-    np.array(score_sp) - std_sp * 1.98,
-    np.array(score_sp) + std_sp * 1.98,
-    alpha=alpha2,
+    np.array(score_sp) - std_sp * 1.96,
+    np.array(score_sp) + std_sp * 1.96,
+    alpha=alpha1,
     edgecolor="orange",
 )
 score_sp[0] += 1.5
@@ -156,12 +154,12 @@ for xp, yp, m in zip(time_sp, score_sp, steps):
         color="black",
         zorder=10,
     )
-ax3.plot(time_rollout, score_rollout, marker2, label="Simulations (Random Rollouts)")
+ax3.plot(time_rollout, score_rollout, marker, label="Simulations (Random Rollouts)")
 ax3.fill_between(
     time_rollout,
-    np.array(score_rollout) - std_rollout * 1.98,
-    np.array(score_rollout) + std_rollout * 1.98,
-    alpha=alpha2,
+    np.array(score_rollout) - std_rollout * 1.96,
+    np.array(score_rollout) + std_rollout * 1.96,
+    alpha=alpha1,
     edgecolor="green",
 )
 score_rollout[0] += 2
@@ -179,12 +177,12 @@ time_step10_c1 = [345, 91, 30.4, 8.48, 2.9]
 score_step10_c1 = [12.8, 10.3, 7.8, 4.8, 4]
 std_step10_c1 = 0.6
 
-ax3.plot(time_step10_c1, score_step10_c1, marker2, label="Random Rollouts")
+ax3.plot(time_step10_c1, score_step10_c1, marker, label="Random Rollouts")
 ax3.fill_between(
     time_step10_c1,
-    np.array(score_step10_c1) - std_step10_c1 * 1.98,
-    np.array(score_step10_c1) + std_step10_c1 * 1.98,
-    alpha=alpha2,
+    np.array(score_step10_c1) - std_step10_c1 * 1.96,
+    np.array(score_step10_c1) + std_step10_c1 * 1.96,
+    alpha=alpha1,
     edgecolor="red",
 )
 time_step10_c1[4] += 1
@@ -199,7 +197,7 @@ for xp, yp, m in zip(time_step10_c1, score_step10_c1, sims_step10_c1):
         zorder=10,
     )
 
-ax3.set_title("Effect of different number of simulations and rollouts on\n the think time and average score.")
+# ax3.set_title("Effect of different number of simulations and rollouts on\n the think time and average score.")
 ax3.set_xscale("log")
 ax3.set_xlabel("Thinking time per move (ms)")
 ax3.set_ylabel("Score Difference")
@@ -211,17 +209,33 @@ times_sp = [0, 4580, 9215, 13822, 18406, 23000, 27600, 32100, 36700]
 times_sp = [x / 3600 for x in times_sp]
 std_sp = 1.3
 
-
-ax4.plot(times_sp, scores_sp, marker, label="Self-Play")
+ax4.hlines(14.3, 0, 10, label="Human Data")
+ax4.fill_between(
+    [0, 10],
+    np.array([14.3, 14.3]) - std_sp * 1.96,
+    np.array([14.3, 14.3]) + std_sp * 1.96,
+    alpha=alpha1,
+    edgecolor="blue",
+)
+ax4.plot(times_sp, scores_sp, marker, label="Self-Play", color="#ff7f0e")
 ax4.fill_between(
     times_sp,
-    np.array(scores_sp) - std_sp * 1.98,
-    np.array(scores_sp) + std_sp * 1.98,
-    alpha=0.2,
+    np.array(scores_sp) - std_sp * 1.96,
+    np.array(scores_sp) + std_sp * 1.96,
+    alpha=alpha1,
+    edgecolor="orange",
 )
-ax4.hlines(14.3, 0, 10, label="Human Data", color="#ff7f0e")
 ax4.hlines(3.0, 0, 10, label="Random Rollouts", color="#2ca02c")
-ax4.set_title("Progression of the average score while training (simulations=10).")
+ax4.fill_between(
+    [0, 10],
+    np.array([3.0, 3.0]) - std_sp * 1.96,
+    np.array([3.0, 3.0]) + std_sp * 1.96,
+    alpha=alpha1,
+    edgecolor="green",
+)
+
+
+# ax4.set_title("Progression of the average score while training (simulations=10).")
 ax4.set_ylabel("Score Difference")
 ax4.set_xlabel("Training time (hours)")
 ax4.legend(loc=5)
@@ -250,16 +264,16 @@ plt.show()
 
 # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(21, 7))
 # ax1.plot(X_10_5, y_10_5, marker, label="10 steps")
-# ax1.fill_between(X_10_5, np.array(y_10_5) - std_10_5 * 1.98, np.array(y_10_5) + std_10_5 * 1.98, alpha=0.2)
+# ax1.fill_between(X_10_5, np.array(y_10_5) - std_10_5 * 1.96, np.array(y_10_5) + std_10_5 * 1.96, alpha=0.2)
 
 # ax1.plot(X_50_5, y_50_5, marker, label="50 steps")
-# ax1.fill_between(X_50_5, np.array(y_50_5) - std_50_5 * 1.98, np.array(y_50_5) + std_50_5 * 1.98, alpha=0.2)
+# ax1.fill_between(X_50_5, np.array(y_50_5) - std_50_5 * 1.96, np.array(y_50_5) + std_50_5 * 1.96, alpha=0.2)
 
 # ax1.plot(X_200_5, y_200_5, marker, label="200 steps")
-# ax1.fill_between(X_200_5, np.array(y_200_5) - std_200_5 * 1.98, np.array(y_200_5) + std_200_5 * 1.98, alpha=0.2)
+# ax1.fill_between(X_200_5, np.array(y_200_5) - std_200_5 * 1.96, np.array(y_200_5) + std_200_5 * 1.96, alpha=0.2)
 
 # ax1.plot(X_500_5, y_500_5, marker, label="500 steps")
-# ax1.fill_between(X_500_5, np.array(y_500_5) - std_500_5 * 1.98, np.array(y_500_5) + std_500_5 * 1.98, alpha=0.2)
+# ax1.fill_between(X_500_5, np.array(y_500_5) - std_500_5 * 1.96, np.array(y_500_5) + std_500_5 * 1.96, alpha=0.2)
 
 # ax1.set_title("Effect of different number of steps with different \n C values on the average score (sims=5)")
 # # ax1.set_title("Average Score vs C value (Exploration Rate) \n for different number of steps and sims=5")
@@ -344,19 +358,19 @@ plt.show()
 # ax3.plot(times_no_sims, scores_no_sims, marker, label="RL without sims")
 # ax3.fill_between(
 #     times_no_sims,
-#     np.array(scores_no_sims) - std_no_sims * 1.98,
-#     np.array(scores_no_sims) + std_no_sims * 1.98,
+#     np.array(scores_no_sims) - std_no_sims * 1.96,
+#     np.array(scores_no_sims) + std_no_sims * 1.96,
 #     alpha=0.2,
 # )
 # ax3.plot(times_sims, scores_sims, marker, label="RL with sims")
 # ax3.fill_between(
-#     times_sims, np.array(scores_sims) - std_sims * 1.98, np.array(scores_sims) + std_sims * 1.98, alpha=0.2
+#     times_sims, np.array(scores_sims) - std_sims * 1.96, np.array(scores_sims) + std_sims * 1.96, alpha=0.2
 # )
 # ax3.plot(times_boosted, scores_boosted, marker, label="RL boosted")
 # ax3.fill_between(
 #     times_boosted,
-#     np.array(scores_boosted) - std_boosted * 1.98,
-#     np.array(scores_boosted) + std_boosted * 1.98,
+#     np.array(scores_boosted) - std_boosted * 1.96,
+#     np.array(scores_boosted) + std_boosted * 1.96,
 #     alpha=0.2,
 # )
 # ax3.set_title("Progression of the average score while training")

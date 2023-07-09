@@ -60,14 +60,6 @@ class State:
 
         self.tricks = [Trick(self.current_player)]
 
-    def __eq__(self, other: State) -> bool:
-        raise NotImplementedError
-        return self.__dict__ == other.__dict__
-
-    def __hash__(self) -> int:
-        raise NotImplementedError
-        return hash(tuple(sorted(self.__dict__.items())))
-
     def set_determinization(self):
         other_players = [0, 1, 2, 3]
         other_players.pop(self.own_position)

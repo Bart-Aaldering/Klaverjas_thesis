@@ -133,11 +133,11 @@ def test_vs_rule_player(
             round.set_cards(rounds.loc[round_num]["Cards"])
         else:
             round = Round(
-                (rounds.loc[round_num]["FirstPlayer"] + 1) % 4,
-                rounds.loc[round_num]["Troef"][0],
-                (rounds.loc[round_num]["Gaat"] + 1) % 4,
+                (rounds.loc[round_num - 1]["FirstPlayer"] + 1) % 4,
+                rounds.loc[round_num - 1]["Troef"][0],
+                (rounds.loc[round_num - 1]["Gaat"] + 1) % 4,
             )
-            cards = rounds.loc[round_num]["Cards"]
+            cards = rounds.loc[round_num - 1]["Cards"]
             round.set_cards(cards[3:] + cards[:3])
 
         alpha_player_0.new_round_Round(round)

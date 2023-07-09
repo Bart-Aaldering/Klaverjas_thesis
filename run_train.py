@@ -2,10 +2,9 @@ import os
 import wandb
 import math
 import time
-import copy
 
 from AlphaZero.train_alphazero import train
-from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn, create_large_nn
+from AlphaZero.AlphaZeroPlayer.networks import create_simple_nn, create_normal_nn
 
 
 def run_train(
@@ -68,8 +67,6 @@ def run_train(
             model = create_simple_nn(learning_rate, l1, l2)
         elif model_params["model_type"] == "normal":
             model = create_normal_nn(learning_rate, l1, l2)
-        elif model_params["model_type"] == "large":
-            model = create_large_nn(learning_rate)
         else:
             raise Exception("model type not recognized")
 

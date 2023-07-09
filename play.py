@@ -65,10 +65,6 @@ def main():
                     raise Exception("move not found")
 
                 print(played_card)
-                a = alpha_player_1.state.to_nparray()
-                b = alpha_player_2.state.to_nparray()
-                c = alpha_player_3.state.to_nparray()
-                print_state(a)
 
                 round.play_card(played_card)
                 move = Card(card_transform(played_card.id, ["k", "h", "r", "s"].index(round.trump_suit)))

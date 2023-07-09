@@ -18,7 +18,6 @@ class AlphaZero_player:
         if self.state is not None:
             for i in range(len(self.tijden)):
                 self.tijden[i] += self.state.tijden[i]
-        # self.state = State(round, self.player_position)
         self.state = State(self.player_position)
         self.state.init_from_Round(round)
 

@@ -223,7 +223,6 @@ def main():
     # run_create_data()
     # merge_npy(10)
     # train_nn_on_data(model_name, step)
-    step = 0
     test(test_rounds, mcts_params, model_name, step)
 
 

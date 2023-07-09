@@ -6,7 +6,7 @@ import math
 from AlphaZero.test_alphazero import run_test_multiprocess
 
 
-def run_test(mcts_steps, ucb):
+def run_test():
     try:
         n_cores = int(os.environ["SLURM_JOB_CPUS_PER_NODE"])
         cluster = "cluster"
@@ -17,16 +17,16 @@ def run_test(mcts_steps, ucb):
     opponent = "rule"
     multiprocessing = True
 
-    num_rounds = 3000
+    num_rounds = 1000
     num_rounds = (
         math.ceil(num_rounds / n_cores) * n_cores
     )  # make sure rounds is divisible by n_cores and not devide to 0
 
     mcts_params = {
-        "mcts_steps": mcts_steps,
+        "mcts_steps": 200,
         "n_of_sims": 1,
         "nn_scaler": 0,
-        "ucb_c": ucb,
+        "ucb_c": 200,
     }
 
     # model_paths = ["SL_models/SL_model_0.h5", None]
@@ -62,15 +62,7 @@ def run_test(mcts_steps, ucb):
     )
 
 
-def main():
-
-    # run_test(10, 50)
-    # run_test(50, 200)
-    # run_test(200, 800)
-    run_test(800, 50)
-
-
 if __name__ == "__main__":
     start_time = time.time()
-    main()
+    run_test()
     print("Total time: ", time.time() - start_time)

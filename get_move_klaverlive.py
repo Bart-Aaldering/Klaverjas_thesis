@@ -145,7 +145,7 @@ def process_klaverlive_json(json_state):
         played_cards.append(card_tranformed)
 
     starting_player = json_state["History"][0]["First"]
-    declaring_team = 1 - json_state["TeamGaat"]
+    declaring_team = json_state["TeamGaat"]
 
     return hand, starting_player, declaring_team, played_cards
 
@@ -171,7 +171,7 @@ def main(json_state, alpha_player_settings):
 
     for card in played_cards:
         alphazero_player.update_state(Card(card))
-
+    print(alphazero_player.state.hands)
     move = alphazero_player.get_move().id
     return alpha_card_to_klaverlive_card(move, json_state["TroefKleur"])
 
