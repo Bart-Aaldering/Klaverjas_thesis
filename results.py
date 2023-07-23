@@ -33,7 +33,11 @@ std_3200_1 = 2.3
 
 marker = ".-"
 alpha1 = 0.08
-fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(28, 7))
+fig1, ax1 = plt.subplots(figsize=(7, 7))
+fig2, ax2 = plt.subplots(figsize=(7, 7))
+fig3, ax3 = plt.subplots(figsize=(7, 7))
+fig4, ax4 = plt.subplots(figsize=(7, 7))
+
 ax1.plot(X_10_1, y_10_1, marker, label="10 simulations")
 ax1.fill_between(X_10_1, np.array(y_10_1) - std_10_1 * 1.96, np.array(y_10_1) + std_10_1 * 1.96, alpha=alpha1)
 
@@ -75,7 +79,7 @@ time_hp = [24.2, 102, 410, 1708, 6631.9]
 score_hp = [14.3, 30.6, 42.7, 50.5, 53.9]
 std_hp = np.array([1.3, 1.3, 1.3, 2.3, 4])
 
-time_sp = [32.8, 249.8, 395.2, 1551.9, 6561.3]
+time_sp = [32.8, 229.8, 395.2, 1551.9, 6561.3]
 score_sp = [8.9, 20.1, 34.8, 45.8, 46.4]
 std_sp = np.array([1.3, 1.3, 1.8, 2.3, 4.0])
 
@@ -83,7 +87,7 @@ time_rollout = [2.9, 12.6, 54.1, 310, 885.2]
 score_rollout = [4, 28.8, 43.9, 55, 58.6]
 std_rollout = np.array([1.3, 1.3, 1.3, 1.8, 2.3])
 
-ax2.plot(steps, score_hp, marker, label="Human Data")
+ax2.plot(steps, score_hp, marker, label="Human-data")
 ax2.fill_between(
     steps,
     np.array(score_hp) - std_hp * 1.96,
@@ -91,7 +95,7 @@ ax2.fill_between(
     alpha=alpha1,
     edgecolor="blue",
 )
-ax2.plot(steps, score_sp, marker, label="Self-Play")
+ax2.plot(steps, score_sp, marker, label="Self-play")
 ax2.fill_between(
     steps,
     np.array(score_sp) - std_sp * 1.96,
@@ -99,7 +103,7 @@ ax2.fill_between(
     alpha=alpha1,
     edgecolor="orange",
 )
-ax2.plot(steps, score_rollout, marker, label="Random Rollouts")
+ax2.plot(steps, score_rollout, marker, label="Rollout")
 ax2.fill_between(
     steps,
     np.array(score_rollout) - std_rollout * 1.96,
@@ -119,7 +123,7 @@ ax2.legend()
 number_base = 130
 number_scale = 10
 
-ax3.plot(time_hp, score_hp, marker, label="Simulations (Human Data)")
+ax3.plot(time_hp, score_hp, marker, label="Simulations (Human-data)")
 ax3.fill_between(
     time_hp,
     np.array(score_hp) - std_hp * 1.96,
@@ -136,7 +140,7 @@ for xp, yp, m in zip(time_hp, score_hp, steps):
         color="black",
         zorder=10,
     )
-ax3.plot(time_sp, score_sp, marker, label="Simulations (Self-Play)")
+ax3.plot(time_sp, score_sp, marker, label="Simulations (Self-play)")
 ax3.fill_between(
     time_sp,
     np.array(score_sp) - std_sp * 1.96,
@@ -154,7 +158,7 @@ for xp, yp, m in zip(time_sp, score_sp, steps):
         color="black",
         zorder=10,
     )
-ax3.plot(time_rollout, score_rollout, marker, label="Simulations (Random Rollouts)")
+ax3.plot(time_rollout, score_rollout, marker, label="Simulations (Rollout)")
 ax3.fill_between(
     time_rollout,
     np.array(score_rollout) - std_rollout * 1.96,
@@ -209,7 +213,7 @@ times_sp = [0, 4580, 9215, 13822, 18406, 23000, 27600, 32100, 36700]
 times_sp = [x / 3600 for x in times_sp]
 std_sp = 1.3
 
-ax4.hlines(14.3, 0, 10, label="Human Data")
+ax4.hlines(14.3, 0, 10, label="Human-data")
 ax4.fill_between(
     [0, 10],
     np.array([14.3, 14.3]) - std_sp * 1.96,
@@ -217,7 +221,7 @@ ax4.fill_between(
     alpha=alpha1,
     edgecolor="blue",
 )
-ax4.plot(times_sp, scores_sp, marker, label="Self-Play", color="#ff7f0e")
+ax4.plot(times_sp, scores_sp, marker, label="Self-play", color="#ff7f0e")
 ax4.fill_between(
     times_sp,
     np.array(scores_sp) - std_sp * 1.96,
@@ -225,7 +229,7 @@ ax4.fill_between(
     alpha=alpha1,
     edgecolor="orange",
 )
-ax4.hlines(3.0, 0, 10, label="Random Rollouts", color="#2ca02c")
+ax4.hlines(3.0, 0, 10, label="Rollout", color="#2ca02c")
 ax4.fill_between(
     [0, 10],
     np.array([3.0, 3.0]) - std_sp * 1.96,
@@ -239,8 +243,10 @@ ax4.fill_between(
 ax4.set_ylabel("Score Difference")
 ax4.set_xlabel("Training time (hours)")
 ax4.legend(loc=5)
-plt.show()
-
+fig1.savefig("result_1.png", bbox_inches="tight", dpi=300)
+fig2.savefig("result_2.png", bbox_inches="tight", dpi=300)
+fig3.savefig("result_3.png", bbox_inches="tight", dpi=300)
+fig4.savefig("result_4.png", bbox_inches="tight", dpi=300)
 
 # OLD
 # X_10_5 = [200, 130, 100, 50, 25, 10]

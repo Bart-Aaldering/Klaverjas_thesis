@@ -71,6 +71,7 @@ def main():
                 alpha_player_1.update_state(move)
                 alpha_player_2.update_state(move)
                 alpha_player_3.update_state(move)
+                # print_state(alpha_player_1.state.to_nparray())
 
 
 np.set_printoptions(threshold=np.inf)
